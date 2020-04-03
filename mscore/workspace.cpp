@@ -723,6 +723,7 @@ void Workspace::read(XmlReader& e)
       bool niToolbar = false;
       bool foToolbar = false;
       bool pcToolbar = false;
+
       while (e.readNextStartElement()) {
             const QStringRef& tag(e.name());
             if (tag == "name")

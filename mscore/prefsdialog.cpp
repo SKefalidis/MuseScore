@@ -236,6 +236,9 @@ PreferenceDialog::PreferenceDialog(QWidget* parent)
       connect(advancedSearch, &QLineEdit::textChanged, this, &PreferenceDialog::filterAdvancedPreferences);
       connect(resetPreference, &QPushButton::clicked, this, &PreferenceDialog::resetAdvancedPreferenceToDefault);
 
+      connect(cBoxAdvancedSmoothing, SIGNAL(toggled(bool)), this, SLOT(toggleAdvancedVisibility(bool)));
+      connect(cBoxShowControlCursor, SIGNAL(toggled(bool)), mscore->currentScoreView(), SLOT(setContinuousCursorVisible(bool)));
+
       MuseScore::restoreGeometry(this);
 #if !defined(Q_OS_MAC) && (!defined(Q_OS_WIN) || defined(FOR_WINSTORE))
       General->removeTab(General->indexOf(tabUpdate)); // updateTab not needed on Linux and not wanted in Windows Store
@@ -610,6 +613,36 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
 
       exportPdfDpi->setValue(preferences.getInt(PREF_EXPORT_PDF_DPI));
       pageVertical->setChecked(MScore::verticalOrientation());
+
+      sBoxContinuousModifierBase->setValue(preferences.getDouble(PREF_PAN_MODIFIER_BASE));
+      sBoxModifierStep->setValue(preferences.getDouble(PREF_PAN_MODIFIER_STEP));
+      sBoxMinModifier->setValue(preferences.getDouble(PREF_PAN_MODIFIER_MIN));
+      sBoxMaxModifier->setValue(preferences.getDouble(PREF_PAN_MODIFIER_MAX));
+      sBoxLeftDistance->setValue(preferences.getDouble(PREF_PAN_DISTANCE_LEFT));
+      sBoxLDistance1->setValue(preferences.getDouble(PREF_PAN_DISTANCE_LEFT1));
+      sBoxLDistance2->setValue(preferences.getDouble(PREF_PAN_DISTANCE_LEFT2));
+      sBoxLDistance3->setValue(preferences.getDouble(PREF_PAN_DISTANCE_LEFT3));
+      sBoxLMod1->setValue(preferences.getDouble(PREF_PAN_MODIFIER_LEFT1));
+      sBoxLMod2->setValue(preferences.getDouble(PREF_PAN_MODIFIER_LEFT2));
+      sBoxLMod3->setValue(preferences.getDouble(PREF_PAN_MODIFIER_LEFT3));
+      sBoxRightDistance->setValue(preferences.getDouble(PREF_PAN_DISTANCE_RIGHT));
+      sBoxRDistance1->setValue(preferences.getDouble(PREF_PAN_DISTANCE_RIGHT1));
+      sBoxRDistance2->setValue(preferences.getDouble(PREF_PAN_DISTANCE_RIGHT2));
+      sBoxRDistance3->setValue(preferences.getDouble(PREF_PAN_DISTANCE_RIGHT3));
+      sBoxRMod1->setValue(preferences.getDouble(PREF_PAN_MODIFIER_RIGHT1));
+      sBoxRMod2->setValue(preferences.getDouble(PREF_PAN_MODIFIER_RIGHT2));
+      sBoxRMod3->setValue(preferences.getDouble(PREF_PAN_MODIFIER_RIGHT3));
+
+      sBoxNormalWeight->setValue(preferences.getDouble(PREF_PAN_WEIGHT_NORMAL));
+      sBoxSmartWeight->setValue(preferences.getDouble(PREF_PAN_WEIGHT_SMART));
+      cBoxAdvancedSmoothing->setChecked(preferences.getBool(PREF_PAN_WEIGHT_ADVANCED));
+
+      cBoxShowControlCursor->setChecked((preferences.getBool(PREF_PAN_CURSOR_VISIBLE)));
+      sBoxCursorTimerDuration->setValue(preferences.getInt(PREF_PAN_SMART_TIMER_DURATION));
+      sBoxControlCursorScreenPos->setValue(preferences.getDouble(PREF_PAN_CURSOR_POS));
+
+      toggleAdvancedVisibility(cBoxAdvancedSmoothing->isChecked());
+      mscore->currentScoreView()->setContinuousCursorVisible(cBoxShowControlCursor->isChecked());
 
       if (useDefaultValues)
             preferences.setReturnDefaultValuesMode(false);
@@ -1181,6 +1214,60 @@ void PreferenceDialog::apply()
       emit preferencesChanged();
       preferences.save();
       mscore->startAutoSave();
+
+      preferences.setPreference(PREF_PAN_MODIFIER_BASE, sBoxContinuousModifierBase->value());
+      preferences.setPreference(PREF_PAN_MODIFIER_STEP, sBoxModifierStep->value());
+      preferences.setPreference(PREF_PAN_MODIFIER_MIN, sBoxMinModifier->value());
+      preferences.setPreference(PREF_PAN_MODIFIER_MAX, sBoxMaxModifier->value());
+      preferences.setPreference(PREF_PAN_DISTANCE_LEFT, sBoxLeftDistance->value());
+      preferences.setPreference(PREF_PAN_DISTANCE_LEFT1, sBoxLDistance1->value());
+      preferences.setPreference(PREF_PAN_DISTANCE_LEFT2, sBoxLDistance2->value());
+      preferences.setPreference(PREF_PAN_DISTANCE_LEFT3, sBoxLDistance3->value());
+      preferences.setPreference(PREF_PAN_MODIFIER_LEFT1, sBoxLMod1->value());
+      preferences.setPreference(PREF_PAN_MODIFIER_LEFT2, sBoxLMod2->value());
+      preferences.setPreference(PREF_PAN_MODIFIER_LEFT3, sBoxLMod3->value());
+      preferences.setPreference(PREF_PAN_DISTANCE_RIGHT, sBoxRightDistance->value());
+      preferences.setPreference(PREF_PAN_DISTANCE_RIGHT1, sBoxRDistance1->value());
+      preferences.setPreference(PREF_PAN_DISTANCE_RIGHT2, sBoxRDistance2->value());
+      preferences.setPreference(PREF_PAN_DISTANCE_RIGHT3, sBoxRDistance3->value());
+      preferences.setPreference(PREF_PAN_MODIFIER_RIGHT1, sBoxRMod1->value());
+      preferences.setPreference(PREF_PAN_MODIFIER_RIGHT2, sBoxRMod2->value());
+      preferences.setPreference(PREF_PAN_MODIFIER_RIGHT3, sBoxRMod3->value());
+
+      preferences.setPreference(PREF_PAN_WEIGHT_NORMAL, sBoxNormalWeight->value());
+      preferences.setPreference(PREF_PAN_WEIGHT_SMART, sBoxSmartWeight->value());
+      preferences.setPreference(PREF_PAN_WEIGHT_ADVANCED, cBoxAdvancedSmoothing->isChecked());
+
+      preferences.setPreference(PREF_PAN_SMART_TIMER_DURATION, sBoxCursorTimerDuration->value());
+      preferences.setPreference(PREF_PAN_CURSOR_POS, sBoxControlCursorScreenPos->value());
+      preferences.setPreference(PREF_PAN_CURSOR_VISIBLE, cBoxShowControlCursor->isChecked());
+
+      //Smooth panning
+      SmoothPanSettings* svPanSettings = mscore->currentScoreView()->panSettings();
+      svPanSettings->continuousModifierSteps = sBoxModifierStep->value();
+      svPanSettings->minContinuousModifier = sBoxMinModifier->value();
+      svPanSettings->maxContinuousModifier = sBoxMaxModifier->value();
+      svPanSettings->leftDistance = sBoxLeftDistance->value();
+      svPanSettings->leftDistance1 = sBoxLDistance1->value();
+      svPanSettings->leftDistance2 = sBoxLDistance2->value();
+      svPanSettings->leftDistance3 = sBoxLDistance3->value();
+      svPanSettings->leftMod1 = sBoxLMod1->value();
+      svPanSettings->leftMod2 = sBoxLMod2->value();
+      svPanSettings->leftMod3 = sBoxLMod3->value();
+      svPanSettings->rightDistance = sBoxRightDistance->value();
+      svPanSettings->rightDistance1 = sBoxRDistance1->value();
+      svPanSettings->rightDistance2 = sBoxRDistance2->value();
+      svPanSettings->rightDistance3 = sBoxRDistance3->value();
+      svPanSettings->rightMod1 = sBoxRMod1->value();
+      svPanSettings->rightMod2 = sBoxRMod2->value();
+      svPanSettings->rightMod3 = sBoxRMod3->value();
+      svPanSettings->normalWeight = sBoxNormalWeight->value();
+      svPanSettings->smartWeight = sBoxSmartWeight->value();
+      svPanSettings->continuousModifierBase = sBoxContinuousModifierBase->value();
+      svPanSettings->advancedWeighting = cBoxAdvancedSmoothing->isChecked();
+      svPanSettings->cursorTimerDuration = sBoxCursorTimerDuration->value();
+      svPanSettings->controlCursorScreenPos = sBoxControlCursorScreenPos->value();
+      mscore->currentScoreView()->setContinuousCursorVisible(cBoxShowControlCursor->isChecked());
       }
 
 //---------------------------------------------------------
@@ -1508,6 +1595,16 @@ void PreferenceDialog::printShortcutsClicked()
 void PreferenceDialog::restartAudioEngine()
       {
       mscore->restartAudioEngine();
+      }
+
+void PreferenceDialog::toggleAdvancedVisibility(bool b)
+      {
+      sBoxNormalWeight->setVisible(b);
+      labelNormalWeight->setVisible(b);
+      sBoxSmartWeight->setVisible(b);
+      labelSmartWeight->setVisible(b);
+      sBoxCursorTimerDuration->setVisible(b);
+      label_Timer->setVisible(b);
       }
 
 

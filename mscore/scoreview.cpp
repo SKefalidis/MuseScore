@@ -155,6 +155,13 @@ ScoreView::ScoreView(QWidget* parent)
 
       _cursor     = new PositionCursor(this);
       _cursor->setType(CursorType::POS);
+
+      _continuousCursor     = new PositionCursor(this);
+      _continuousCursor->setType(CursorType::POS);
+      _continuousCursor->setVisible(preferences.getBool(PREF_PAN_CURSOR_VISIBLE));
+      _panSettings.loadFromPreferences();
+      _continuousModifier = _panSettings.continuousModifierBase;
+
       _continuousPanel = new ContinuousPanel(this);
       _continuousPanel->setActive(true);
 
@@ -257,6 +264,7 @@ ScoreView::~ScoreView()
       delete lasso;
       delete _foto;
       delete _cursor;
+      delete _continuousCursor;
       delete _continuousPanel;
       delete _curLoopIn;
       delete _curLoopOut;
@@ -616,8 +624,128 @@ void ScoreView::moveCursor(const Fraction& tick)
 
       _cursor->setRect(QRectF(x, y, w, h));
       update(_matrix.mapRect(_cursor->rect()).toRect().adjusted(-1,-1,1,1));
-      if (mscore->state() == ScoreState::STATE_PLAY && mscore->panDuringPlayback())
+
+      if(_score->layoutMode() == LayoutMode::LINE)
+            moveCursorContinuous(tick);
+
+      if (mscore->state() == ScoreState::STATE_PLAY && mscore->panDuringPlayback()) {
             adjustCanvasPosition(measure, true);
+            }
+      }
+
+//---------------------------------------------------------
+//   moveCursorContinuous
+//    move cursor during playback
+//---------------------------------------------------------
+
+void ScoreView::moveCursorContinuous(const Fraction& tick)
+      {
+      QColor c(Qt::green);
+      c.setAlpha(30);
+      _continuousCursor->setColor(c);
+      _continuousCursor->setTick(tick);
+
+      int realX = _cursor->rect().x();
+      int controlX = _continuousCursor->rect().x();
+      double distance = realX - controlX;
+
+      if(seq->isPlaying()) { // smoothly move the cursor if the score is playing
+            //playbackCursor in front of the controlCursor
+            if(distance > _panSettings.rightDistance)
+                  _continuousModifier += _panSettings.continuousModifierSteps;
+            else if(distance > _panSettings.rightDistance1 && _continuousModifier < _panSettings.rightMod1)
+                  _continuousModifier += _panSettings.continuousModifierSteps;
+            else if(distance > _panSettings.rightDistance2 && _continuousModifier < _panSettings.rightMod2)
+                  _continuousModifier += _panSettings.continuousModifierSteps;
+            else if(_continuousModifier > _panSettings.rightMod1 && distance < _panSettings.rightDistance1)
+                  _continuousModifier -= _panSettings.continuousModifierSteps;
+            else if(_continuousModifier > _panSettings.rightMod2 && distance < _panSettings.rightDistance2)
+                  _continuousModifier -= _panSettings.continuousModifierSteps;
+            else if(_continuousModifier > _panSettings.rightMod3 && distance < _panSettings.rightDistance3)
+                  _continuousModifier = _panSettings.continuousModifierBase;
+            //playbackCursor behind the controlCursor
+            else if(distance < _panSettings.leftDistance)
+                  _continuousModifier -= _panSettings.continuousModifierSteps;
+            else if(_continuousModifier < _panSettings.leftMod1 && distance > _panSettings.leftDistance1)
+                  _continuousModifier += _panSettings.continuousModifierSteps;
+            else if(_continuousModifier < _panSettings.leftMod2 && distance > _panSettings.leftDistance2)
+                  _continuousModifier += _panSettings.continuousModifierSteps;
+            else if(_continuousModifier < _panSettings.leftMod3 && distance > _panSettings.leftDistance3)
+                  _continuousModifier = _panSettings.continuousModifierBase;
+
+            //enforce limits
+            if(_continuousModifier < _panSettings.minContinuousModifier)
+                  _continuousModifier = _panSettings.minContinuousModifier;
+            else if(_continuousModifier > _panSettings.maxContinuousModifier)
+                  _continuousModifier = _panSettings.maxContinuousModifier;
+
+            double addition = 0;
+            if(controlCursorTimer.isNull() == false) {
+                  if(!_panSettings.advancedWeighting || _continuousModifier == _panSettings.minContinuousModifier || _continuousModifier == _panSettings.maxContinuousModifier) {
+                        addition = controlCursorTimer.elapsed() * _continuousModifier;
+                        }
+                  else {
+                        addition = controlCursorTimer.elapsed() * _continuousModifier * _panSettings.normalWeight + controlCursorTimer.elapsed() * (_playbackCursorDistanceTravelled/500) * _panSettings.smartWeight; // spire42 has a better smartWeight, use that!!!
+                        }
+                  }
+            _timeElapsed += addition;
+            }
+      else { // reposition the cursor when the score is not playing
+            double curOffset = _cursor->rect().x() - score()->firstMeasure()->pos().x();
+            double length = score()->lastMeasure()->pos().x() - score()->firstMeasure()->pos().x();
+            _timeElapsed = (curOffset / length) * score()->duration() * 1000;
+            _continuousModifier = 1;
+            }
+
+      qreal x = score()->firstMeasure()->pos().x() + (score()->lastMeasure()->pos().x() - score()->firstMeasure()->pos().x()) * (_timeElapsed / (score()->duration() * 1000));
+
+
+      // Prepare for the next round of calculations
+      if(controlCursorTimer.isNull() && distance > 100) // distance > 100 used to hack around the count-in option
+            controlCursorTimer.start();
+      else if(!controlCursorTimer.isNull())
+            controlCursorTimer.restart();
+
+      if(playbackCursorTimer.isNull()) {
+            _playbackCursorOldPosition = _cursor->rect().x();
+            playbackCursorTimer.start();
+            }
+      else if(playbackCursorTimer.elapsed() > _panSettings.cursorTimerDuration) {
+            _playbackCursorNewPosition = _cursor->rect().x();
+            _playbackCursorDistanceTravelled = _playbackCursorNewPosition - _playbackCursorOldPosition;
+            _playbackCursorOldPosition = _playbackCursorNewPosition;
+            playbackCursorTimer.restart();
+            }
+
+
+      Measure* measure = score()->tick2measureMM(tick);
+      System* system = measure->system();
+      if (system == 0)
+            return;
+      double y        = system->staffYpage(0) + system->page()->pos().y();
+      double _spatium = score()->spatium();
+
+      update(_matrix.mapRect(_continuousCursor->rect()).toRect().adjusted(-1,-1,1,1));
+
+      qreal mag = _spatium / SPATIUM20;
+      double w  = _spatium * 2.0 + score()->scoreFont()->width(SymId::noteheadBlack, mag);
+      double h  = 6 * _spatium;
+      //
+      // set cursor height for whole system
+      //
+      double y2 = 0.0;
+
+      for (int i = 0; i < _score->nstaves(); ++i) {
+            SysStaff* ss = system->staff(i);
+            if (!ss->show() || !_score->staff(i)->show())
+                  continue;
+            y2 = ss->bbox().bottom();
+            }
+      h += y2;
+      x -= _spatium;
+      y -= 3 * _spatium;
+      _continuousCursor->setRect(QRectF(x, y, w, h));
+      update(_matrix.mapRect(_continuousCursor->rect()).toRect().adjusted(-1,-1,1,1));
       }
 
 //---------------------------------------------------------
@@ -917,6 +1045,8 @@ void ScoreView::paintEvent(QPaintEvent* ev)
       _curLoopIn->paint(&vp);
       _curLoopOut->paint(&vp);
       _cursor->paint(&vp);
+      if (_score->layoutMode() == LayoutMode::LINE)
+            _continuousCursor->paint(&vp);
 
       if (_score->layoutMode() == LayoutMode::LINE)
             _continuousPanel->paint(ev->rect(), vp);
@@ -3294,6 +3424,8 @@ void ScoreView::adjustCanvasPosition(const Element* el, bool playBack, int staff
 
             qreal xo = 0.0;  // new x offset
             QRectF curPos = playBack ? _cursor->rect() : el->canvasBoundingRect();
+            if(_score->layoutMode() == LayoutMode::LINE && seq->isPlaying())
+                  curPos = _continuousCursor->rect();
             // keep current note in view as well if applicable (note input mode)
             Element* current = nullptr;
             if (noteEntryMode()) {
@@ -3309,17 +3441,16 @@ void ScoreView::adjustCanvasPosition(const Element* el, bool playBack, int staff
             qreal marginLeft = width() * 0.05;
             qreal marginRight = width() * 0.05; // leaves 5% margin to the right
 
-            if (_continuousPanel->active())
-                  marginLeft += _continuousPanel->width() * mag();
+//            if (_continuousPanel->active())                           causes jump
+//                  marginLeft += _continuousPanel->width() * mag();
 
             // this code implements "continuous" panning
             // it could potentially be enabled via more panning options
-            //if (playBack && _cursor) {
-            //      // keep playback cursor pinned at 25%
-            //      xo = -curPosL * mag() + marginLeft + width() * 0.2;
-            //      }
-            //else
-            if (round(curPosMagR) > round(width() - marginRight)) {
+            if (playBack && _cursor && seq->isPlaying() && mscore->panSmoothly()) {
+                  // keep playback cursor pinned at 35% (or at the percent of controlCursorScreenPos + 5%)
+                  xo = -curPosL * mag() + marginLeft + width() * _panSettings.controlCursorScreenPos;
+                  }
+            else if (round(curPosMagR) > round(width() - marginRight)) {
                   // focus in or beyond right margin
                   // pan to left margin in playback,
                   // most of the way left in note entry,
@@ -3921,6 +4052,15 @@ void ScoreView::changeEditElement(Element* e)
 void ScoreView::setCursorVisible(bool v)
       {
       _cursor->setVisible(v);
+      }
+
+//---------------------------------------------------------
+//   setContinuousCursorVisible
+//---------------------------------------------------------
+
+void ScoreView::setContinuousCursorVisible(bool v)
+      {
+      _continuousCursor->setVisible(v);
       }
 
 //---------------------------------------------------------
@@ -5145,4 +5285,33 @@ void ScoreView::moveViewportToLastEdit()
       const int staff = sc->isMaster() && mb->isMeasure() ? st.startStaff() : -1; // TODO: choose the closest staff to the current viewport?
       adjustCanvasPosition(viewportElement, /* playback */ false, staff);
       }
+
+void SmoothPanSettings::loadFromPreferences()
+      {
+      cout << "loading" << endl;
+      continuousModifierBase = preferences.getDouble(PREF_PAN_MODIFIER_BASE);
+      continuousModifierSteps = preferences.getDouble(PREF_PAN_MODIFIER_STEP);
+      minContinuousModifier = preferences.getDouble(PREF_PAN_MODIFIER_MIN);
+      maxContinuousModifier = preferences.getDouble(PREF_PAN_MODIFIER_MAX);
+      leftDistance = preferences.getDouble(PREF_PAN_DISTANCE_LEFT);
+      leftDistance1 = preferences.getDouble(PREF_PAN_DISTANCE_LEFT1);
+      leftDistance2 = preferences.getDouble(PREF_PAN_DISTANCE_LEFT2);
+      leftDistance3 = preferences.getDouble(PREF_PAN_DISTANCE_LEFT3);
+      leftMod1 = preferences.getDouble(PREF_PAN_MODIFIER_LEFT1);
+      leftMod2 = preferences.getDouble(PREF_PAN_MODIFIER_LEFT2);
+      leftMod3 = preferences.getDouble(PREF_PAN_MODIFIER_LEFT3);
+      rightDistance = preferences.getDouble(PREF_PAN_DISTANCE_RIGHT);
+      rightDistance1 = preferences.getDouble(PREF_PAN_DISTANCE_RIGHT1);
+      rightDistance2 = preferences.getDouble(PREF_PAN_DISTANCE_RIGHT2);
+      rightDistance3 = preferences.getDouble(PREF_PAN_DISTANCE_RIGHT3);
+      rightMod1 = preferences.getDouble(PREF_PAN_MODIFIER_RIGHT1);
+      rightMod2 = preferences.getDouble(PREF_PAN_MODIFIER_RIGHT2);
+      rightMod3 = preferences.getDouble(PREF_PAN_MODIFIER_RIGHT3);
+      normalWeight = preferences.getDouble(PREF_PAN_WEIGHT_NORMAL);
+      smartWeight = preferences.getDouble(PREF_PAN_WEIGHT_SMART);
+      advancedWeighting = preferences.getBool(PREF_PAN_WEIGHT_ADVANCED);
+      cursorTimerDuration = preferences.getInt(PREF_PAN_SMART_TIMER_DURATION);
+      controlCursorScreenPos = preferences.getDouble(PREF_PAN_CURSOR_POS);
+      }
+
 }

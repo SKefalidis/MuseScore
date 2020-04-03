@@ -274,6 +274,7 @@ const std::list<const char*> MuseScore::_allPlaybackControlEntries {
             "",
             "repeat",
             "pan",
+            "pan-smoothly",
             "metronome",
             "countin"
             };
@@ -1048,6 +1049,7 @@ MuseScore::MuseScore()
       metronomeAction = getAction("metronome");
       countInAction   = getAction("countin");
       panAction       = getAction("pan");
+      smoothPanAction = getAction("pan-smoothly");
 
       _statusBar = new QStatusBar;
       _statusBar->addPermanentWidget(new QWidget(this), 2);

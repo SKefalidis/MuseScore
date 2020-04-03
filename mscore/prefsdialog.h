@@ -82,6 +82,8 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       void resetAdvancedPreferenceToDefault();
       void restartAudioEngine();
 
+      void toggleAdvancedVisibility(bool);
+
       void changeSoundfontPaths();
       void updateTranslationClicked();
 

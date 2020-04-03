@@ -389,6 +389,7 @@ class MuseScore : public QMainWindow, public MuseScoreCore {
       QAction* loopInAction;
       QAction* loopOutAction;
       QAction* panAction;
+      QAction* smoothPanAction;
 
       QLabel* cornerLabel;
       QStringList _recentScores;
@@ -766,6 +767,7 @@ class MuseScore : public QMainWindow, public MuseScoreCore {
       bool metronome() const         { return metronomeAction->isChecked(); }
       bool countIn() const           { return countInAction->isChecked(); }
       bool panDuringPlayback() const { return panAction->isChecked(); }
+      bool panSmoothly() const       { return smoothPanAction->isChecked(); }
       void noteTooShortForTupletDialog();
       void openFiles(bool switchTab = true, bool singleFile = false);
       void importScore(bool switchTab = true, bool singleFile = false);

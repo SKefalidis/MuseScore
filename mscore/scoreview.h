@@ -65,6 +65,41 @@ enum class MagIdx : char;
 //   ViewState
 //---------------------------------------------------------
 
+struct SmoothPanSettings {
+      double continuousModifierBase       { 1 };
+      double continuousModifierSteps      { 0.01 };
+      double minContinuousModifier        { 0 };
+      double maxContinuousModifier        { 5 };
+
+      double leftDistance                 { -250 };
+      double leftDistance1                { -125 };
+      double leftDistance2                { -50 };
+      double leftDistance3                { -25 };
+      double rightDistance                { 500 };
+      double rightDistance1               { 250 };
+      double rightDistance2               { 125 };
+      double rightDistance3               { 50 };
+      double leftMod1                     { 0.8 };
+      double leftMod2                     { 0.9 };
+      double leftMod3                     { 0.95 };
+      double rightMod1                    { 1.2 };
+      double rightMod2                    { 1.1 };
+      double rightMod3                    { 1.05 };
+
+      double controlCursorScreenPos       { 0.3 };
+      int cursorTimerDuration             { 1000 };
+
+      bool advancedWeighting              { false };
+      double normalWeight                 { 1 };
+      double smartWeight                  { 0 };
+
+      void loadFromPreferences();
+      };
+
+//---------------------------------------------------------
+//   ViewState
+//---------------------------------------------------------
+
 enum class ViewState {
       NORMAL,
       DRAG,
@@ -117,6 +152,15 @@ class ScoreView : public QWidget, public MuseScoreView {
 
       //--input state:
       PositionCursor* _cursor;
+      PositionCursor* _continuousCursor;
+      SmoothPanSettings _panSettings;
+      double _timeElapsed;
+      double _continuousModifier;
+      double _playbackCursorOldPosition;
+      double _playbackCursorNewPosition;
+      double _playbackCursorDistanceTravelled;
+
+
       ShadowNote* shadowNote;
 
       // Realtime state:      Note: always set allowRealtimeRests to desired value before starting a timer.
@@ -284,6 +328,8 @@ class ScoreView : public QWidget, public MuseScoreView {
       bool normalPaste(Fraction scale = Fraction(1, 1));
       void normalSwap();
 
+      void setContinuousCursorVisible(bool v);
+
       void cloneElement(Element* e);
       void doFotoDragEdit(QMouseEvent* ev);
 
@@ -306,6 +352,7 @@ class ScoreView : public QWidget, public MuseScoreView {
       void startEditMode(Element*);
 
       void moveCursor(const Fraction& tick);
+      void moveCursorContinuous(const Fraction& tick);
       Fraction cursorTick() const;
       void setCursorOn(bool);
       void setBackground(QPixmap*);
@@ -404,6 +451,8 @@ class ScoreView : public QWidget, public MuseScoreView {
 
       virtual void moveCursor() override;
 
+      SmoothPanSettings* panSettings() { return &_panSettings; }
+
       virtual void layoutChanged();
       virtual void dataChanged(const QRectF&);
       virtual void updateAll()    { update(); }
@@ -436,6 +485,8 @@ class ScoreView : public QWidget, public MuseScoreView {
       void updateGrips();
       bool moveWhenInactive() const { return _moveWhenInactive; }
       bool moveWhenInactive(bool move) { bool m = _moveWhenInactive; _moveWhenInactive = move; return m; }
+
+      QTime controlCursorTimer, playbackCursorTimer;
       };
 
 } // namespace Ms
