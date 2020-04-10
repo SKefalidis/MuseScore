@@ -50,8 +50,8 @@ void MuseScore::startPreferenceDialog()
       {
       if (!preferenceDialog) {
             preferenceDialog = new PreferenceDialog(this);
-            connect(preferenceDialog, SIGNAL(preferencesChanged()),
-               SLOT(preferencesChanged()));
+            connect(preferenceDialog, SIGNAL(preferencesChanged(bool, bool)),
+               SLOT(preferencesChanged(bool, bool)));
             connect(preferenceDialog, SIGNAL(mixerPreferencesChanged(bool)),
                SLOT(mixerPreferencesChanged(bool)));
             }
@@ -70,6 +70,7 @@ PreferenceDialog::PreferenceDialog(QWidget* parent)
       setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
       setModal(true);
       shortcutsChanged        = false;
+      uiStyleThemeChanged     = false;
 
 #ifndef USE_JACK
       jackDriver->setVisible(false);
@@ -965,7 +966,26 @@ void PreferenceDialog::buttonBoxClicked(QAbstractButton* button)
 
 void PreferenceDialog::apply()
       {
-      advancedWidget->save();
+      // protects against multiple clicks to apply, which make the program look like it has been frozen
+      if (applyTimer.isValid()) {
+            if (applyTimer.elapsed() > applyCoolDown)
+                  applyTimer.restart();
+            else
+                  return;
+            }
+      else {
+            applyTimer.start();
+            }
+
+      if (preferences.globalStyle() != MuseScoreStyleType(styleName->currentIndex()))
+         uiStyleThemeChanged = true;
+
+      std::vector<QString> changedAdvancedProperties = advancedWidget->save();
+
+      for (auto x : changedAdvancedProperties) {
+            if (x.split("/").at(0) == "ui")
+                  uiStyleThemeChanged = true;
+            }
 
       if (lastSession->isChecked())
             preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::LAST);
@@ -1026,20 +1046,63 @@ void PreferenceDialog::apply()
       preferences.setPreference(PREF_UI_APP_STARTUP_SHOWSTARTCENTER, showStartcenter->isChecked());
       preferences.setPreference(PREF_UI_APP_STARTUP_SHOWTOURS, showTours->isChecked());
       preferences.setPreference(PREF_APP_TELEMETRY_ALLOWED, collectTelemetry->isChecked());
-      preferences.setPreference(PREF_UI_CANVAS_BG_USECOLOR, bgColorButton->isChecked());
-      preferences.setPreference(PREF_UI_CANVAS_BG_COLOR, bgColorLabel->color());
-      preferences.setPreference(PREF_UI_CANVAS_FG_USECOLOR, fgColorButton->isChecked());
-      preferences.setPreference(PREF_UI_CANVAS_FG_USECOLOR_IN_PALETTES, fgUseColorInPalettes->isChecked());
-      preferences.setPreference(PREF_UI_CANVAS_FG_COLOR, fgColorLabel->color());
-      preferences.setPreference(PREF_UI_CANVAS_BG_WALLPAPER, bgWallpaper->text());
-      preferences.setPreference(PREF_UI_CANVAS_FG_WALLPAPER, fgWallpaper->text());
-      preferences.setPreference(PREF_UI_CANVAS_MISC_ANTIALIASEDDRAWING, drawAntialiased->isChecked());
-      preferences.setPreference(PREF_UI_CANVAS_MISC_SELECTIONPROXIMITY, proximity->value());
-      preferences.setPreference(PREF_UI_CANVAS_SCROLL_LIMITSCROLLAREA, limitScrollArea->isChecked());
-      preferences.setPreference(PREF_UI_THEME_ICONWIDTH, iconWidth->value());
-      preferences.setPreference(PREF_UI_THEME_ICONHEIGHT, iconHeight->value());
-      preferences.setPreference(PREF_UI_THEME_FONTFAMILY, fontFamily->currentFont().family());
-      preferences.setPreference(PREF_UI_THEME_FONTSIZE, fontSize->value());
+
+      if (preferences.getBool(PREF_UI_CANVAS_BG_USECOLOR) != bgColorButton->isChecked()) {
+            preferences.setPreference(PREF_UI_CANVAS_BG_USECOLOR, bgColorButton->isChecked());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getColor(PREF_UI_CANVAS_BG_COLOR) != bgColorLabel->color()) {
+            preferences.setPreference(PREF_UI_CANVAS_BG_COLOR, bgColorLabel->color());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getBool(PREF_UI_CANVAS_FG_USECOLOR) != fgColorButton->isChecked()) {
+            preferences.setPreference(PREF_UI_CANVAS_FG_USECOLOR, fgColorButton->isChecked());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getBool(PREF_UI_CANVAS_FG_USECOLOR_IN_PALETTES) != fgUseColorInPalettes->isChecked()) {
+            preferences.setPreference(PREF_UI_CANVAS_FG_USECOLOR_IN_PALETTES, fgUseColorInPalettes->isChecked());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getColor(PREF_UI_CANVAS_FG_COLOR) != fgColorLabel->color()) {
+            preferences.setPreference(PREF_UI_CANVAS_FG_COLOR, fgColorLabel->color());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getString(PREF_UI_CANVAS_BG_WALLPAPER) != bgWallpaper->text()) {
+            preferences.setPreference(PREF_UI_CANVAS_BG_WALLPAPER, bgWallpaper->text());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getString(PREF_UI_CANVAS_FG_WALLPAPER) != fgWallpaper->text()) {
+            preferences.setPreference(PREF_UI_CANVAS_FG_WALLPAPER, fgWallpaper->text());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getBool(PREF_UI_CANVAS_MISC_ANTIALIASEDDRAWING) != drawAntialiased->isChecked()) {
+            preferences.setPreference(PREF_UI_CANVAS_MISC_ANTIALIASEDDRAWING, drawAntialiased->isChecked());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getBool(PREF_UI_CANVAS_SCROLL_LIMITSCROLLAREA) != limitScrollArea->isChecked()) {
+            preferences.setPreference(PREF_UI_CANVAS_SCROLL_LIMITSCROLLAREA, limitScrollArea->isChecked());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getInt(PREF_UI_CANVAS_MISC_SELECTIONPROXIMITY) != proximity->value()) {
+            preferences.setPreference(PREF_UI_CANVAS_MISC_SELECTIONPROXIMITY, proximity->value());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getInt(PREF_UI_THEME_ICONWIDTH) != iconWidth->value()) {
+            preferences.setPreference(PREF_UI_THEME_ICONWIDTH, iconWidth->value());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getInt(PREF_UI_THEME_ICONHEIGHT) != iconHeight->value()) {
+            preferences.setPreference(PREF_UI_THEME_ICONHEIGHT, iconHeight->value());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getString(PREF_UI_THEME_FONTFAMILY) != fontFamily->currentFont().family()) {
+            preferences.setPreference(PREF_UI_THEME_FONTFAMILY, fontFamily->currentFont().family());
+            uiStyleThemeChanged = true;
+            }
+      if (preferences.getInt(PREF_UI_THEME_FONTSIZE) != fontSize->value()) {
+            preferences.setPreference(PREF_UI_THEME_FONTSIZE, fontSize->value());
+            uiStyleThemeChanged = true;
+            }
 
       bool wasJack = (preferences.getBool(PREF_IO_JACK_USEJACKMIDI) || preferences.getBool(PREF_IO_JACK_USEJACKAUDIO));
       bool wasJackAudio = preferences.getBool(PREF_IO_JACK_USEJACKAUDIO);
@@ -1198,13 +1261,15 @@ void PreferenceDialog::apply()
             preferences.setPreference(PREF_SCORE_STYLE_PARTSTYLEFILE, partStyle->text());
             MScore::defaultStyleForPartsHasChanged();
             }
-      
+
       WorkspacesManager::retranslateAll();
       preferences.setPreference(PREF_APP_WORKSPACE, WorkspacesManager::currentWorkspace()->name());
-      mscore->changeWorkspace(WorkspacesManager::currentWorkspace());
+      mscore->changeWorkspace(WorkspacesManager::currentWorkspace(), true); // with true you don't call preferencesChanged a second time (look at emit preferencesChanged())
+
       emit mscore->workspacesChanged();
-      
-      emit preferencesChanged();
+
+      emit preferencesChanged(false, uiStyleThemeChanged);
+      uiStyleThemeChanged = false;
       preferences.save();
       mscore->startAutoSave();
       }

@@ -37,7 +37,10 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       Q_OBJECT
 
       QMap<QString, Shortcut*> localShortcuts;
+      QElapsedTimer applyTimer;
+      const int applyCoolDown { 1000 }; // milliseconds
       bool shortcutsChanged;
+      bool uiStyleThemeChanged;
       QButtonGroup* recordButtons;
       PreferencesListWidget* advancedWidget;
 
@@ -86,7 +89,7 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       void updateTranslationClicked();
 
    signals:
-      void preferencesChanged();
+      void preferencesChanged(bool fromWorkspace, bool changeUI);
       void mixerPreferencesChanged(bool showMidiControls);
 
    protected:
