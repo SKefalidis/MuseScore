@@ -304,10 +304,24 @@ void PreferenceDialog::start()
             #endif
                   new IntPreferenceItem(PREF_EXPORT_AUDIO_SAMPLERATE, exportAudioSampleRate),
                   new IntPreferenceItem(PREF_EXPORT_MP3_BITRATE, exportMp3BitRate),
-                  new StringPreferenceItem(PREF_SCORE_STYLE_DEFAULTSTYLEFILE, defaultStyle, [](){MScore::readDefaultStyle(preferences.getString(PREF_SCORE_STYLE_DEFAULTSTYLEFILE));}),
-                  new StringPreferenceItem(PREF_SCORE_STYLE_PARTSTYLEFILE, partStyle, [](){MScore::defaultStyleForPartsHasChanged();}),
+                  new StringPreferenceItem(PREF_SCORE_STYLE_DEFAULTSTYLEFILE, defaultStyle, []() {MScore::readDefaultStyle(preferences.getString(PREF_SCORE_STYLE_DEFAULTSTYLEFILE));}),
+                  new StringPreferenceItem(PREF_SCORE_STYLE_PARTSTYLEFILE, partStyle, []() {MScore::defaultStyleForPartsHasChanged();}),
                   new StringPreferenceItem(PREF_IMPORT_STYLE_STYLEFILE, importStyleFile,
-                                           [&](){preferences.setPreference(PREF_IMPORT_STYLE_STYLEFILE, useImportStyleFile->isChecked() ? importStyleFile->text() : "");}),
+                                          [&]() {preferences.setPreference(PREF_IMPORT_STYLE_STYLEFILE, useImportStyleFile->isChecked() ? importStyleFile->text() : "");}),
+                  new BoolPreferenceItem(PREF_IO_MIDI_SHOWCONTROLSINMIXER, warnPitchRange, [&](){emit mixerPreferencesChanged(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));}),
+                  new BoolPreferenceItem(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION, pageVertical,
+                                          [&]() {
+                                                MScore::setVerticalOrientation(pageVertical->isChecked());
+                                                for (Score* s : mscore->scores()) {
+                                                      s->doLayout();
+                                                      for (Score* ss : s->scoreList())
+                                                            ss->doLayout();
+                                                      }
+                                                if (mscore->currentScoreView())
+                                                      mscore->currentScoreView()->setOffset(0.0, 0.0);
+                                                mscore->scorePageLayoutChanged();
+                                                mscore->update();
+                                                }),
       };
       uiRelatedWidgets = vector<PreferenceItem*>{
                   new BoolPreferenceItem(PREF_UI_CANVAS_BG_USECOLOR, bgColorButton),
@@ -575,6 +589,7 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       //
       // score settings
       //
+<<<<<<< HEAD
       showMidiControls->setChecked(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));
       defaultPlayDuration->setValue(preferences.getInt(PREF_SCORE_NOTE_DEFAULTPLAYDURATION));
 
@@ -601,11 +616,20 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       else {
             qDebug("Unknown shortestNote value of %d, defaulting to 16th", nn);
             shortestNoteIndex = 2;
+=======
+      int shortestNoteIndex = 2;
+      int nn = (preferences.getInt(PREF_IO_MIDI_SHORTESTNOTE) * 16)/MScore::division;
+      switch(nn) {
+            case 16: shortestNoteIndex = 0; break;
+            case 8:  shortestNoteIndex = 1; break;
+            case 4:  shortestNoteIndex = 2; break;
+            case 2:  shortestNoteIndex = 3; break;
+            case 1:  shortestNoteIndex = 4; break;
+>>>>>>> added apply function to bools and changed more preferences
             }
       shortestNote->setCurrentIndex(shortestNoteIndex);
 
       QString styleFile = preferences.getString(PREF_IMPORT_STYLE_STYLEFILE);
-      importStyleFile->setText(styleFile);
       useImportBuiltinStyle->setChecked(styleFile.isEmpty());
       useImportStyleFile->setChecked(!styleFile.isEmpty());
 
@@ -1136,20 +1160,6 @@ void PreferenceDialog::apply()
       else if (exportNoBreaks->isChecked())
             preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::NO);
 
-      if (preferences.getBool(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION) != pageVertical->isChecked()) {
-            preferences.setPreference(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION, pageVertical->isChecked());
-            MScore::setVerticalOrientation(pageVertical->isChecked());
-            for (Score* s : mscore->scores()) {
-                  s->doLayout();
-                  for (Score* ss : s->scoreList())
-                        ss->doLayout();
-                  }
-            if (mscore->currentScoreView())
-                  mscore->currentScoreView()->setOffset(0.0, 0.0);
-            mscore->scorePageLayoutChanged();
-            mscore->update();
-            }
-
       if (shortcutsChanged) {
             shortcutsChanged = false;
             for(const Shortcut* s : localShortcuts) {
@@ -1166,6 +1176,8 @@ void PreferenceDialog::apply()
       QString l = lang == 0 ? "system" : mscore->languages().at(lang).key;
       bool languageChanged = l != preferences.getString(PREF_UI_APP_LANGUAGE);
       preferences.setPreference(PREF_UI_APP_LANGUAGE, l);
+
+      preferences.setPreference(PREF_SCORE_MAGNIFICATION, scale->value()/100.0);
 
       if (showMidiControls->isChecked() != preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER)) {
             preferences.setPreference(PREF_IO_MIDI_SHOWCONTROLSINMIXER, showMidiControls->isChecked());

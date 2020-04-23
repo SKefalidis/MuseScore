@@ -63,12 +63,13 @@ class BoolPreferenceItem : public PreferenceItem {
       QCheckBox* _editor      {nullptr}; // make a QVariant out of these 3
       QGroupBox* _editor2     {nullptr};
       QRadioButton* _editor3  {nullptr};
+      std::function<void()> applyFunction = {};
 
    public:
-      BoolPreferenceItem(QString name);
-      BoolPreferenceItem(QString name, QCheckBox* editor);
-      BoolPreferenceItem(QString name, QGroupBox* editor);
-      BoolPreferenceItem(QString name, QRadioButton* editor);
+      BoolPreferenceItem(QString name, std::function<void()> applyFunc = {});
+      BoolPreferenceItem(QString name, QCheckBox* editor, std::function<void()> applyFunc = {});
+      BoolPreferenceItem(QString name, QGroupBox* editor, std::function<void()> applyFunc = {});
+      BoolPreferenceItem(QString name, QRadioButton* editor, std::function<void()> applyFunc = {});
 
       void save() override;
       void update() override;
@@ -126,13 +127,13 @@ class StringPreferenceItem : public PreferenceItem {
       QLineEdit* _editor { nullptr };
       QFontComboBox* _editor2 { nullptr };
       QComboBox* _editor3 { nullptr };
-      std::function<void()> function = {};
+      std::function<void()> applyFunction = {};
 
    public:
-      StringPreferenceItem(QString name, std::function<void()> func = {});
-      StringPreferenceItem(QString name, QLineEdit* editor, std::function<void()> func = {});
-      StringPreferenceItem(QString name, QFontComboBox* editor, std::function<void()> func = {});
-      StringPreferenceItem(QString name, QComboBox* editor, std::function<void()> func = {});
+      StringPreferenceItem(QString name, std::function<void()> applyFunc = {});
+      StringPreferenceItem(QString name, QLineEdit* editor, std::function<void()> applyFunc = {});
+      StringPreferenceItem(QString name, QFontComboBox* editor, std::function<void()> applyFunc = {});
+      StringPreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc = {});
 
       void save() override;
       void update() override;
