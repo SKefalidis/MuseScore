@@ -238,7 +238,10 @@ void IntPreferenceItem::update()
             }
       else if (_editor2) {
             int index = _editor2->findData(preferences.getInt(name()));
-            _editor2->setCurrentIndex(index);
+            if (index == -1)
+                  setDefaultValue();
+            else
+                  _editor2->setCurrentIndex(index);
             }
       }
 
@@ -249,6 +252,7 @@ void IntPreferenceItem::setDefaultValue()
             }
       else if (_editor2) {
             int index = _editor2->findData(preferences.defaultValue(name()).toInt());
+            Q_ASSERT(index != -1);
             _editor2->setCurrentIndex(index);
             }
       }
@@ -338,7 +342,10 @@ void DoublePreferenceItem::update()
             }
       else if (_editor2) {
             int index = _editor2->findData(preferences.getDouble(name()));
-            _editor2->setCurrentIndex(index);
+            if (index == -1)
+                  setDefaultValue();
+            else
+                  _editor2->setCurrentIndex(index);
             }
       }
 
@@ -349,6 +356,7 @@ void DoublePreferenceItem::setDefaultValue()
             }
       else if (_editor2) {
             int index = _editor2->findData(preferences.defaultValue(name()).toDouble());
+            Q_ASSERT(index != -1);
             _editor2->setCurrentIndex(index);
             }
       }
@@ -487,34 +495,37 @@ bool BoolPreferenceItem::isModified() const
 //   StringPreferenceItem
 //---------------------------------------------------------
 
-StringPreferenceItem::StringPreferenceItem(QString name)
+StringPreferenceItem::StringPreferenceItem(QString name, std::function<void()> func)
       : PreferenceItem(name),
         _initialValue(preferences.getString(name)),
         _editor(new QLineEdit)
       {
       _editor->setText(_initialValue);
       connect(_editor, &QLineEdit::textChanged, this, &PreferenceItem::editorValueModified);
+      function = func;
       }
 
-StringPreferenceItem::StringPreferenceItem(QString name, QLineEdit* editor)
+StringPreferenceItem::StringPreferenceItem(QString name, QLineEdit* editor, std::function<void()> func)
       : PreferenceItem(name),
         _initialValue(preferences.getString(name)),
         _editor(editor)
       {
       _editor->setText(_initialValue);
-      connect(_editor, &QLineEdit::textChanged, this, &PreferenceItem::editorValueModified);
+      connect(_editor, &QLineEdit::textChanged, this, &PreferenceItem::editorValueModified);     
+      function = func;
       }
 
-StringPreferenceItem::StringPreferenceItem(QString name, QFontComboBox* editor)
+StringPreferenceItem::StringPreferenceItem(QString name, QFontComboBox* editor, std::function<void()> func)
       : PreferenceItem(name),
         _initialValue(preferences.getString(name)),
         _editor2(editor)
       {
       _editor2->setCurrentFont(QFont(_initialValue));
       connect(_editor2, &QFontComboBox::currentFontChanged, this, &PreferenceItem::editorValueModified);
+      function = func;
       }
 
-StringPreferenceItem::StringPreferenceItem(QString name, QComboBox* editor)
+StringPreferenceItem::StringPreferenceItem(QString name, QComboBox* editor, std::function<void()> func)
       : PreferenceItem(name),
         _initialValue(preferences.getString(name)),
         _editor3(editor)
@@ -522,6 +533,7 @@ StringPreferenceItem::StringPreferenceItem(QString name, QComboBox* editor)
       int index = _editor3->findData(preferences.getString(name));
       _editor3->setCurrentIndex(index);
       connect(_editor3, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PreferenceItem::editorValueModified);
+      function = func;
       }
 
 
@@ -542,6 +554,8 @@ void StringPreferenceItem::save()
             _initialValue = newValue;
             PreferenceItem::save(newValue);
             }
+      if (function.operator bool())
+            function();
       }
 
 void StringPreferenceItem::update()
@@ -556,7 +570,10 @@ void StringPreferenceItem::update()
             }
       else if (_editor3) {
             int index = _editor3->findData(preferences.getString(name()));
-            _editor3->setCurrentIndex(index);
+            if (index == -1)
+                  setDefaultValue();
+            else
+                  _editor3->setCurrentIndex(index);
             }
       }
 
@@ -570,8 +587,11 @@ void StringPreferenceItem::setDefaultValue()
             }
       else if (_editor3) {
             int index = _editor3->findData(preferences.defaultValue(name()).toString());
+            Q_ASSERT(index != -1);
             _editor3->setCurrentIndex(index);
             }
+      if (function.operator bool())
+            function();
       }
 
 QWidget* StringPreferenceItem::editor() const

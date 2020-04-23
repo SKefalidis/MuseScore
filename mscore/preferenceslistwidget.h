@@ -83,8 +83,8 @@ class BoolPreferenceItem : public PreferenceItem {
 //---------------------------------------------------------
 class IntPreferenceItem : public PreferenceItem {
       int _initialValue;
-      QSpinBox* _editor;
-      QComboBox* _editor2;
+      QSpinBox* _editor { nullptr };
+      QComboBox* _editor2 { nullptr };
 
    public:
       IntPreferenceItem(QString name);
@@ -123,15 +123,16 @@ class DoublePreferenceItem : public PreferenceItem {
 //---------------------------------------------------------
 class StringPreferenceItem : public PreferenceItem {
       QString _initialValue;
-      QLineEdit* _editor;
-      QFontComboBox* _editor2;
-      QComboBox* _editor3;
+      QLineEdit* _editor { nullptr };
+      QFontComboBox* _editor2 { nullptr };
+      QComboBox* _editor3 { nullptr };
+      std::function<void()> function = {};
 
    public:
-      StringPreferenceItem(QString name);
-      StringPreferenceItem(QString name, QLineEdit* editor);
-      StringPreferenceItem(QString name, QFontComboBox* editor);
-      StringPreferenceItem(QString name, QComboBox* editor);
+      StringPreferenceItem(QString name, std::function<void()> func = {});
+      StringPreferenceItem(QString name, QLineEdit* editor, std::function<void()> func = {});
+      StringPreferenceItem(QString name, QFontComboBox* editor, std::function<void()> func = {});
+      StringPreferenceItem(QString name, QComboBox* editor, std::function<void()> func = {});
 
       void save() override;
       void update() override;
