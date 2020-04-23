@@ -131,7 +131,7 @@ void PreferenceItem::save(QVariant value)
 //   ColorPreferenceItem
 //---------------------------------------------------------
 
-ColorPreferenceItem::ColorPreferenceItem(QString name)
+ColorPreferenceItem::ColorPreferenceItem(QString name, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getColor(name)),
         _editor(new Awl::ColorLabel)
@@ -139,9 +139,11 @@ ColorPreferenceItem::ColorPreferenceItem(QString name)
       _editor->setColor(_initialValue);
       _editor->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
       connect(_editor, &Awl::ColorLabel::colorChanged, this, &PreferenceItem::editorValueModified);
+      applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
-ColorPreferenceItem::ColorPreferenceItem(QString name, Awl::ColorLabel* editor)
+ColorPreferenceItem::ColorPreferenceItem(QString name, Awl::ColorLabel* editor, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getColor(name)),
         _editor(editor)
@@ -149,6 +151,8 @@ ColorPreferenceItem::ColorPreferenceItem(QString name, Awl::ColorLabel* editor)
       _editor->setColor(_initialValue);
       _editor->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
       connect(_editor, &Awl::ColorLabel::colorChanged, this, &PreferenceItem::editorValueModified);
+      applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
 void ColorPreferenceItem::save()
@@ -156,17 +160,23 @@ void ColorPreferenceItem::save()
       QColor newValue = _editor->color();
       _initialValue = newValue;
       PreferenceItem::save(newValue);
+      if (applyFunction.operator bool())
+            applyFunction();
       }
 
 void ColorPreferenceItem::update()
       {
       QColor newValue = preferences.getColor(name());
       _editor->setColor(newValue);
+      if (updateFunction.operator bool())
+            updateFunction();
       }
 
 void ColorPreferenceItem::setDefaultValue()
       {
       _editor->setColor(preferences.defaultValue(name()).value<QColor>());
+      if (applyFunction.operator bool())
+            applyFunction();
       }
 
 QWidget* ColorPreferenceItem::editor() const
@@ -184,7 +194,7 @@ bool ColorPreferenceItem::isModified() const
 //   IntPreferenceItem
 //---------------------------------------------------------
 
-IntPreferenceItem::IntPreferenceItem(QString name)
+IntPreferenceItem::IntPreferenceItem(QString name, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getInt(name)),
         _editor(new QSpinBox)
@@ -193,9 +203,11 @@ IntPreferenceItem::IntPreferenceItem(QString name)
       _editor->setMinimum(INT_MIN);
       _editor->setValue(_initialValue);
       connect(_editor, QOverload<int>::of(&QSpinBox::valueChanged), this, &PreferenceItem::editorValueModified);
+      applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
-IntPreferenceItem::IntPreferenceItem(QString name, QSpinBox* editor)
+IntPreferenceItem::IntPreferenceItem(QString name, QSpinBox* editor, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getInt(name)),
         _editor(editor)
@@ -204,9 +216,11 @@ IntPreferenceItem::IntPreferenceItem(QString name, QSpinBox* editor)
       _editor->setMinimum(INT_MIN);
       _editor->setValue(_initialValue);
       connect(_editor, QOverload<int>::of(&QSpinBox::valueChanged), this, &PreferenceItem::editorValueModified);
+      applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
-IntPreferenceItem::IntPreferenceItem(QString name, QComboBox* editor)
+IntPreferenceItem::IntPreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getInt(name)),
         _editor2(editor)
@@ -214,6 +228,8 @@ IntPreferenceItem::IntPreferenceItem(QString name, QComboBox* editor)
       int index = _editor2->findData(preferences.getInt(name));
       _editor2->setCurrentIndex(index);
       connect(_editor2, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PreferenceItem::editorValueModified);
+      applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
 void IntPreferenceItem::save()
@@ -228,6 +244,8 @@ void IntPreferenceItem::save()
             _initialValue = newValue;
             PreferenceItem::save(newValue);
             }
+      if (applyFunction.operator bool())
+            applyFunction();
       }
 
 void IntPreferenceItem::update()
@@ -243,6 +261,8 @@ void IntPreferenceItem::update()
             else
                   _editor2->setCurrentIndex(index);
             }
+      if (updateFunction.operator bool())
+            updateFunction();
       }
 
 void IntPreferenceItem::setDefaultValue()
@@ -255,6 +275,8 @@ void IntPreferenceItem::setDefaultValue()
             Q_ASSERT(index != -1);
             _editor2->setCurrentIndex(index);
             }
+      if (applyFunction.operator bool())
+            applyFunction();
       }
 
 QWidget* IntPreferenceItem::editor() const
@@ -282,7 +304,7 @@ bool IntPreferenceItem::isModified() const
 //   DoublePreferenceItem
 //---------------------------------------------------------
 
-DoublePreferenceItem::DoublePreferenceItem(QString name)
+DoublePreferenceItem::DoublePreferenceItem(QString name, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getDouble(name)),
         _editor(new QDoubleSpinBox)
@@ -293,9 +315,11 @@ DoublePreferenceItem::DoublePreferenceItem(QString name)
       if (qAbs(_initialValue) < 2.0)
             _editor->setSingleStep(0.1);
       connect(_editor, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &PreferenceItem::editorValueModified);
+      applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
-DoublePreferenceItem::DoublePreferenceItem(QString name, QDoubleSpinBox* editor, double modifier)
+DoublePreferenceItem::DoublePreferenceItem(QString name, QDoubleSpinBox* editor, double modifier, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getDouble(name)),
         _modifier(modifier),
@@ -307,9 +331,11 @@ DoublePreferenceItem::DoublePreferenceItem(QString name, QDoubleSpinBox* editor,
       if (qAbs(_initialValue) < 2.0)
             _editor->setSingleStep(0.1);
       connect(_editor, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &PreferenceItem::editorValueModified);
+      applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
-DoublePreferenceItem::DoublePreferenceItem(QString name, QComboBox* editor, double modifier)
+DoublePreferenceItem::DoublePreferenceItem(QString name, QComboBox* editor, double modifier, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getDouble(name)),
         _modifier(modifier),
@@ -318,6 +344,8 @@ DoublePreferenceItem::DoublePreferenceItem(QString name, QComboBox* editor, doub
       int index = _editor2->findData(preferences.getDouble(name));
       _editor2->setCurrentIndex(index);
       connect(_editor2, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PreferenceItem::editorValueModified);
+      applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
 void DoublePreferenceItem::save()
@@ -332,6 +360,8 @@ void DoublePreferenceItem::save()
             _initialValue = newValue;
             PreferenceItem::save(newValue);
             }
+      if (applyFunction.operator bool())
+            applyFunction();
       }
 
 void DoublePreferenceItem::update()
@@ -347,6 +377,8 @@ void DoublePreferenceItem::update()
             else
                   _editor2->setCurrentIndex(index);
             }
+      if (updateFunction.operator bool())
+            updateFunction();
       }
 
 void DoublePreferenceItem::setDefaultValue()
@@ -359,6 +391,8 @@ void DoublePreferenceItem::setDefaultValue()
             Q_ASSERT(index != -1);
             _editor2->setCurrentIndex(index);
             }
+      if (applyFunction.operator bool())
+            applyFunction();
       }
 
 QWidget* DoublePreferenceItem::editor() const
@@ -386,7 +420,7 @@ bool DoublePreferenceItem::isModified() const
 //   BoolPreferenceItem
 //---------------------------------------------------------
 
-BoolPreferenceItem::BoolPreferenceItem(QString name, std::function<void()> applyFunc)
+BoolPreferenceItem::BoolPreferenceItem(QString name, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getBool(name)),
         _editor(new QCheckBox)
@@ -394,9 +428,10 @@ BoolPreferenceItem::BoolPreferenceItem(QString name, std::function<void()> apply
       _editor->setChecked(_initialValue);
       connect(_editor, &QCheckBox::toggled, this, &PreferenceItem::editorValueModified);
       applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
-BoolPreferenceItem::BoolPreferenceItem(QString name, QCheckBox* editor, std::function<void()> applyFunc)
+BoolPreferenceItem::BoolPreferenceItem(QString name, QCheckBox* editor, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getBool(name)),
         _editor(editor)
@@ -404,9 +439,10 @@ BoolPreferenceItem::BoolPreferenceItem(QString name, QCheckBox* editor, std::fun
       _editor->setChecked(_initialValue);
       connect(_editor, &QCheckBox::toggled, this, &PreferenceItem::editorValueModified);
       applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
-BoolPreferenceItem::BoolPreferenceItem(QString name, QGroupBox* editor, std::function<void()> applyFunc)
+BoolPreferenceItem::BoolPreferenceItem(QString name, QGroupBox* editor, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getBool(name)),
         _editor2(editor)
@@ -414,9 +450,10 @@ BoolPreferenceItem::BoolPreferenceItem(QString name, QGroupBox* editor, std::fun
       _editor2->setChecked(_initialValue);
       connect(_editor2, &QGroupBox::toggled, this, &PreferenceItem::editorValueModified);
       applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
-BoolPreferenceItem::BoolPreferenceItem(QString name, QRadioButton* editor, std::function<void()> applyFunc)
+BoolPreferenceItem::BoolPreferenceItem(QString name, QRadioButton* editor, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getBool(name)),
         _editor3(editor)
@@ -424,6 +461,7 @@ BoolPreferenceItem::BoolPreferenceItem(QString name, QRadioButton* editor, std::
       _editor3->setChecked(_initialValue);
       connect(_editor3, &QRadioButton::toggled, this, &PreferenceItem::editorValueModified);
       applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
 void BoolPreferenceItem::save()
@@ -461,6 +499,8 @@ void BoolPreferenceItem::update()
             bool newValue = preferences.getBool(name());
             _editor3->setChecked(newValue);
             }
+      if (updateFunction.operator bool())
+            updateFunction();
       }
 
 void BoolPreferenceItem::setDefaultValue()
@@ -503,7 +543,7 @@ bool BoolPreferenceItem::isModified() const
 //   StringPreferenceItem
 //---------------------------------------------------------
 
-StringPreferenceItem::StringPreferenceItem(QString name, std::function<void()> applyFunc)
+StringPreferenceItem::StringPreferenceItem(QString name, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getString(name)),
         _editor(new QLineEdit)
@@ -511,9 +551,10 @@ StringPreferenceItem::StringPreferenceItem(QString name, std::function<void()> a
       _editor->setText(_initialValue);
       connect(_editor, &QLineEdit::textChanged, this, &PreferenceItem::editorValueModified);
       applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
-StringPreferenceItem::StringPreferenceItem(QString name, QLineEdit* editor, std::function<void()> applyFunc)
+StringPreferenceItem::StringPreferenceItem(QString name, QLineEdit* editor, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getString(name)),
         _editor(editor)
@@ -521,9 +562,10 @@ StringPreferenceItem::StringPreferenceItem(QString name, QLineEdit* editor, std:
       _editor->setText(_initialValue);
       connect(_editor, &QLineEdit::textChanged, this, &PreferenceItem::editorValueModified);     
       applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
-StringPreferenceItem::StringPreferenceItem(QString name, QFontComboBox* editor, std::function<void()> applyFunc)
+StringPreferenceItem::StringPreferenceItem(QString name, QFontComboBox* editor, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getString(name)),
         _editor2(editor)
@@ -531,9 +573,10 @@ StringPreferenceItem::StringPreferenceItem(QString name, QFontComboBox* editor, 
       _editor2->setCurrentFont(QFont(_initialValue));
       connect(_editor2, &QFontComboBox::currentFontChanged, this, &PreferenceItem::editorValueModified);
       applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
-StringPreferenceItem::StringPreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc)
+StringPreferenceItem::StringPreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc, std::function<void()> updateFunc)
       : PreferenceItem(name),
         _initialValue(preferences.getString(name)),
         _editor3(editor)
@@ -542,6 +585,7 @@ StringPreferenceItem::StringPreferenceItem(QString name, QComboBox* editor, std:
       _editor3->setCurrentIndex(index);
       connect(_editor3, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PreferenceItem::editorValueModified);
       applyFunction = applyFunc;
+      updateFunction = updateFunc;
       }
 
 
@@ -583,6 +627,8 @@ void StringPreferenceItem::update()
             else
                   _editor3->setCurrentIndex(index);
             }
+      if (updateFunction.operator bool())
+            updateFunction();
       }
 
 void StringPreferenceItem::setDefaultValue()

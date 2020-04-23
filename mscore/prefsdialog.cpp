@@ -234,8 +234,8 @@ PreferenceDialog::PreferenceDialog(QWidget* parent)
       advancedWidget->loadPreferences();
       connect(advancedSearch, &QLineEdit::textChanged, this, &PreferenceDialog::filterAdvancedPreferences);
       connect(resetPreference, &QPushButton::clicked, this, &PreferenceDialog::resetAdvancedPreferenceToDefault);
-      connect(this, &PreferenceDialog::preferencesChanged, mscore->timeline(),  &Timeline::updateTimelineTheme);
-
+      connect(this, &PreferenceDialog::preferencesChanged, mscore->timeline(),  &Timeline::updateTimelineTheme); // this should probably be moved to updateUiStyleAndTheme
+      applySetActive(false);
       MuseScore::restoreGeometry(this);
 #if !defined(Q_OS_MAC) && (!defined(Q_OS_WIN) || defined(FOR_WINSTORE))
       General->removeTab(General->indexOf(tabUpdate)); // updateTab not needed on Linux and not wanted in Windows Store
@@ -306,11 +306,12 @@ void PreferenceDialog::start()
                   new IntPreferenceItem(PREF_EXPORT_MP3_BITRATE, exportMp3BitRate),
                   new StringPreferenceItem(PREF_SCORE_STYLE_DEFAULTSTYLEFILE, defaultStyle, []() {MScore::readDefaultStyle(preferences.getString(PREF_SCORE_STYLE_DEFAULTSTYLEFILE));}),
                   new StringPreferenceItem(PREF_SCORE_STYLE_PARTSTYLEFILE, partStyle, []() {MScore::defaultStyleForPartsHasChanged();}),
-                  new StringPreferenceItem(PREF_IMPORT_STYLE_STYLEFILE, importStyleFile,
+                  new StringPreferenceItem(PREF_IMPORT_STYLE_STYLEFILE, importStyleFile,  // is the use of [&] dangerous in this case?
                                           [&]() {preferences.setPreference(PREF_IMPORT_STYLE_STYLEFILE, useImportStyleFile->isChecked() ? importStyleFile->text() : "");}),
-                  new BoolPreferenceItem(PREF_IO_MIDI_SHOWCONTROLSINMIXER, showMidiControls, [&](){emit mixerPreferencesChanged(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));}),
+                  new BoolPreferenceItem(PREF_IO_MIDI_SHOWCONTROLSINMIXER, showMidiControls,  // is the use of [&] dangerous in this case?
+                                          [&](){emit mixerPreferencesChanged(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));}),
                   new BoolPreferenceItem(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION, pageVertical,
-                                          [&]() {
+                                          [&]() { // is the use of [&] dangerous in this case?
                                                 MScore::setVerticalOrientation(pageVertical->isChecked());
                                                 for (Score* s : mscore->scores()) {
                                                       s->doLayout();
@@ -438,10 +439,10 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
 
       advancedWidget->updatePreferences();
 
-      bool useBgColor = preferences.getBool(PREF_UI_CANVAS_BG_USECOLOR);
+      bool useBgColor = preferences.getBool(PREF_UI_CANVAS_BG_USECOLOR); // needs update function
       updateBgView(useBgColor);
 
-      bool useFgColor = preferences.getBool(PREF_UI_CANVAS_FG_USECOLOR);
+      bool useFgColor = preferences.getBool(PREF_UI_CANVAS_FG_USECOLOR); // needs update function
       updateFgView(useFgColor);
       
       //macOS default fonts are not in QFontCombobox because they are "private":
@@ -615,7 +616,7 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
             }
       shortestNote->setCurrentIndex(shortestNoteIndex);
 
-      QString styleFile = preferences.getString(PREF_IMPORT_STYLE_STYLEFILE);
+      QString styleFile = preferences.getString(PREF_IMPORT_STYLE_STYLEFILE); // needs update functions
       useImportBuiltinStyle->setChecked(styleFile.isEmpty());
       useImportStyleFile->setChecked(!styleFile.isEmpty());
 
@@ -634,8 +635,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
             idx++;
             }
 
-      warnPitchRange->setChecked(preferences.getBool(PREF_SCORE_NOTE_WARNPITCHRANGE));
-
       language->blockSignals(true);
       language->clear();
       QString lang = preferences.getString(PREF_UI_APP_LANGUAGE);
@@ -649,8 +648,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       language->blockSignals(false);
 
       styleName->setCurrentIndex(int(preferences.globalStyle()));
-      defaultStyle->setText(preferences.getString(PREF_SCORE_STYLE_DEFAULTSTYLEFILE));
-      partStyle->setText(preferences.getString(PREF_SCORE_STYLE_PARTSTYLEFILE));
 
       pageVertical->setChecked(MScore::verticalOrientation());
 
