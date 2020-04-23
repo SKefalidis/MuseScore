@@ -30,7 +30,9 @@ namespace Ms {
 //---------------------------------------------------------
 //   PreferenceItem
 //---------------------------------------------------------
-class PreferenceItem : public QTreeWidgetItem, public QObject {
+class PreferenceItem : public QObject, public QTreeWidgetItem {
+
+      Q_OBJECT
 
       QString _name;
 
@@ -49,25 +51,30 @@ class PreferenceItem : public QTreeWidgetItem, public QObject {
 
       QString name() const {return _name;}
 
+   signals:
+      void editorValueModified();
       };
 
 //---------------------------------------------------------
 //   BoolPreferenceItem
 //---------------------------------------------------------
 class BoolPreferenceItem : public PreferenceItem {
-   private:
       bool _initialValue;
-      QCheckBox* _editor;
+      QCheckBox* _editor      {nullptr}; // make a QVariant out of these 3
+      QGroupBox* _editor2     {nullptr};
+      QRadioButton* _editor3  {nullptr};
 
    public:
       BoolPreferenceItem(QString name);
+      BoolPreferenceItem(QString name, QCheckBox* editor);
+      BoolPreferenceItem(QString name, QGroupBox* editor);
+      BoolPreferenceItem(QString name, QRadioButton* editor);
 
-      void save();
-      void update();
-      void setDefaultValue();
-      QWidget* editor() const {return _editor;}
-      bool isModified() const;
-
+      void save() override;
+      void update() override;
+      void setDefaultValue() override;
+      QWidget* editor() const override;
+      bool isModified() const override;
       };
 
 
@@ -77,32 +84,38 @@ class BoolPreferenceItem : public PreferenceItem {
 class IntPreferenceItem : public PreferenceItem {
       int _initialValue;
       QSpinBox* _editor;
+      QComboBox* _editor2;
 
    public:
       IntPreferenceItem(QString name);
+      IntPreferenceItem(QString name, QSpinBox* editor);
+      IntPreferenceItem(QString name, QComboBox* editor);
 
-      void save();
-      void update();
-      void setDefaultValue();
-      QWidget* editor() const {return _editor;}
-      bool isModified() const;
+      void save() override;
+      void update() override;
+      void setDefaultValue() override;
+      QWidget* editor() const override;
+      bool isModified() const override;
       };
 
 //---------------------------------------------------------
 //   DoublePreferenceItem
 //---------------------------------------------------------
 class DoublePreferenceItem : public PreferenceItem {
-      double _initialValue;
-      QDoubleSpinBox* _editor;
+      double _initialValue { 0 }, _modifier { 1 };
+      QDoubleSpinBox* _editor { nullptr };
+      QComboBox* _editor2 { nullptr };
 
    public:
       DoublePreferenceItem(QString name);
+      DoublePreferenceItem(QString name, QDoubleSpinBox* editor, double modifier = 1);
+      DoublePreferenceItem(QString name, QComboBox* editor, double modifier = 1);
 
-      void save();
-      void update();
-      void setDefaultValue();
-      QWidget* editor() const {return _editor;}
-      bool isModified() const;
+      void save() override;
+      void update() override;
+      void setDefaultValue() override;
+      QWidget* editor() const override;
+      bool isModified() const override;
       };
 
 //---------------------------------------------------------
@@ -111,15 +124,20 @@ class DoublePreferenceItem : public PreferenceItem {
 class StringPreferenceItem : public PreferenceItem {
       QString _initialValue;
       QLineEdit* _editor;
+      QFontComboBox* _editor2;
+      QComboBox* _editor3;
 
    public:
       StringPreferenceItem(QString name);
+      StringPreferenceItem(QString name, QLineEdit* editor);
+      StringPreferenceItem(QString name, QFontComboBox* editor);
+      StringPreferenceItem(QString name, QComboBox* editor);
 
-      void save();
-      void update();
-      void setDefaultValue();
-      QWidget* editor() const {return _editor;}
-      bool isModified() const;
+      void save() override;
+      void update() override;
+      void setDefaultValue() override;
+      QWidget* editor() const override;
+      bool isModified() const override;
       };
 
 //---------------------------------------------------------
@@ -131,12 +149,13 @@ class ColorPreferenceItem : public PreferenceItem {
 
    public:
       ColorPreferenceItem(QString name);
+      ColorPreferenceItem(QString name, Awl::ColorLabel* editor);
 
-      void save();
-      void update();
-      void setDefaultValue();
-      QWidget* editor() const {return _editor;}
-      bool isModified() const;
+      void save() override;
+      void update() override;
+      void setDefaultValue() override;
+      QWidget* editor() const override;
+      bool isModified() const override;
       };
 
 
@@ -163,8 +182,7 @@ class PreferencesListWidget : public QTreeWidget, public PreferenceVisitor {
       void visit(QString key, BoolPreference*);
       void visit(QString key, StringPreference*);
       void visit(QString key, ColorPreference*);
-
-};
+      };
 
 } // namespace Ms
 

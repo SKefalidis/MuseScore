@@ -50,10 +50,8 @@ void MuseScore::startPreferenceDialog()
       {
       if (!preferenceDialog) {
             preferenceDialog = new PreferenceDialog(this);
-            connect(preferenceDialog, SIGNAL(preferencesChanged(bool, bool)),
-               SLOT(preferencesChanged(bool, bool)));
-            connect(preferenceDialog, SIGNAL(mixerPreferencesChanged(bool)),
-               SLOT(mixerPreferencesChanged(bool)));
+            connect(preferenceDialog, SIGNAL(preferencesChanged(bool, bool)), SLOT(preferencesChanged(bool, bool)));
+            connect(preferenceDialog, SIGNAL(mixerPreferencesChanged(bool)), SLOT(mixerPreferencesChanged(bool)));
             }
       preferenceDialog->start();
       }
@@ -70,7 +68,6 @@ PreferenceDialog::PreferenceDialog(QWidget* parent)
       setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
       setModal(true);
       shortcutsChanged        = false;
-      uiStyleThemeChanged     = false;
 
 #ifndef USE_JACK
       jackDriver->setVisible(false);
@@ -251,6 +248,88 @@ PreferenceDialog::PreferenceDialog(QWidget* parent)
 
 void PreferenceDialog::start()
       {
+      normalWidgets = vector<PreferenceItem*>{
+                  new IntPreferenceItem(PREF_APP_AUTOSAVE_AUTOSAVETIME, autoSaveTime),
+                  new BoolPreferenceItem(PREF_APP_AUTOSAVE_USEAUTOSAVE, autoSave),
+//                  new StringPreferenceItem(PREF_APP_PATHS_INSTRUMENTLIST1, instrumentList1),
+//                  new StringPreferenceItem(PREF_APP_PATHS_INSTRUMENTLIST2, instrumentList2),
+//                  new StringPreferenceItem(PREF_APP_PATHS_MYIMAGES, myImages),
+//                  new StringPreferenceItem(PREF_APP_PATHS_MYPLUGINS, myPlugins),
+//                  new StringPreferenceItem(PREF_APP_PATHS_MYSCORES, myScores),
+//                  new StringPreferenceItem(PREF_APP_PATHS_MYSOUNDFONTS, mySoundfonts),
+//                  new StringPreferenceItem(PREF_APP_PATHS_MYSTYLES, myStyles),
+//                  new StringPreferenceItem(PREF_APP_PATHS_MYTEMPLATES, myTemplates),
+//                  new StringPreferenceItem(PREF_APP_PATHS_MYEXTENSIONS, myExtensions),
+//                  new StringPreferenceItem(PREF_APP_STARTUP_STARTSCORE, sessionScore),
+                  new BoolPreferenceItem(PREF_EXPORT_MUSICXML_EXPORTLAYOUT, exportAllLayouts),
+                  new IntPreferenceItem(PREF_EXPORT_PDF_DPI, exportPdfDpi),
+//                  new DoublePreferenceItem(PREF_EXPORT_PNG_RESOLUTION, pngResolution),
+                  new BoolPreferenceItem(PREF_EXPORT_PNG_USETRANSPARENCY, pngTransparent),
+                  new BoolPreferenceItem(PREF_IMPORT_MUSICXML_IMPORTBREAKS, importBreaks),
+                  new BoolPreferenceItem(PREF_IMPORT_MUSICXML_IMPORTLAYOUT, importLayout),
+            #ifdef AVSOMR
+                  new BoolPreferenceItem(PREF_IMPORT_AVSOMR_USELOCAL, useLocalAvsOmr),
+            #endif
+                  new BoolPreferenceItem(PREF_IO_MIDI_ADVANCEONRELEASE, advanceOnRelease),
+                  new BoolPreferenceItem(PREF_IO_MIDI_ENABLEINPUT, enableMidiInput),
+                  new BoolPreferenceItem(PREF_IO_MIDI_EXPANDREPEATS, expandRepeats),
+                  new BoolPreferenceItem(PREF_EXPORT_AUDIO_NORMALIZE, normalize),
+                  new BoolPreferenceItem(PREF_IO_MIDI_EXPORTRPNS, exportRPNs),
+                  new IntPreferenceItem(PREF_IO_MIDI_REALTIMEDELAY, realtimeDelay),
+                  new BoolPreferenceItem(PREF_IO_MIDI_USEREMOTECONTROL, rcGroup),
+                  new IntPreferenceItem(PREF_IO_OSC_PORTNUMBER, oscPort),
+                  new BoolPreferenceItem(PREF_IO_OSC_USEREMOTECONTROL, oscServer),
+                  new BoolPreferenceItem(PREF_SCORE_CHORD_PLAYONADDNOTE, playChordOnAddNote),
+                  new BoolPreferenceItem(PREF_SCORE_HARMONY_PLAY, playHarmony),
+                  new BoolPreferenceItem(PREF_SCORE_HARMONY_PLAY_ONEDIT, playHarmonyOnEdit),
+                  new IntPreferenceItem(PREF_SCORE_NOTE_DEFAULTPLAYDURATION, defaultPlayDuration),
+                  new BoolPreferenceItem(PREF_SCORE_NOTE_PLAYONCLICK, playNotes),
+                  new BoolPreferenceItem(PREF_UI_APP_STARTUP_CHECKUPDATE, checkUpdateStartup),
+                  new BoolPreferenceItem(PREF_UI_APP_STARTUP_SHOWNAVIGATOR, navigatorShow),
+                  new BoolPreferenceItem(PREF_UI_APP_STARTUP_SHOWPLAYPANEL, playPanelShow),
+                  new BoolPreferenceItem(PREF_UI_APP_STARTUP_SHOWSPLASHSCREEN, showSplashScreen),
+                  new BoolPreferenceItem(PREF_UI_APP_STARTUP_SHOWSTARTCENTER, showStartcenter),
+                  new BoolPreferenceItem(PREF_UI_APP_STARTUP_SHOWTOURS, showTours),
+                  new BoolPreferenceItem(PREF_APP_TELEMETRY_ALLOWED, collectTelemetry),
+                  new BoolPreferenceItem(PREF_IO_JACK_TIMEBASEMASTER, becomeTimebaseMaster),
+                  new BoolPreferenceItem(PREF_IO_JACK_REMEMBERLASTCONNECTIONS, rememberLastMidiConnections),
+                  new BoolPreferenceItem(PREF_SCORE_NOTE_WARNPITCHRANGE, warnPitchRange),
+//                  new StringPreferenceItem(PREF_IMPORT_OVERTURE_CHARSET, importCharsetListOve), crash
+//                  new StringPreferenceItem(PREF_IMPORT_GUITARPRO_CHARSET, importCharsetListGP),
+                  new DoublePreferenceItem(PREF_SCORE_MAGNIFICATION, scale, 100),
+            #ifdef USE_PORTMIDI
+//                  new StringPreferenceItem(PREF_IO_PORTMIDI_INPUTDEVICE, portMidiInput),
+//                  new StringPreferenceItem(PREF_IO_PORTMIDI_OUTPUTDEVICE, portMidiOutput),
+                  new IntPreferenceItem(PREF_IO_PORTMIDI_OUTPUTLATENCYMILLISECONDS, portMidiOutputLatencyMilliseconds),
+            #endif
+                  new IntPreferenceItem(PREF_EXPORT_AUDIO_SAMPLERATE, exportAudioSampleRate),
+                  new IntPreferenceItem(PREF_EXPORT_MP3_BITRATE, exportMp3BitRate),
+      };
+      uiRelatedWidgets = vector<PreferenceItem*>{
+                  new BoolPreferenceItem(PREF_UI_CANVAS_BG_USECOLOR, bgColorButton),
+                  new ColorPreferenceItem(PREF_UI_CANVAS_BG_COLOR, bgColorLabel),
+                  new BoolPreferenceItem(PREF_UI_CANVAS_FG_USECOLOR, fgColorButton),
+                  new BoolPreferenceItem(PREF_UI_CANVAS_FG_USECOLOR_IN_PALETTES, fgUseColorInPalettes),
+                  new ColorPreferenceItem(PREF_UI_CANVAS_FG_COLOR, fgColorLabel),
+//                  new StringPreferenceItem(PREF_UI_CANVAS_BG_WALLPAPER, bgWallpaper),
+//                  new StringPreferenceItem(PREF_UI_CANVAS_FG_WALLPAPER, fgWallpaper),
+                  new BoolPreferenceItem(PREF_UI_CANVAS_MISC_ANTIALIASEDDRAWING, drawAntialiased),
+                  new BoolPreferenceItem(PREF_UI_CANVAS_SCROLL_LIMITSCROLLAREA, limitScrollArea),
+                  new IntPreferenceItem(PREF_UI_CANVAS_MISC_SELECTIONPROXIMITY, proximity),
+                  new IntPreferenceItem(PREF_UI_THEME_ICONWIDTH, iconWidth),
+                  new IntPreferenceItem(PREF_UI_THEME_ICONHEIGHT, iconHeight),
+//                  new StringPreferenceItem(PREF_UI_THEME_FONTFAMILY, fontFamily),
+                  new IntPreferenceItem(PREF_UI_THEME_FONTSIZE, fontSize)
+      };
+
+      for (auto& x : normalWidgets) {
+            connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::applyActivate);
+            }
+
+      for (auto& x : uiRelatedWidgets) {
+            connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::applyActivate);
+            }
+
       updateValues();
       show();
       }
@@ -343,6 +422,11 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
 
       advancedWidget->updatePreferences();
 
+      for (auto& x : normalWidgets)
+            x->update();
+      for (auto& x : uiRelatedWidgets)
+            x->update();
+
       rcGroup->setChecked(preferences.getBool(PREF_IO_MIDI_USEREMOTECONTROL));
       advanceOnRelease->setChecked(preferences.getBool(PREF_IO_MIDI_ADVANCEONRELEASE));
 
@@ -364,7 +448,7 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       if (-1 == fontFamily->findText(currFontFamily))
             fontFamily->addItem(currFontFamily);
       fontFamily->setCurrentIndex(fontFamily->findText(currFontFamily));
-      
+
       fontSize->setValue(preferences.getInt(PREF_UI_THEME_FONTSIZE));
 
       enableMidiInput->setChecked(preferences.getBool(PREF_IO_MIDI_ENABLEINPUT));
@@ -631,7 +715,7 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
 
       if (useDefaultValues)
             preferences.setReturnDefaultValuesMode(false);
-}
+      }
 
 //---------------------------------------------------------
 //   portaudioApiActivated
@@ -960,33 +1044,63 @@ void PreferenceDialog::buttonBoxClicked(QAbstractButton* button)
             }
       }
 
+
+void PreferenceDialog::applySetActive(bool active)
+      {
+      buttonBox->button(QDialogButtonBox::Apply)->setEnabled(active);
+      }
+
+
+void PreferenceDialog::checkForModifications()
+      {
+      if(buttonBox->button(QDialogButtonBox::Apply)->isEnabled() == false) {
+            for (auto& x : normalWidgets) {
+                  if (x->isModified()) {
+                        applySetActive(true);
+                        return;
+                        }
+                  }
+            for (auto& x : uiRelatedWidgets) {
+                  if (x->isModified()) {
+                        applySetActive(true);
+                        return;
+                        }
+                  }
+            }
+      }
+
+void PreferenceDialog::applyActivate()
+      {
+      applySetActive(true);
+      }
+
 //---------------------------------------------------------
 //   apply
 //---------------------------------------------------------
 
 void PreferenceDialog::apply()
       {
-      // protects against multiple clicks to apply, which make the program look like it has been frozen
-      if (applyTimer.isValid()) {
-            if (applyTimer.elapsed() > applyCoolDown)
-                  applyTimer.restart();
-            else
-                  return;
-            }
-      else {
-            applyTimer.start();
-            }
+      if(buttonBox->button(QDialogButtonBox::Apply)->isEnabled() == false)
+            return;
+      cout << "c" << endl;
+      QElapsedTimer timer;
+      timer.start();
+
+      bool uiStyleThemeChanged = false;
+
+      applySetActive(false);
+      buttonBox->button(QDialogButtonBox::Apply)->setText("Applying...");
+      buttonBox->repaint();
 
       if (preferences.globalStyle() != MuseScoreStyleType(styleName->currentIndex()))
          uiStyleThemeChanged = true;
 
       std::vector<QString> changedAdvancedProperties = advancedWidget->save();
-
-      for (auto x : changedAdvancedProperties) {
-            if (x.split("/").at(0) == "ui")
+      cout << "r" << endl;
+      for (auto x : changedAdvancedProperties)
+            if (x.startsWith("ui"))
                   uiStyleThemeChanged = true;
-            }
-
+      cout << "here" << endl;
       if (lastSession->isChecked())
             preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::LAST);
       else if (newSession->isChecked())
@@ -995,27 +1109,23 @@ void PreferenceDialog::apply()
             preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::SCORE);
       else if (emptySession->isChecked())
             preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::EMPTY);
+      cout << "crash" << endl;
+      for (auto& x : normalWidgets) {
+            cout << "1" << endl;
+            if (x->isModified()) {
+                  cout << "2" << endl;
+                  x->save();
+                  }
+            }
+      cout << "probably this" << endl;
+      for (auto& x : uiRelatedWidgets) {
+            if (x->isModified()) {
+                  x->save();
+                  uiStyleThemeChanged = true;
+                  }
+            }
 
-      preferences.setPreference(PREF_APP_AUTOSAVE_AUTOSAVETIME, autoSaveTime->value());
-      preferences.setPreference(PREF_APP_AUTOSAVE_USEAUTOSAVE, autoSave->isChecked());
-      preferences.setPreference(PREF_APP_PATHS_INSTRUMENTLIST1, instrumentList1->text());
-      preferences.setPreference(PREF_APP_PATHS_INSTRUMENTLIST2, instrumentList2->text());
-      preferences.setPreference(PREF_APP_PATHS_MYIMAGES, myImages->text());
-      preferences.setPreference(PREF_APP_PATHS_MYPLUGINS, myPlugins->text());
-      preferences.setPreference(PREF_APP_PATHS_MYSCORES, myScores->text());
-      preferences.setPreference(PREF_APP_PATHS_MYSOUNDFONTS, mySoundfonts->text());
-      preferences.setPreference(PREF_APP_PATHS_MYSTYLES, myStyles->text());
-      preferences.setPreference(PREF_APP_PATHS_MYTEMPLATES, myTemplates->text());
-      preferences.setPreference(PREF_APP_PATHS_MYEXTENSIONS, myExtensions->text());
-      preferences.setPreference(PREF_APP_STARTUP_STARTSCORE, sessionScore->text());
-      preferences.setPreference(PREF_EXPORT_AUDIO_SAMPLERATE, exportAudioSampleRate->currentData().toInt());
-      preferences.setPreference(PREF_EXPORT_MP3_BITRATE, exportMp3BitRate->currentData().toInt());
-      preferences.setPreference(PREF_EXPORT_MUSICXML_EXPORTLAYOUT, exportAllLayouts->isChecked());
-      preferences.setPreference(PREF_EXPORT_PDF_DPI, exportPdfDpi->value());
-      preferences.setPreference(PREF_EXPORT_PNG_RESOLUTION, pngResolution->value());
-      preferences.setPreference(PREF_EXPORT_PNG_USETRANSPARENCY, pngTransparent->isChecked());
-      preferences.setPreference(PREF_IMPORT_MUSICXML_IMPORTBREAKS, importBreaks->isChecked());
-      preferences.setPreference(PREF_IMPORT_MUSICXML_IMPORTLAYOUT, importLayout->isChecked());
+      cout << "a" << endl;
       if (resetElementPositionsAlwaysAsk->isChecked())
             preferences.setPreference(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, "Ask");
       else if (resetElementPositionsYes->isChecked())
@@ -1025,85 +1135,8 @@ void PreferenceDialog::apply()
 #ifdef AVSOMR
       preferences.setPreference(PREF_IMPORT_AVSOMR_USELOCAL, useLocalAvsOmr->isChecked());
 #endif
-      preferences.setPreference(PREF_IO_MIDI_ADVANCEONRELEASE, advanceOnRelease->isChecked());
-      preferences.setPreference(PREF_IO_MIDI_ENABLEINPUT, enableMidiInput->isChecked());
-      preferences.setPreference(PREF_IO_MIDI_EXPANDREPEATS, expandRepeats->isChecked());
-      preferences.setPreference(PREF_EXPORT_AUDIO_NORMALIZE, normalize->isChecked());
-      preferences.setPreference(PREF_IO_MIDI_EXPORTRPNS, exportRPNs->isChecked());
-      preferences.setPreference(PREF_IO_MIDI_REALTIMEDELAY, realtimeDelay->value());
-      preferences.setPreference(PREF_IO_MIDI_USEREMOTECONTROL, rcGroup->isChecked());
-      preferences.setPreference(PREF_IO_OSC_PORTNUMBER, oscPort->value());
-      preferences.setPreference(PREF_IO_OSC_USEREMOTECONTROL, oscServer->isChecked());
-      preferences.setPreference(PREF_SCORE_CHORD_PLAYONADDNOTE, playChordOnAddNote->isChecked());
-      preferences.setPreference(PREF_SCORE_HARMONY_PLAY, playHarmony->isChecked());
-      preferences.setPreference(PREF_SCORE_HARMONY_PLAY_ONEDIT, playHarmonyOnEdit->isChecked());
-      preferences.setPreference(PREF_SCORE_NOTE_DEFAULTPLAYDURATION, defaultPlayDuration->value());
-      preferences.setPreference(PREF_SCORE_NOTE_PLAYONCLICK, playNotes->isChecked());
-      preferences.setPreference(PREF_UI_APP_STARTUP_CHECKUPDATE, checkUpdateStartup->isChecked());
-      preferences.setPreference(PREF_UI_APP_STARTUP_SHOWNAVIGATOR, navigatorShow->isChecked());
-      preferences.setPreference(PREF_UI_APP_STARTUP_SHOWPLAYPANEL, playPanelShow->isChecked());
-      preferences.setPreference(PREF_UI_APP_STARTUP_SHOWSPLASHSCREEN, showSplashScreen->isChecked());
-      preferences.setPreference(PREF_UI_APP_STARTUP_SHOWSTARTCENTER, showStartcenter->isChecked());
-      preferences.setPreference(PREF_UI_APP_STARTUP_SHOWTOURS, showTours->isChecked());
-      preferences.setPreference(PREF_APP_TELEMETRY_ALLOWED, collectTelemetry->isChecked());
 
-      if (preferences.getBool(PREF_UI_CANVAS_BG_USECOLOR) != bgColorButton->isChecked()) {
-            preferences.setPreference(PREF_UI_CANVAS_BG_USECOLOR, bgColorButton->isChecked());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getColor(PREF_UI_CANVAS_BG_COLOR) != bgColorLabel->color()) {
-            preferences.setPreference(PREF_UI_CANVAS_BG_COLOR, bgColorLabel->color());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getBool(PREF_UI_CANVAS_FG_USECOLOR) != fgColorButton->isChecked()) {
-            preferences.setPreference(PREF_UI_CANVAS_FG_USECOLOR, fgColorButton->isChecked());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getBool(PREF_UI_CANVAS_FG_USECOLOR_IN_PALETTES) != fgUseColorInPalettes->isChecked()) {
-            preferences.setPreference(PREF_UI_CANVAS_FG_USECOLOR_IN_PALETTES, fgUseColorInPalettes->isChecked());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getColor(PREF_UI_CANVAS_FG_COLOR) != fgColorLabel->color()) {
-            preferences.setPreference(PREF_UI_CANVAS_FG_COLOR, fgColorLabel->color());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getString(PREF_UI_CANVAS_BG_WALLPAPER) != bgWallpaper->text()) {
-            preferences.setPreference(PREF_UI_CANVAS_BG_WALLPAPER, bgWallpaper->text());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getString(PREF_UI_CANVAS_FG_WALLPAPER) != fgWallpaper->text()) {
-            preferences.setPreference(PREF_UI_CANVAS_FG_WALLPAPER, fgWallpaper->text());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getBool(PREF_UI_CANVAS_MISC_ANTIALIASEDDRAWING) != drawAntialiased->isChecked()) {
-            preferences.setPreference(PREF_UI_CANVAS_MISC_ANTIALIASEDDRAWING, drawAntialiased->isChecked());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getBool(PREF_UI_CANVAS_SCROLL_LIMITSCROLLAREA) != limitScrollArea->isChecked()) {
-            preferences.setPreference(PREF_UI_CANVAS_SCROLL_LIMITSCROLLAREA, limitScrollArea->isChecked());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getInt(PREF_UI_CANVAS_MISC_SELECTIONPROXIMITY) != proximity->value()) {
-            preferences.setPreference(PREF_UI_CANVAS_MISC_SELECTIONPROXIMITY, proximity->value());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getInt(PREF_UI_THEME_ICONWIDTH) != iconWidth->value()) {
-            preferences.setPreference(PREF_UI_THEME_ICONWIDTH, iconWidth->value());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getInt(PREF_UI_THEME_ICONHEIGHT) != iconHeight->value()) {
-            preferences.setPreference(PREF_UI_THEME_ICONHEIGHT, iconHeight->value());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getString(PREF_UI_THEME_FONTFAMILY) != fontFamily->currentFont().family()) {
-            preferences.setPreference(PREF_UI_THEME_FONTFAMILY, fontFamily->currentFont().family());
-            uiStyleThemeChanged = true;
-            }
-      if (preferences.getInt(PREF_UI_THEME_FONTSIZE) != fontSize->value()) {
-            preferences.setPreference(PREF_UI_THEME_FONTSIZE, fontSize->value());
-            uiStyleThemeChanged = true;
-            }
-
+      //all this
       bool wasJack = (preferences.getBool(PREF_IO_JACK_USEJACKMIDI) || preferences.getBool(PREF_IO_JACK_USEJACKAUDIO));
       bool wasJackAudio = preferences.getBool(PREF_IO_JACK_USEJACKAUDIO);
       bool wasJackMidi = preferences.getBool(PREF_IO_JACK_USEJACKMIDI);
@@ -1115,10 +1148,9 @@ void PreferenceDialog::apply()
                   || preferences.getBool(PREF_IO_JACK_REMEMBERLASTCONNECTIONS) != rememberLastMidiConnections->isChecked()
                   || preferences.getBool(PREF_IO_JACK_TIMEBASEMASTER) != becomeTimebaseMaster->isChecked())
                   && (wasJack && nowJack);
+      //till this
 
-      preferences.setPreference(PREF_IO_JACK_TIMEBASEMASTER, becomeTimebaseMaster->isChecked());
-      preferences.setPreference(PREF_IO_JACK_REMEMBERLASTCONNECTIONS, rememberLastMidiConnections->isChecked());
-      preferences.setPreference(PREF_IO_JACK_USEJACKTRANSPORT, jackDriver->isChecked() && useJackTransport->isChecked());
+      preferences.setPreference(PREF_IO_JACK_USEJACKTRANSPORT, jackDriver->isChecked() && useJackTransport->isChecked()); //this
 
       if (jackParametersChanged) {
             // Change parameters of JACK driver without unload
@@ -1159,8 +1191,6 @@ void PreferenceDialog::apply()
 #endif
 
 #ifdef USE_PORTMIDI
-      preferences.setPreference(PREF_IO_PORTMIDI_INPUTDEVICE, portMidiInput->currentText());
-      preferences.setPreference(PREF_IO_PORTMIDI_OUTPUTDEVICE, portMidiOutput->currentText());
       if (seq->driver() && static_cast<PortMidiDriver*>(static_cast<Portaudio*>(seq->driver())->mididriver())->isSameCoreMidiIacBus(preferences.getString(PREF_IO_PORTMIDI_INPUTDEVICE), preferences.getString(PREF_IO_PORTMIDI_OUTPUTDEVICE))) {
             QMessageBox msgBox;
             msgBox.setWindowTitle(tr("Possible MIDI Loopback"));
@@ -1168,9 +1198,8 @@ void PreferenceDialog::apply()
             msgBox.setText(tr("Warning: You used the same CoreMIDI IAC bus for input and output. This will cause problematic loopback, whereby MuseScore's output MIDI messages will be sent back to MuseScore as input, causing confusion. To avoid this problem, access Audio MIDI Setup via Spotlight to create a dedicated virtual port for MuseScore's MIDI output, restart MuseScore, return to Preferences, and select your new virtual port for MuseScore's MIDI output. Other programs may then use that dedicated virtual port to receive MuseScore's MIDI output."));
             msgBox.exec();
             }
-      preferences.setPreference(PREF_IO_PORTMIDI_OUTPUTLATENCYMILLISECONDS, portMidiOutputLatencyMilliseconds->value());
 #endif
-
+      cout << "s" << endl;
       if (exportAllLayouts->isChecked() || exportAllBreaks->isChecked())
             preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::ALL);
       else if (exportManualBreaks->isChecked())
@@ -1209,8 +1238,6 @@ void PreferenceDialog::apply()
       bool languageChanged = l != preferences.getString(PREF_UI_APP_LANGUAGE);
       preferences.setPreference(PREF_UI_APP_LANGUAGE, l);
 
-      preferences.setPreference(PREF_SCORE_MAGNIFICATION, scale->value()/100.0);
-
       if (showMidiControls->isChecked() != preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER)) {
             preferences.setPreference(PREF_IO_MIDI_SHOWCONTROLSINMIXER, showMidiControls->isChecked());
             emit mixerPreferencesChanged(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));
@@ -1241,12 +1268,8 @@ void PreferenceDialog::apply()
             }
       preferences.setPreference(PREF_IO_MIDI_SHORTESTNOTE, ticks);
 
-      preferences.setPreference(PREF_IMPORT_OVERTURE_CHARSET, importCharsetListOve->currentText());
-      preferences.setPreference(PREF_IMPORT_GUITARPRO_CHARSET, importCharsetListGP->currentText());
-      preferences.setPreference(PREF_SCORE_NOTE_WARNPITCHRANGE, warnPitchRange->isChecked());
-
       preferences.setCustomPreference<MuseScoreStyleType>(PREF_UI_APP_GLOBALSTYLE, MuseScoreStyleType(styleName->currentIndex()));
-
+      cout << "h" << endl;
       if (languageChanged) {
             setMscoreLocale(preferences.getString(PREF_UI_APP_LANGUAGE));
             mscore->update();
@@ -1272,6 +1295,8 @@ void PreferenceDialog::apply()
       uiStyleThemeChanged = false;
       preferences.save();
       mscore->startAutoSave();
+
+      buttonBox->button(QDialogButtonBox::Apply)->setText("Apply");
       }
 
 //---------------------------------------------------------
@@ -1600,6 +1625,5 @@ void PreferenceDialog::restartAudioEngine()
       {
       mscore->restartAudioEngine();
       }
-
 
 } // namespace Ms

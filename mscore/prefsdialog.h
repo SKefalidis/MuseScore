@@ -37,11 +37,10 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       Q_OBJECT
 
       QMap<QString, Shortcut*> localShortcuts;
-      QElapsedTimer applyTimer;
-      const int applyCoolDown { 1000 }; // milliseconds
       bool shortcutsChanged;
-      bool uiStyleThemeChanged;
       QButtonGroup* recordButtons;
+      std::vector<PreferenceItem*> normalWidgets;
+      std::vector<PreferenceItem*> uiRelatedWidgets;
       PreferencesListWidget* advancedWidget;
 
       virtual void hideEvent(QHideEvent*);
@@ -49,6 +48,8 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       void updateSCListView();
       void setUseMidiOutput(bool);
       void updateValues(bool useDefaultValues = false);
+
+      void applySetActive(bool active);
 
    private slots:
       void buttonBoxClicked(QAbstractButton*);
@@ -84,6 +85,8 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       void filterAdvancedPreferences(const QString&);
       void resetAdvancedPreferenceToDefault();
       void restartAudioEngine();
+      void checkForModifications();
+      void applyActivate();
 
       void changeSoundfontPaths();
       void updateTranslationClicked();
