@@ -308,7 +308,7 @@ void PreferenceDialog::start()
                   new StringPreferenceItem(PREF_SCORE_STYLE_PARTSTYLEFILE, partStyle, []() {MScore::defaultStyleForPartsHasChanged();}),
                   new StringPreferenceItem(PREF_IMPORT_STYLE_STYLEFILE, importStyleFile,
                                           [&]() {preferences.setPreference(PREF_IMPORT_STYLE_STYLEFILE, useImportStyleFile->isChecked() ? importStyleFile->text() : "");}),
-                  new BoolPreferenceItem(PREF_IO_MIDI_SHOWCONTROLSINMIXER, warnPitchRange, [&](){emit mixerPreferencesChanged(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));}),
+                  new BoolPreferenceItem(PREF_IO_MIDI_SHOWCONTROLSINMIXER, showMidiControls, [&](){emit mixerPreferencesChanged(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));}),
                   new BoolPreferenceItem(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION, pageVertical,
                                           [&]() {
                                                 MScore::setVerticalOrientation(pageVertical->isChecked());
@@ -589,10 +589,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       //
       // score settings
       //
-<<<<<<< HEAD
-      showMidiControls->setChecked(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));
-      defaultPlayDuration->setValue(preferences.getInt(PREF_SCORE_NOTE_DEFAULTPLAYDURATION));
-
       int shortestNoteIndex;
       int nn = preferences.getInt(PREF_IO_MIDI_SHORTESTNOTE);
       if (nn == MScore::division)
@@ -616,16 +612,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       else {
             qDebug("Unknown shortestNote value of %d, defaulting to 16th", nn);
             shortestNoteIndex = 2;
-=======
-      int shortestNoteIndex = 2;
-      int nn = (preferences.getInt(PREF_IO_MIDI_SHORTESTNOTE) * 16)/MScore::division;
-      switch(nn) {
-            case 16: shortestNoteIndex = 0; break;
-            case 8:  shortestNoteIndex = 1; break;
-            case 4:  shortestNoteIndex = 2; break;
-            case 2:  shortestNoteIndex = 3; break;
-            case 1:  shortestNoteIndex = 4; break;
->>>>>>> added apply function to bools and changed more preferences
             }
       shortestNote->setCurrentIndex(shortestNoteIndex);
 
@@ -1176,18 +1162,6 @@ void PreferenceDialog::apply()
       QString l = lang == 0 ? "system" : mscore->languages().at(lang).key;
       bool languageChanged = l != preferences.getString(PREF_UI_APP_LANGUAGE);
       preferences.setPreference(PREF_UI_APP_LANGUAGE, l);
-
-      preferences.setPreference(PREF_SCORE_MAGNIFICATION, scale->value()/100.0);
-
-      if (showMidiControls->isChecked() != preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER)) {
-            preferences.setPreference(PREF_IO_MIDI_SHOWCONTROLSINMIXER, showMidiControls->isChecked());
-            emit mixerPreferencesChanged(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));
-            }
-
-      if (useImportStyleFile->isChecked())
-            preferences.setPreference(PREF_IMPORT_STYLE_STYLEFILE, importStyleFile->text());
-      else
-            preferences.setPreference(PREF_IMPORT_STYLE_STYLEFILE, "");
 
       int ticks = MScore::division / 4;
       switch (shortestNote->currentIndex()) {
