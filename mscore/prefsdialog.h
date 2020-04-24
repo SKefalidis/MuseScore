@@ -41,6 +41,8 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       QButtonGroup* recordButtons;
       std::vector<PreferenceItem*> normalWidgets;
       std::vector<PreferenceItem*> uiRelatedWidgets;
+      std::vector<PreferenceItem*> modifiedWidgets;
+      std::vector<PreferenceItem*> modifiedUiWidgets;
       PreferencesListWidget* advancedWidget;
 
       virtual void hideEvent(QHideEvent*);
@@ -86,7 +88,8 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       void resetAdvancedPreferenceToDefault();
       void restartAudioEngine();
       void checkForModifications();
-      void applyActivate();
+      void widgetModified();
+      void uiWidgetModified();
 
       void changeSoundfontPaths();
       void updateTranslationClicked();

@@ -63,14 +63,14 @@ class BoolPreferenceItem : public PreferenceItem {
       QCheckBox* _editor      {nullptr}; // make a QVariant out of these 3
       QGroupBox* _editor2     {nullptr};
       QRadioButton* _editor3  {nullptr};
-      std::function<void()> applyFunction = {};
-      std::function<void()> updateFunction = {};
+      std::function<void()> applyFunction = nullptr;
+      std::function<void()> updateFunction = nullptr;
 
    public:
-      BoolPreferenceItem(QString name, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
-      BoolPreferenceItem(QString name, QCheckBox* editor, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
-      BoolPreferenceItem(QString name, QGroupBox* editor, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
-      BoolPreferenceItem(QString name, QRadioButton* editor, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
+      BoolPreferenceItem(QString name, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      BoolPreferenceItem(QString name, QCheckBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      BoolPreferenceItem(QString name, QGroupBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      BoolPreferenceItem(QString name, QRadioButton* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
 
       void save() override;
       void update() override;
@@ -87,13 +87,13 @@ class IntPreferenceItem : public PreferenceItem {
       int _initialValue;
       QSpinBox* _editor { nullptr };
       QComboBox* _editor2 { nullptr };
-      std::function<void()> applyFunction = {};
-      std::function<void()> updateFunction = {};
+      std::function<void()> applyFunction = nullptr;
+      std::function<void()> updateFunction = nullptr;
 
    public:
-      IntPreferenceItem(QString name, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
-      IntPreferenceItem(QString name, QSpinBox* editor, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
-      IntPreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
+      IntPreferenceItem(QString name, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      IntPreferenceItem(QString name, QSpinBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      IntPreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
 
       void save() override;
       void update() override;
@@ -106,16 +106,16 @@ class IntPreferenceItem : public PreferenceItem {
 //   DoublePreferenceItem
 //---------------------------------------------------------
 class DoublePreferenceItem : public PreferenceItem {
-      double _initialValue { 0 }, _modifier { 1 };
+      double _initialValue { 0 };
       QDoubleSpinBox* _editor { nullptr };
       QComboBox* _editor2 { nullptr };
-      std::function<void()> applyFunction = {};
-      std::function<void()> updateFunction = {};
+      std::function<void()> applyFunction = nullptr;
+      std::function<void()> updateFunction = nullptr;
 
    public:
-      DoublePreferenceItem(QString name, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
-      DoublePreferenceItem(QString name, QDoubleSpinBox* editor, double modifier = 1, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
-      DoublePreferenceItem(QString name, QComboBox* editor, double modifier = 1, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
+      DoublePreferenceItem(QString name, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      DoublePreferenceItem(QString name, QDoubleSpinBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      DoublePreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
 
       void save() override;
       void update() override;
@@ -132,14 +132,14 @@ class StringPreferenceItem : public PreferenceItem {
       QLineEdit* _editor { nullptr };
       QFontComboBox* _editor2 { nullptr };
       QComboBox* _editor3 { nullptr };
-      std::function<void()> applyFunction = {};
-      std::function<void()> updateFunction = {};
+      std::function<void()> applyFunction = nullptr;
+      std::function<void()> updateFunction = nullptr;
 
    public:
-      StringPreferenceItem(QString name, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
-      StringPreferenceItem(QString name, QLineEdit* editor, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
-      StringPreferenceItem(QString name, QFontComboBox* editor, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
-      StringPreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
+      StringPreferenceItem(QString name, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      StringPreferenceItem(QString name, QLineEdit* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      StringPreferenceItem(QString name, QFontComboBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      StringPreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
 
       void save() override;
       void update() override;
@@ -154,12 +154,12 @@ class StringPreferenceItem : public PreferenceItem {
 class ColorPreferenceItem : public PreferenceItem {
       QColor _initialValue;
       Awl::ColorLabel* _editor { nullptr };
-      std::function<void()> applyFunction = {};
-      std::function<void()> updateFunction = {};
+      std::function<void()> applyFunction = nullptr;
+      std::function<void()> updateFunction = nullptr;
 
    public:
-      ColorPreferenceItem(QString name, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
-      ColorPreferenceItem(QString name, Awl::ColorLabel* editor, std::function<void()> applyFunc = {}, std::function<void()> updateFunc = {});
+      ColorPreferenceItem(QString name, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      ColorPreferenceItem(QString name, Awl::ColorLabel* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
 
       void save() override;
       void update() override;

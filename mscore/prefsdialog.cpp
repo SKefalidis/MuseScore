@@ -296,7 +296,7 @@ void PreferenceDialog::start()
                   new BoolPreferenceItem(PREF_SCORE_NOTE_WARNPITCHRANGE, warnPitchRange),
                   new StringPreferenceItem(PREF_IMPORT_OVERTURE_CHARSET, importCharsetListOve),
                   new StringPreferenceItem(PREF_IMPORT_GUITARPRO_CHARSET, importCharsetListGP),
-                  new DoublePreferenceItem(PREF_SCORE_MAGNIFICATION, scale, 100),
+                  new DoublePreferenceItem(PREF_SCORE_MAGNIFICATION, scale), // 100 not needed, make it an apply function
             #ifdef USE_PORTMIDI
                   new StringPreferenceItem(PREF_IO_PORTMIDI_INPUTDEVICE, portMidiInput),
                   new StringPreferenceItem(PREF_IO_PORTMIDI_OUTPUTDEVICE, portMidiOutput),
@@ -304,14 +304,34 @@ void PreferenceDialog::start()
             #endif
                   new IntPreferenceItem(PREF_EXPORT_AUDIO_SAMPLERATE, exportAudioSampleRate),
                   new IntPreferenceItem(PREF_EXPORT_MP3_BITRATE, exportMp3BitRate),
-                  new StringPreferenceItem(PREF_SCORE_STYLE_DEFAULTSTYLEFILE, defaultStyle, []() {MScore::readDefaultStyle(preferences.getString(PREF_SCORE_STYLE_DEFAULTSTYLEFILE));}),
-                  new StringPreferenceItem(PREF_SCORE_STYLE_PARTSTYLEFILE, partStyle, []() {MScore::defaultStyleForPartsHasChanged();}),
+                  new StringPreferenceItem(PREF_SCORE_STYLE_DEFAULTSTYLEFILE, defaultStyle,
+                                          [&]() { // apply function
+                                                preferences.setPreference(PREF_SCORE_STYLE_DEFAULTSTYLEFILE, defaultStyle->text());
+                                                MScore::readDefaultStyle(preferences.getString(PREF_SCORE_STYLE_DEFAULTSTYLEFILE));
+                                                }),
+                  new StringPreferenceItem(PREF_SCORE_STYLE_PARTSTYLEFILE, partStyle,
+                                          [&]() { // apply function
+                                                preferences.setPreference(PREF_SCORE_STYLE_PARTSTYLEFILE, partStyle->text());
+                                                MScore::defaultStyleForPartsHasChanged();
+                                                }),
                   new StringPreferenceItem(PREF_IMPORT_STYLE_STYLEFILE, importStyleFile,  // is the use of [&] dangerous in this case?
-                                          [&]() {preferences.setPreference(PREF_IMPORT_STYLE_STYLEFILE, useImportStyleFile->isChecked() ? importStyleFile->text() : "");}),
+                                          [&]() { // apply function
+                                                preferences.setPreference(PREF_IMPORT_STYLE_STYLEFILE, useImportStyleFile->isChecked() ? importStyleFile->text() : "");
+                                                },
+                                          [&]() { // update function
+                                                QString styleFile = preferences.getString(PREF_IMPORT_STYLE_STYLEFILE);
+                                                importStyleFile->setText(styleFile);
+                                                useImportBuiltinStyle->setChecked(styleFile.isEmpty());
+                                                useImportStyleFile->setChecked(!styleFile.isEmpty());
+                                                }),
                   new BoolPreferenceItem(PREF_IO_MIDI_SHOWCONTROLSINMIXER, showMidiControls,  // is the use of [&] dangerous in this case?
-                                          [&](){emit mixerPreferencesChanged(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));}),
-                  new BoolPreferenceItem(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION, pageVertical,
-                                          [&]() { // is the use of [&] dangerous in this case?
+                                          [&]() { // apply function
+                                                preferences.setPreference(PREF_IO_MIDI_SHOWCONTROLSINMIXER, showMidiControls->isChecked());
+                                                emit mixerPreferencesChanged(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));
+                                                }),
+                  new BoolPreferenceItem(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION, pageVertical,  // is the use of [&] dangerous in this case?
+                                          [&]() { //apply function
+                                                preferences.setPreference(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION, pageVertical->isChecked());
                                                 MScore::setVerticalOrientation(pageVertical->isChecked());
                                                 for (Score* s : mscore->scores()) {
                                                       s->doLayout();
@@ -323,15 +343,64 @@ void PreferenceDialog::start()
                                                 mscore->scorePageLayoutChanged();
                                                 mscore->update();
                                                 }),
+                  new IntPreferenceItem(PREF_IO_MIDI_SHORTESTNOTE, shortestNote,
+                                          [&]() { // apply function
+                                                int ticks = MScore::division / 4;
+                                                switch (shortestNote->currentIndex()) {
+                                                      case 0: ticks = MScore::division;       break;
+                                                      case 1: ticks = MScore::division / 2;   break;
+                                                      case 2: ticks = MScore::division / 4;   break;
+                                                      case 3: ticks = MScore::division / 8;   break;
+                                                      case 4: ticks = MScore::division / 16;  break;
+                                                      case 5: ticks = MScore::division / 32;  break;
+                                                      case 6: ticks = MScore::division / 64;  break;
+                                                      case 7: ticks = MScore::division / 128; break;
+                                                      case 8: ticks = MScore::division / 256; break;
+                                                      default: {
+                                                            qDebug("Unknown index for shortestNote: %d, defaulting to 16th",
+                                                                   shortestNote->currentIndex());
+                                                            ticks = MScore::division / 4;
+                                                            }
+                                                      }
+                                                preferences.setPreference(PREF_IO_MIDI_SHORTESTNOTE, ticks);
+                                                },
+                                          [&]() { // update function
+                                                int shortestNoteIndex;
+                                                int nn = preferences.getInt(PREF_IO_MIDI_SHORTESTNOTE);
+                                                if (nn == MScore::division)
+                                                      shortestNoteIndex = 0;           // Quarter
+                                                else if (nn == MScore::division / 2)
+                                                      shortestNoteIndex = 1;  // Eighth
+                                                else if (nn == MScore::division / 4)
+                                                      shortestNoteIndex = 2;  // etc.
+                                                else if (nn == MScore::division / 8)
+                                                      shortestNoteIndex = 3;
+                                                else if (nn == MScore::division / 16)
+                                                      shortestNoteIndex = 4;
+                                                else if (nn == MScore::division / 32)
+                                                      shortestNoteIndex = 5;
+                                                else if (nn == MScore::division / 64)
+                                                      shortestNoteIndex = 6;
+                                                else if (nn == MScore::division / 128)
+                                                      shortestNoteIndex = 7;
+                                                else if (nn == MScore::division / 256)
+                                                      shortestNoteIndex = 8;
+                                                else {
+                                                      qDebug("Unknown shortestNote value of %d, defaulting to 16th", nn);
+                                                      shortestNoteIndex = 2;
+                                                      }
+                                                shortestNote->setCurrentIndex(shortestNoteIndex);
+                                                }),
+
       };
       uiRelatedWidgets = vector<PreferenceItem*>{
-                  new BoolPreferenceItem(PREF_UI_CANVAS_BG_USECOLOR, bgColorButton),
-                  new ColorPreferenceItem(PREF_UI_CANVAS_BG_COLOR, bgColorLabel),
-                  new BoolPreferenceItem(PREF_UI_CANVAS_FG_USECOLOR, fgColorButton),
-                  new BoolPreferenceItem(PREF_UI_CANVAS_FG_USECOLOR_IN_PALETTES, fgUseColorInPalettes),
-                  new ColorPreferenceItem(PREF_UI_CANVAS_FG_COLOR, fgColorLabel),
-                  new StringPreferenceItem(PREF_UI_CANVAS_BG_WALLPAPER, bgWallpaper),
-                  new StringPreferenceItem(PREF_UI_CANVAS_FG_WALLPAPER, fgWallpaper),
+                  new BoolPreferenceItem(PREF_UI_CANVAS_BG_USECOLOR, bgColorButton, nullptr, [&](){ updateBgView(preferences.getBool(PREF_UI_CANVAS_BG_USECOLOR)); }),
+                  new ColorPreferenceItem(PREF_UI_CANVAS_BG_COLOR, bgColorLabel, nullptr, [](){;}),
+                  new BoolPreferenceItem(PREF_UI_CANVAS_FG_USECOLOR, fgColorButton, nullptr, [&](){ updateFgView(preferences.getBool(PREF_UI_CANVAS_FG_USECOLOR)); }),
+                  new BoolPreferenceItem(PREF_UI_CANVAS_FG_USECOLOR_IN_PALETTES, fgUseColorInPalettes, nullptr, [](){;}),
+                  new ColorPreferenceItem(PREF_UI_CANVAS_FG_COLOR, fgColorLabel, nullptr, [](){;}),
+                  new StringPreferenceItem(PREF_UI_CANVAS_BG_WALLPAPER, bgWallpaper, nullptr, [](){;}),
+                  new StringPreferenceItem(PREF_UI_CANVAS_FG_WALLPAPER, fgWallpaper, nullptr, [](){;}),
                   new BoolPreferenceItem(PREF_UI_CANVAS_MISC_ANTIALIASEDDRAWING, drawAntialiased),
                   new BoolPreferenceItem(PREF_UI_CANVAS_SCROLL_LIMITSCROLLAREA, limitScrollArea),
                   new IntPreferenceItem(PREF_UI_CANVAS_MISC_SELECTIONPROXIMITY, proximity),
@@ -342,10 +411,10 @@ void PreferenceDialog::start()
       };
 
       for (auto& x : normalWidgets)
-            connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::applyActivate);
+            connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::widgetModified);
 
       for (auto& x : uiRelatedWidgets)
-            connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::applyActivate);
+            connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::widgetModified);
 
       updateValues();
       show();
@@ -438,12 +507,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
             preferences.setReturnDefaultValuesMode(true);
 
       advancedWidget->updatePreferences();
-
-      bool useBgColor = preferences.getBool(PREF_UI_CANVAS_BG_USECOLOR); // needs update function
-      updateBgView(useBgColor);
-
-      bool useFgColor = preferences.getBool(PREF_UI_CANVAS_FG_USECOLOR); // needs update function
-      updateFgView(useFgColor);
       
       //macOS default fonts are not in QFontCombobox because they are "private":
       //https://code.woboq.org/qt5/qtbase/src/widgets/widgets/qfontcombobox.cpp.html#329
@@ -590,36 +653,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       //
       // score settings
       //
-      int shortestNoteIndex;
-      int nn = preferences.getInt(PREF_IO_MIDI_SHORTESTNOTE);
-      if (nn == MScore::division)
-            shortestNoteIndex = 0;           // Quarter
-      else if (nn == MScore::division / 2)
-            shortestNoteIndex = 1;  // Eighth
-      else if (nn == MScore::division / 4)
-            shortestNoteIndex = 2;  // etc.
-      else if (nn == MScore::division / 8)
-            shortestNoteIndex = 3;
-      else if (nn == MScore::division / 16)
-            shortestNoteIndex = 4;
-      else if (nn == MScore::division / 32)
-            shortestNoteIndex = 5;
-      else if (nn == MScore::division / 64)
-            shortestNoteIndex = 6;
-      else if (nn == MScore::division / 128)
-            shortestNoteIndex = 7;
-      else if (nn == MScore::division / 256)
-            shortestNoteIndex = 8;
-      else {
-            qDebug("Unknown shortestNote value of %d, defaulting to 16th", nn);
-            shortestNoteIndex = 2;
-            }
-      shortestNote->setCurrentIndex(shortestNoteIndex);
-
-      QString styleFile = preferences.getString(PREF_IMPORT_STYLE_STYLEFILE); // needs update functions
-      useImportBuiltinStyle->setChecked(styleFile.isEmpty());
-      useImportStyleFile->setChecked(!styleFile.isEmpty());
-
       QList<QByteArray> charsets = QTextCodec::availableCodecs();
       qSort(charsets.begin(), charsets.end());
       int idx = 0;
@@ -1013,9 +1046,18 @@ void PreferenceDialog::checkForModifications()
             }
       }
 
-void PreferenceDialog::applyActivate()
+void PreferenceDialog::widgetModified()
       {
       applySetActive(true);
+      PreferenceItem* item = dynamic_cast<PreferenceItem*>(sender());
+      modifiedWidgets.push_back(item);
+      }
+
+void PreferenceDialog::uiWidgetModified()
+      {
+      applySetActive(true);
+      PreferenceItem* item = dynamic_cast<PreferenceItem*>(sender());
+      modifiedUiWidgets.push_back(item);
       }
 
 //---------------------------------------------------------
@@ -1029,7 +1071,6 @@ void PreferenceDialog::apply()
 
       QElapsedTimer timer;
       timer.start();
-
       bool uiStyleThemeChanged = false;
 
       applySetActive(false);
@@ -1053,15 +1094,13 @@ void PreferenceDialog::apply()
       else if (emptySession->isChecked())
             preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::EMPTY);
 
-      for (auto& x : normalWidgets)
-            if (x->isModified())
-                  x->save();
+      for (auto& x : modifiedWidgets)
+            x->save();
 
-      for (auto& x : uiRelatedWidgets)
-            if (x->isModified()) {
-                  x->save();
-                  uiStyleThemeChanged = true;
-                  }
+      for (auto& x : modifiedUiWidgets) {
+            x->save();
+            uiStyleThemeChanged = true;
+            }
 
       if (resetElementPositionsAlwaysAsk->isChecked())
             preferences.setPreference(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, "Ask");
@@ -1154,30 +1193,10 @@ void PreferenceDialog::apply()
                   }
             Shortcut::dirty = true;
             }
-
       int lang = language->itemData(language->currentIndex()).toInt();
       QString l = lang == 0 ? "system" : mscore->languages().at(lang).key;
       bool languageChanged = l != preferences.getString(PREF_UI_APP_LANGUAGE);
       preferences.setPreference(PREF_UI_APP_LANGUAGE, l);
-
-      int ticks = MScore::division / 4;
-      switch (shortestNote->currentIndex()) {
-            case 0: ticks = MScore::division;       break;
-            case 1: ticks = MScore::division / 2;   break;
-            case 2: ticks = MScore::division / 4;   break;
-            case 3: ticks = MScore::division / 8;   break;
-            case 4: ticks = MScore::division / 16;  break;
-            case 5: ticks = MScore::division / 32;  break;
-            case 6: ticks = MScore::division / 64;  break;
-            case 7: ticks = MScore::division / 128; break;
-            case 8: ticks = MScore::division / 256; break;
-            default: {
-                  qDebug("Unknown index for shortestNote: %d, defaulting to 16th",
-                         shortestNote->currentIndex());
-                  ticks = MScore::division / 4;
-                  }
-            }
-      preferences.setPreference(PREF_IO_MIDI_SHORTESTNOTE, ticks);
 
       preferences.setCustomPreference<MuseScoreStyleType>(PREF_UI_APP_GLOBALSTYLE, MuseScoreStyleType(styleName->currentIndex()));
       if (languageChanged) {
@@ -1185,17 +1204,23 @@ void PreferenceDialog::apply()
             mscore->update();
             }
 
-      WorkspacesManager::retranslateAll();
-      preferences.setPreference(PREF_APP_WORKSPACE, WorkspacesManager::currentWorkspace()->name());
-      mscore->changeWorkspace(WorkspacesManager::currentWorkspace(), true); // with true you don't call preferencesChanged a second time (look at emit preferencesChanged())
-
-      emit mscore->workspacesChanged();
-
+      if(uiStyleThemeChanged) {
+            cout << timer.elapsed() << endl;
+            WorkspacesManager::retranslateAll();
+            cout << timer.elapsed() << endl;
+            preferences.setPreference(PREF_APP_WORKSPACE, WorkspacesManager::currentWorkspace()->name());
+            cout << timer.elapsed() << endl;
+            mscore->changeWorkspace(WorkspacesManager::currentWorkspace(), true); // with true you don't call preferencesChanged a second time (look at emit preferencesChanged())
+            cout << timer.elapsed() << endl;
+            emit mscore->workspacesChanged();
+            }
+      cout << timer.elapsed() << endl;
       emit preferencesChanged(false, uiStyleThemeChanged);
       uiStyleThemeChanged = false;
       preferences.save();
       mscore->startAutoSave();
-
+      modifiedWidgets.clear();
+      modifiedUiWidgets.clear();
       buttonBox->button(QDialogButtonBox::Apply)->setText("Apply");
       }
 
