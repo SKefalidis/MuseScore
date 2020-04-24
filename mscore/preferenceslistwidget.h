@@ -132,6 +132,7 @@ class StringPreferenceItem : public PreferenceItem {
       QLineEdit* _editor { nullptr };
       QFontComboBox* _editor2 { nullptr };
       QComboBox* _editor3 { nullptr };
+      QRadioButton* _editor4 { nullptr };
       std::function<void()> applyFunction = nullptr;
       std::function<void()> updateFunction = nullptr;
 
@@ -140,6 +141,7 @@ class StringPreferenceItem : public PreferenceItem {
       StringPreferenceItem(QString name, QLineEdit* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
       StringPreferenceItem(QString name, QFontComboBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
       StringPreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      StringPreferenceItem(QString name, QRadioButton* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
 
       void save() override;
       void update() override;

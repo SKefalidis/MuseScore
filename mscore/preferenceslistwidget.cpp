@@ -610,6 +610,18 @@ StringPreferenceItem::StringPreferenceItem(QString name, QComboBox* editor, std:
       updateFunction = updateFunc;
       }
 
+StringPreferenceItem::StringPreferenceItem(QString name, QRadioButton* editor, std::function<void ()> applyFunc, std::function<void ()> updateFunc)
+      : PreferenceItem(name),
+        _initialValue(""),
+        _editor4(editor)
+      {
+      connect(_editor4, &QRadioButton::toggled, this, &PreferenceItem::editorValueModified);
+      Q_ASSERT(!applyFunction.operator bool()); // if an apply and an update function are not provided this cannot work
+      applyFunction = applyFunc;
+      Q_ASSERT(!updateFunc.operator bool());
+      updateFunction = updateFunc;
+      }
+
 
 void StringPreferenceItem::save()
       {
@@ -631,6 +643,9 @@ void StringPreferenceItem::save()
                   QString newValue = _editor3->currentText();
                   _initialValue = newValue;
                   PreferenceItem::save(newValue);
+                  }
+            else if (_editor4) {
+                  Q_ASSERT(false);
                   }
             }
       }
@@ -656,6 +671,9 @@ void StringPreferenceItem::update()
                   else
                         _editor3->setCurrentIndex(index);
                   }
+            else if (_editor4) {
+                  Q_ASSERT(false);
+                  }
             }
       }
 
@@ -671,6 +689,9 @@ void StringPreferenceItem::setDefaultValue() // needs update function?
             int index = _editor3->findData(preferences.defaultValue(name()).toString());
             Q_ASSERT(index != -1);
             _editor3->setCurrentIndex(index);
+            }
+      else if (_editor4) {
+            ;
             }
       if (applyFunction.operator bool())
             applyFunction();
@@ -688,7 +709,7 @@ QWidget* StringPreferenceItem::editor() const
             return nullptr;
       }
 
-bool StringPreferenceItem::isModified() const
+bool StringPreferenceItem::isModified() const // I have to add modified
       {
       if (_editor)
             return _initialValue != _editor->text();
@@ -696,10 +717,10 @@ bool StringPreferenceItem::isModified() const
             return _initialValue != _editor2->currentFont().family();
       else if (_editor3)
             return _initialValue != _editor3->currentText(); // this should be currentData.toString() but this causes a crash INVESTIGATE!
+//      else if (_editor4)
+//            return _initialValue != _editor4->text();
       else
             Q_ASSERT(false);
       }
-
-
 
 } // namespace Ms

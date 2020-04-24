@@ -344,53 +344,44 @@ void PreferenceDialog::start()
                                                 mscore->update();
                                                 }),
                   new IntPreferenceItem(PREF_IO_MIDI_SHORTESTNOTE, shortestNote,
+                                          [&]() { applyShortestNote();  },  // apply function
+                                          [&]() { updateShortestNote(); }), // update function
+                  new StringPreferenceItem(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, resetElementPositionsAlwaysAsk,
                                           [&]() { // apply function
-                                                int ticks = MScore::division / 4;
-                                                switch (shortestNote->currentIndex()) {
-                                                      case 0: ticks = MScore::division;       break;
-                                                      case 1: ticks = MScore::division / 2;   break;
-                                                      case 2: ticks = MScore::division / 4;   break;
-                                                      case 3: ticks = MScore::division / 8;   break;
-                                                      case 4: ticks = MScore::division / 16;  break;
-                                                      case 5: ticks = MScore::division / 32;  break;
-                                                      case 6: ticks = MScore::division / 64;  break;
-                                                      case 7: ticks = MScore::division / 128; break;
-                                                      case 8: ticks = MScore::division / 256; break;
-                                                      default: {
-                                                            qDebug("Unknown index for shortestNote: %d, defaulting to 16th",
-                                                                   shortestNote->currentIndex());
-                                                            ticks = MScore::division / 4;
-                                                            }
-                                                      }
-                                                preferences.setPreference(PREF_IO_MIDI_SHORTESTNOTE, ticks);
+                                                if (resetElementPositionsAlwaysAsk->isChecked())
+                                                      preferences.setPreference(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, "Ask");
                                                 },
                                           [&]() { // update function
-                                                int shortestNoteIndex;
-                                                int nn = preferences.getInt(PREF_IO_MIDI_SHORTESTNOTE);
-                                                if (nn == MScore::division)
-                                                      shortestNoteIndex = 0;           // Quarter
-                                                else if (nn == MScore::division / 2)
-                                                      shortestNoteIndex = 1;  // Eighth
-                                                else if (nn == MScore::division / 4)
-                                                      shortestNoteIndex = 2;  // etc.
-                                                else if (nn == MScore::division / 8)
-                                                      shortestNoteIndex = 3;
-                                                else if (nn == MScore::division / 16)
-                                                      shortestNoteIndex = 4;
-                                                else if (nn == MScore::division / 32)
-                                                      shortestNoteIndex = 5;
-                                                else if (nn == MScore::division / 64)
-                                                      shortestNoteIndex = 6;
-                                                else if (nn == MScore::division / 128)
-                                                      shortestNoteIndex = 7;
-                                                else if (nn == MScore::division / 256)
-                                                      shortestNoteIndex = 8;
-                                                else {
-                                                      qDebug("Unknown shortestNote value of %d, defaulting to 16th", nn);
-                                                      shortestNoteIndex = 2;
-                                                      }
-                                                shortestNote->setCurrentIndex(shortestNoteIndex);
+                                                QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
+                                                if (resPref != "Yes" && resPref != "No") // "Ask" or unset (or anything else)
+                                                      resetElementPositionsAlwaysAsk->setChecked(true);
+                                                else
+                                                      resetElementPositionsAlwaysAsk->setChecked(false);
                                                 }),
+                  new StringPreferenceItem(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, resetElementPositionsYes,
+                                           [&]() { // apply function
+                                                if (resetElementPositionsYes->isChecked())
+                                                      preferences.setPreference(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, "Yes");
+                                                 },
+                                           [&]() { // update function
+                                                 QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
+                                                 if (resPref == "Yes") // "Ask" or unset (or anything else)
+                                                       resetElementPositionsYes->setChecked(true);
+                                                 else
+                                                       resetElementPositionsYes->setChecked(false);
+                                                 }),
+                  new StringPreferenceItem(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, resetElementPositionsNo,
+                                           [&]() { // apply function
+                                                if (resetElementPositionsNo->isChecked())
+                                                      preferences.setPreference(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, "No");
+                                                 },
+                                           [&]() { // update function
+                                                 QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
+                                                 if (resPref == "No") // "Ask" or unset (or anything else)
+                                                       resetElementPositionsNo->setChecked(true);
+                                                 else
+                                                       resetElementPositionsNo->setChecked(false);
+                                                 }),
 
       };
       uiRelatedWidgets = vector<PreferenceItem*>{
@@ -553,14 +544,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
 #else
       groupBox_omr->setVisible(false);
 #endif
-
-      QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
-      if (resPref == "No")
-            resetElementPositionsNo->setChecked(true);
-      else if (resPref == "Yes")
-            resetElementPositionsYes->setChecked(true);
-      else // "Ask" or unset (or anything else)
-            resetElementPositionsAlwaysAsk->setChecked(true);
 
       if (preferences.getBool(PREF_EXPORT_MUSICXML_EXPORTLAYOUT)) {
             exportAllLayouts->setChecked(true);
@@ -1048,6 +1031,7 @@ void PreferenceDialog::checkForModifications()
 
 void PreferenceDialog::widgetModified()
       {
+      // πρέπει να βλέπω αν αλλαξε τιμη απο την αρχικη ή αν επεστρεψε πισω στην αρχικη τιμη!!!
       applySetActive(true);
       PreferenceItem* item = dynamic_cast<PreferenceItem*>(sender());
       modifiedWidgets.push_back(item);
@@ -1066,11 +1050,12 @@ void PreferenceDialog::uiWidgetModified()
 
 void PreferenceDialog::apply()
       {
+      QElapsedTimer timer;
+      timer.start();
+
       if(buttonBox->button(QDialogButtonBox::Apply)->isEnabled() == false)
             return;
 
-      QElapsedTimer timer;
-      timer.start();
       bool uiStyleThemeChanged = false;
 
       applySetActive(false);
@@ -1102,12 +1087,6 @@ void PreferenceDialog::apply()
             uiStyleThemeChanged = true;
             }
 
-      if (resetElementPositionsAlwaysAsk->isChecked())
-            preferences.setPreference(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, "Ask");
-      else if (resetElementPositionsYes->isChecked())
-            preferences.setPreference(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, "Yes");
-      else if (resetElementPositionsNo->isChecked())
-            preferences.setPreference(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, "No");
 #ifdef AVSOMR
       preferences.setPreference(PREF_IMPORT_AVSOMR_USELOCAL, useLocalAvsOmr->isChecked());
 #endif
@@ -1549,6 +1528,58 @@ void PreferenceDialog::printShortcutsClicked()
 void PreferenceDialog::restartAudioEngine()
       {
       mscore->restartAudioEngine();
+      }
+
+
+void PreferenceDialog::updateShortestNote()
+      {
+      int shortestNoteIndex;
+      int nn = preferences.getInt(PREF_IO_MIDI_SHORTESTNOTE);
+      if (nn == MScore::division)
+            shortestNoteIndex = 0;           // Quarter
+      else if (nn == MScore::division / 2)
+            shortestNoteIndex = 1;  // Eighth
+      else if (nn == MScore::division / 4)
+            shortestNoteIndex = 2;  // etc.
+      else if (nn == MScore::division / 8)
+            shortestNoteIndex = 3;
+      else if (nn == MScore::division / 16)
+            shortestNoteIndex = 4;
+      else if (nn == MScore::division / 32)
+            shortestNoteIndex = 5;
+      else if (nn == MScore::division / 64)
+            shortestNoteIndex = 6;
+      else if (nn == MScore::division / 128)
+            shortestNoteIndex = 7;
+      else if (nn == MScore::division / 256)
+            shortestNoteIndex = 8;
+      else {
+            qDebug("Unknown shortestNote value of %d, defaulting to 16th", nn);
+            shortestNoteIndex = 2;
+            }
+      shortestNote->setCurrentIndex(shortestNoteIndex);
+      }
+
+void PreferenceDialog::applyShortestNote()
+      {
+      int ticks = MScore::division / 4;
+      switch (shortestNote->currentIndex()) {
+            case 0: ticks = MScore::division;       break;
+            case 1: ticks = MScore::division / 2;   break;
+            case 2: ticks = MScore::division / 4;   break;
+            case 3: ticks = MScore::division / 8;   break;
+            case 4: ticks = MScore::division / 16;  break;
+            case 5: ticks = MScore::division / 32;  break;
+            case 6: ticks = MScore::division / 64;  break;
+            case 7: ticks = MScore::division / 128; break;
+            case 8: ticks = MScore::division / 256; break;
+            default: {
+                  qDebug("Unknown index for shortestNote: %d, defaulting to 16th",
+                         shortestNote->currentIndex());
+                  ticks = MScore::division / 4;
+                  }
+            }
+      preferences.setPreference(PREF_IO_MIDI_SHORTESTNOTE, ticks);
       }
 
 } // namespace Ms
