@@ -159,6 +159,7 @@ void ColorPreferenceItem::save() // I probably need to add _initialValue = prefe
       {
       if (applyFunction.operator bool()) {
             applyFunction();
+            _initialValue = preferences.getColor(name());
             }
       else {
             QColor newValue = _editor->color();
@@ -261,6 +262,7 @@ void IntPreferenceItem::update()
       {
       if (updateFunction.operator bool()) {
             updateFunction();
+            _initialValue = preferences.getInt(name());
             }
       else {
             if (_editor) {
@@ -381,6 +383,7 @@ void DoublePreferenceItem::update()
       {
       if (updateFunction.operator bool()) {
             updateFunction();
+            _initialValue = preferences.getDouble(name());
             }
       else {
             if (_editor) {
@@ -484,6 +487,7 @@ void BoolPreferenceItem::save()
       {
       if (applyFunction.operator bool()) {
             applyFunction();
+            _initialValue = preferences.getBool(name());
             }
       else {
             if (_editor) {
@@ -627,6 +631,7 @@ void StringPreferenceItem::save()
       {
       if (applyFunction.operator bool()) {
             applyFunction();
+            _initialValue = preferences.getString(name());
             }
       else {
             if (_editor) {
@@ -717,10 +722,57 @@ bool StringPreferenceItem::isModified() const // I have to add modified
             return _initialValue != _editor2->currentFont().family();
       else if (_editor3)
             return _initialValue != _editor3->currentText(); // this should be currentData.toString() but this causes a crash INVESTIGATE!
-//      else if (_editor4)
-//            return _initialValue != _editor4->text();
+      else if (_editor4) { // does this work? is this needed?
+            QString currentValue = _initialValue;
+            applyFunction();
+            QString newValue = _initialValue;
+            preferences.setPreference(name(), currentValue);
+            return _initialValue != newValue;
+            }
       else
             Q_ASSERT(false);
+      }
+
+//---------------------------------------------------------
+//   CustomPreferenceItem
+//---------------------------------------------------------
+
+CustomPreferenceItem::CustomPreferenceItem(QString name, QRadioButton* editor, std::function<void ()> applyFunc, std::function<void ()> updateFunc)
+      : PreferenceItem(name),
+        _editor(editor)
+      {
+      connect(_editor, &QRadioButton::toggled, this, &PreferenceItem::editorValueModified);
+      Q_ASSERT(!applyFunction.operator bool()); // if an apply and an update function are not provided this cannot work
+      applyFunction = applyFunc;
+      Q_ASSERT(!updateFunc.operator bool());
+      updateFunction = updateFunc;
+      }
+
+void CustomPreferenceItem::save()
+      {
+      applyFunction();
+      }
+
+void CustomPreferenceItem::update()
+      {
+      updateFunction();
+      }
+
+void CustomPreferenceItem::setDefaultValue()
+      {
+      Q_ASSERT(false);
+      }
+
+QWidget* CustomPreferenceItem::editor() const
+      {
+      Q_ASSERT(false);
+      return nullptr;
+      }
+
+bool CustomPreferenceItem::isModified() const
+      {
+      Q_ASSERT(false);
+      return false;
       }
 
 } // namespace Ms

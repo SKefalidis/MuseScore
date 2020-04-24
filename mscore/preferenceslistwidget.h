@@ -141,7 +141,7 @@ class StringPreferenceItem : public PreferenceItem {
       StringPreferenceItem(QString name, QLineEdit* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
       StringPreferenceItem(QString name, QFontComboBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
       StringPreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
-      StringPreferenceItem(QString name, QRadioButton* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      StringPreferenceItem(QString name, QRadioButton* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr); // remove nullptr default since you cannot not have an apply and update func
 
       void save() override;
       void update() override;
@@ -170,6 +170,23 @@ class ColorPreferenceItem : public PreferenceItem {
       bool isModified() const override;
       };
 
+//---------------------------------------------------------
+//   CustomPreferenceItem
+//---------------------------------------------------------
+class CustomPreferenceItem : public PreferenceItem {
+      QRadioButton* _editor { nullptr };
+      std::function<void()> applyFunction = nullptr;
+      std::function<void()> updateFunction = nullptr;
+
+   public:
+      CustomPreferenceItem(QString name, QRadioButton* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+
+      void save() override;
+      void update() override;
+      void setDefaultValue() override;
+      QWidget* editor() const override;
+      bool isModified() const override;
+      };
 
 //---------------------------------------------------------
 //   PreferencesListWidget

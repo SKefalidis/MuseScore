@@ -382,6 +382,70 @@ void PreferenceDialog::start()
                                                  else
                                                        resetElementPositionsNo->setChecked(false);
                                                  }),
+                  new CustomPreferenceItem(PREF_APP_STARTUP_SESSIONSTART, lastSession,
+                                           [&]() { // apply function
+                                                if (lastSession->isChecked())
+                                                      preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::LAST);
+                                                 },
+                                           [&]() { // update function
+                                                 lastSession->setChecked(preferences.sessionStart() == SessionStart::LAST);
+                                                 }),
+                  new CustomPreferenceItem(PREF_APP_STARTUP_SESSIONSTART, newSession,
+                                           [&]() { // apply function
+                                                if (newSession->isChecked())
+                                                      preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::NEW);
+                                                 },
+                                           [&]() { // update function
+                                                 newSession->setChecked(preferences.sessionStart() == SessionStart::NEW);
+                                                 }),
+                  new CustomPreferenceItem(PREF_APP_STARTUP_SESSIONSTART, scoreSession,
+                                           [&]() { // apply function
+                                                if (scoreSession->isChecked())
+                                                      preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::SCORE);
+                                                 },
+                                           [&]() { // update function
+                                                 scoreSession->setChecked(preferences.sessionStart() == SessionStart::SCORE);
+                                                 }),
+                  new CustomPreferenceItem(PREF_APP_STARTUP_SESSIONSTART, emptySession,
+                                           [&]() { // apply function
+                                                if (emptySession->isChecked())
+                                                      preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::EMPTY);
+                                                 },
+                                           [&]() { // update function
+                                                 emptySession->setChecked(preferences.sessionStart() == SessionStart::EMPTY);
+                                                 }),
+                  new CustomPreferenceItem(PREF_EXPORT_MUSICXML_EXPORTBREAKS, exportAllLayouts,
+                                           [&]() { // apply function
+                                                if (exportAllLayouts->isChecked())
+                                                      preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::ALL);
+                                                 },
+                                           [&]() { // update function
+                                                 ;
+                                                 }),
+                  new CustomPreferenceItem(PREF_EXPORT_MUSICXML_EXPORTBREAKS, exportAllBreaks,
+                                           [&]() { // apply function
+                                                if (exportAllBreaks->isChecked())
+                                                      preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::ALL);
+                                                 },
+                                           [&]() { // update function
+                                                 exportAllBreaks->setChecked(preferences.musicxmlExportBreaks() == MusicxmlExportBreaks::ALL);
+                                                 }),
+                  new CustomPreferenceItem(PREF_EXPORT_MUSICXML_EXPORTBREAKS, exportManualBreaks,
+                                           [&]() { // apply function
+                                                if (exportManualBreaks->isChecked())
+                                                      preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::MANUAL);
+                                                 },
+                                           [&]() { // update function
+                                                 exportManualBreaks->setChecked(preferences.musicxmlExportBreaks() == MusicxmlExportBreaks::MANUAL);
+                                                 }),
+                  new CustomPreferenceItem(PREF_EXPORT_MUSICXML_EXPORTBREAKS, exportNoBreaks,
+                                           [&]() { // apply function
+                                                if (exportNoBreaks->isChecked())
+                                                      preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::NO);
+                                                 },
+                                           [&]() { // update function
+                                                 exportNoBreaks->setChecked(preferences.musicxmlExportBreaks() == MusicxmlExportBreaks::NO);
+                                                 }),
 
       };
       uiRelatedWidgets = vector<PreferenceItem*>{
@@ -523,12 +587,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       alsaPeriodSize->setCurrentIndex(index);
 
       alsaFragments->setValue(preferences.getInt(PREF_IO_ALSA_FRAGMENTS));
-      switch (preferences.sessionStart()) {
-            case SessionStart::EMPTY:  emptySession->setChecked(true); break;
-            case SessionStart::LAST:   lastSession->setChecked(true); break;
-            case SessionStart::NEW:    newSession->setChecked(true); break;
-            case SessionStart::SCORE:  scoreSession->setChecked(true); break;
-            }
 
 #ifdef AVSOMR
       useLocalAvsOmr->setChecked(preferences.getBool(PREF_IMPORT_AVSOMR_USELOCAL));
@@ -544,17 +602,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
 #else
       groupBox_omr->setVisible(false);
 #endif
-
-      if (preferences.getBool(PREF_EXPORT_MUSICXML_EXPORTLAYOUT)) {
-            exportAllLayouts->setChecked(true);
-            }
-      else {
-            switch(preferences.musicxmlExportBreaks()) {
-                  case MusicxmlExportBreaks::ALL:     exportAllBreaks->setChecked(true); break;
-                  case MusicxmlExportBreaks::MANUAL:  exportManualBreaks->setChecked(true); break;
-                  case MusicxmlExportBreaks::NO:      exportNoBreaks->setChecked(true); break;
-                  }
-            }
 
       language->blockSignals(true);
       for (int i = 0; i < language->count(); ++i) {
@@ -1070,15 +1117,6 @@ void PreferenceDialog::apply()
             if (x.startsWith("ui"))
                   uiStyleThemeChanged = true;
 
-      if (lastSession->isChecked())
-            preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::LAST);
-      else if (newSession->isChecked())
-            preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::NEW);
-      else if (scoreSession->isChecked())
-            preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::SCORE);
-      else if (emptySession->isChecked())
-            preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::EMPTY);
-
       for (auto& x : modifiedWidgets)
             x->save();
 
@@ -1154,12 +1192,6 @@ void PreferenceDialog::apply()
             msgBox.exec();
             }
 #endif
-      if (exportAllLayouts->isChecked() || exportAllBreaks->isChecked())
-            preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::ALL);
-      else if (exportManualBreaks->isChecked())
-            preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::MANUAL);
-      else if (exportNoBreaks->isChecked())
-            preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::NO);
 
       if (shortcutsChanged) {
             shortcutsChanged = false;
@@ -1184,15 +1216,12 @@ void PreferenceDialog::apply()
             }
 
       if(uiStyleThemeChanged) {
-            cout << timer.elapsed() << endl;
             WorkspacesManager::retranslateAll();
-            cout << timer.elapsed() << endl;
             preferences.setPreference(PREF_APP_WORKSPACE, WorkspacesManager::currentWorkspace()->name());
-            cout << timer.elapsed() << endl;
             mscore->changeWorkspace(WorkspacesManager::currentWorkspace(), true); // with true you don't call preferencesChanged a second time (look at emit preferencesChanged())
-            cout << timer.elapsed() << endl;
             emit mscore->workspacesChanged();
             }
+
       cout << timer.elapsed() << endl;
       emit preferencesChanged(false, uiStyleThemeChanged);
       uiStyleThemeChanged = false;
