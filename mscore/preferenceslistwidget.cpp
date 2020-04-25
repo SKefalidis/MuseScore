@@ -748,6 +748,17 @@ CustomPreferenceItem::CustomPreferenceItem(QString name, QRadioButton* editor, s
       updateFunction = updateFunc;
       }
 
+CustomPreferenceItem::CustomPreferenceItem(QString name, QComboBox* editor, std::function<void ()> applyFunc, std::function<void ()> updateFunc)
+      : PreferenceItem(name),
+        _editor2(editor)
+      {
+      connect(_editor2, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PreferenceItem::editorValueModified);
+      Q_ASSERT(!applyFunction.operator bool()); // if an apply and an update function are not provided this cannot work
+      applyFunction = applyFunc;
+      Q_ASSERT(!updateFunc.operator bool());
+      updateFunction = updateFunc;
+      }
+
 void CustomPreferenceItem::save()
       {
       applyFunction();

@@ -175,11 +175,13 @@ class ColorPreferenceItem : public PreferenceItem {
 //---------------------------------------------------------
 class CustomPreferenceItem : public PreferenceItem {
       QRadioButton* _editor { nullptr };
+      QComboBox* _editor2 { nullptr };
       std::function<void()> applyFunction = nullptr;
       std::function<void()> updateFunction = nullptr;
 
    public:
       CustomPreferenceItem(QString name, QRadioButton* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      CustomPreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
 
       void save() override;
       void update() override;

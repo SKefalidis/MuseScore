@@ -448,6 +448,7 @@ void PreferenceDialog::start()
                                                  }),
 
       };
+
       uiRelatedWidgets = vector<PreferenceItem*>{
                   new BoolPreferenceItem(PREF_UI_CANVAS_BG_USECOLOR, bgColorButton, nullptr, [&](){ updateBgView(preferences.getBool(PREF_UI_CANVAS_BG_USECOLOR)); }),
                   new ColorPreferenceItem(PREF_UI_CANVAS_BG_COLOR, bgColorLabel, nullptr, [](){;}),
@@ -461,15 +462,46 @@ void PreferenceDialog::start()
                   new IntPreferenceItem(PREF_UI_CANVAS_MISC_SELECTIONPROXIMITY, proximity),
                   new IntPreferenceItem(PREF_UI_THEME_ICONWIDTH, iconWidth),
                   new IntPreferenceItem(PREF_UI_THEME_ICONHEIGHT, iconHeight),
-                  new StringPreferenceItem(PREF_UI_THEME_FONTFAMILY, fontFamily),
-                  new IntPreferenceItem(PREF_UI_THEME_FONTSIZE, fontSize)
+                  new StringPreferenceItem(PREF_UI_THEME_FONTFAMILY, fontFamily, [](){;},
+                                          [&]() { // update function
+                                                auto currFontFamily = preferences.getString(PREF_UI_THEME_FONTFAMILY);
+                                                if (-1 == fontFamily->findText(currFontFamily))
+                                                      fontFamily->addItem(currFontFamily);
+                                                fontFamily->setCurrentIndex(fontFamily->findText(currFontFamily));
+                                                }),
+                  new IntPreferenceItem(PREF_UI_THEME_FONTSIZE, fontSize),
+                  new CustomPreferenceItem(PREF_UI_APP_GLOBALSTYLE, styleName,
+                                          [&]() { // apply function
+                                                preferences.setCustomPreference<MuseScoreStyleType>(PREF_UI_APP_GLOBALSTYLE, MuseScoreStyleType(styleName->currentIndex()));
+                                                },
+                                          [&]() { // update function
+                                                styleName->setCurrentIndex(int(preferences.globalStyle()));
+                                                }),
       };
+
+      audioRelatedWidgets = vector<PreferenceItem*>{
+                  new BoolPreferenceItem(PREF_IO_ALSA_USEALSAAUDIO, alsaDriver, [](){;}),
+                  new BoolPreferenceItem(PREF_IO_JACK_USEJACKAUDIO, useJackAudio, [](){;}),
+                  new BoolPreferenceItem(PREF_IO_PORTAUDIO_USEPORTAUDIO, portaudioDriver, [](){;}),
+                  new BoolPreferenceItem(PREF_IO_PULSEAUDIO_USEPULSEAUDIO, pulseaudioDriver, [](){;}),
+                  new BoolPreferenceItem(PREF_IO_JACK_USEJACKMIDI, useJackMidi, [](){;}),
+                  new BoolPreferenceItem(PREF_IO_JACK_USEJACKTRANSPORT, useJackTransport, [](){;}),
+                  new StringPreferenceItem(PREF_IO_ALSA_DEVICE, alsaDevice, [](){;}),
+                  new IntPreferenceItem(PREF_IO_ALSA_SAMPLERATE, alsaSampleRate, [](){;}),
+                  new IntPreferenceItem(PREF_IO_ALSA_PERIODSIZE, alsaPeriodSize, [](){;}),
+                  new IntPreferenceItem(PREF_IO_ALSA_FRAGMENTS, alsaFragments, [](){;}),
+      };
+
+      //jack related widgets, if one is modified run the related code in apply
 
       for (auto& x : normalWidgets)
             connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::widgetModified);
 
       for (auto& x : uiRelatedWidgets)
-            connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::widgetModified);
+            connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::uiWidgetModified);
+
+      for (auto& x : audioRelatedWidgets)
+            connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::audioWidgetModified);
 
       updateValues();
       show();
@@ -562,31 +594,36 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
             preferences.setReturnDefaultValuesMode(true);
 
       advancedWidget->updatePreferences();
+
+      for (auto& x : normalWidgets)
+            x->update();
+
+      for (auto& x : uiRelatedWidgets)
+            x->update();
+
+      for (auto& x : audioRelatedWidgets)
+            x->update();
       
       //macOS default fonts are not in QFontCombobox because they are "private":
       //https://code.woboq.org/qt5/qtbase/src/widgets/widgets/qfontcombobox.cpp.html#329
-      auto currFontFamily = preferences.getString(PREF_UI_THEME_FONTFAMILY);
-      if (-1 == fontFamily->findText(currFontFamily))
-            fontFamily->addItem(currFontFamily);
-      fontFamily->setCurrentIndex(fontFamily->findText(currFontFamily));
 
-      alsaDriver->setChecked(preferences.getBool(PREF_IO_ALSA_USEALSAAUDIO));
+//      alsaDriver->setChecked(preferences.getBool(PREF_IO_ALSA_USEALSAAUDIO));
       jackDriver->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKAUDIO) || preferences.getBool(PREF_IO_JACK_USEJACKMIDI));
-      useJackAudio->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKAUDIO));
-      portaudioDriver->setChecked(preferences.getBool(PREF_IO_PORTAUDIO_USEPORTAUDIO));
-      pulseaudioDriver->setChecked(preferences.getBool(PREF_IO_PULSEAUDIO_USEPULSEAUDIO));
-      useJackMidi->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKMIDI));
-      useJackTransport->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKTRANSPORT));
+//      useJackAudio->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKAUDIO));
+//      portaudioDriver->setChecked(preferences.getBool(PREF_IO_PORTAUDIO_USEPORTAUDIO));
+//      pulseaudioDriver->setChecked(preferences.getBool(PREF_IO_PULSEAUDIO_USEPULSEAUDIO));
+//      useJackMidi->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKMIDI));
+//      useJackTransport->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKTRANSPORT));
 
-      alsaDevice->setText(preferences.getString(PREF_IO_ALSA_DEVICE));
+//      alsaDevice->setText(preferences.getString(PREF_IO_ALSA_DEVICE));
 
-      int index = alsaSampleRate->findData(preferences.getInt(PREF_IO_ALSA_SAMPLERATE));
-      alsaSampleRate->setCurrentIndex(index);
+//      int index = alsaSampleRate->findData(preferences.getInt(PREF_IO_ALSA_SAMPLERATE));
+//      alsaSampleRate->setCurrentIndex(index);
 
-      index = alsaPeriodSize->findData(preferences.getInt(PREF_IO_ALSA_PERIODSIZE));
-      alsaPeriodSize->setCurrentIndex(index);
+//      index = alsaPeriodSize->findData(preferences.getInt(PREF_IO_ALSA_PERIODSIZE));
+//      alsaPeriodSize->setCurrentIndex(index);
 
-      alsaFragments->setValue(preferences.getInt(PREF_IO_ALSA_FRAGMENTS));
+//      alsaFragments->setValue(preferences.getInt(PREF_IO_ALSA_FRAGMENTS));
 
 #ifdef AVSOMR
       useLocalAvsOmr->setChecked(preferences.getBool(PREF_IMPORT_AVSOMR_USELOCAL));
@@ -710,15 +747,7 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       language->setCurrentIndex(curIdx);
       language->blockSignals(false);
 
-      styleName->setCurrentIndex(int(preferences.globalStyle()));
-
       pageVertical->setChecked(MScore::verticalOrientation());
-
-      for (auto& x : normalWidgets)
-            x->update();
-
-      for (auto& x : uiRelatedWidgets)
-            x->update();
 
       if (useDefaultValues)
             preferences.setReturnDefaultValuesMode(false);
@@ -1091,6 +1120,13 @@ void PreferenceDialog::uiWidgetModified()
       modifiedUiWidgets.push_back(item);
       }
 
+void PreferenceDialog::audioWidgetModified()
+      {
+      applySetActive(true);
+      PreferenceItem* item = dynamic_cast<PreferenceItem*>(sender());
+      modifiedAudioWidgets.push_back(item);
+      }
+
 //---------------------------------------------------------
 //   apply
 //---------------------------------------------------------
@@ -1104,13 +1140,11 @@ void PreferenceDialog::apply()
             return;
 
       bool uiStyleThemeChanged = false;
+      bool audioModified = false;
 
       applySetActive(false);
       buttonBox->button(QDialogButtonBox::Apply)->setText("Applying...");
       buttonBox->repaint();
-
-      if (preferences.globalStyle() != MuseScoreStyleType(styleName->currentIndex()))
-         uiStyleThemeChanged = true;
 
       std::vector<QString> changedAdvancedProperties = advancedWidget->save();
       for (auto x : changedAdvancedProperties)
@@ -1125,55 +1159,62 @@ void PreferenceDialog::apply()
             uiStyleThemeChanged = true;
             }
 
+      for (auto& x : modifiedAudioWidgets) {
+            audioModified = true;
+            break;
+            }
+
 #ifdef AVSOMR
       preferences.setPreference(PREF_IMPORT_AVSOMR_USELOCAL, useLocalAvsOmr->isChecked());
 #endif
 
-      //all this
-      bool wasJack = (preferences.getBool(PREF_IO_JACK_USEJACKMIDI) || preferences.getBool(PREF_IO_JACK_USEJACKAUDIO));
-      bool wasJackAudio = preferences.getBool(PREF_IO_JACK_USEJACKAUDIO);
-      bool wasJackMidi = preferences.getBool(PREF_IO_JACK_USEJACKMIDI);
-      preferences.setPreference(PREF_IO_JACK_USEJACKAUDIO, jackDriver->isChecked() && useJackAudio->isChecked());
-      preferences.setPreference(PREF_IO_JACK_USEJACKMIDI, jackDriver->isChecked() && useJackMidi->isChecked());
-      bool nowJack = (preferences.getBool(PREF_IO_JACK_USEJACKMIDI) || preferences.getBool(PREF_IO_JACK_USEJACKAUDIO));
-      bool jackParametersChanged = (preferences.getBool(PREF_IO_JACK_USEJACKAUDIO) != wasJackAudio
-                  || preferences.getBool(PREF_IO_JACK_USEJACKMIDI) != wasJackMidi
-                  || preferences.getBool(PREF_IO_JACK_REMEMBERLASTCONNECTIONS) != rememberLastMidiConnections->isChecked()
-                  || preferences.getBool(PREF_IO_JACK_TIMEBASEMASTER) != becomeTimebaseMaster->isChecked())
-                  && (wasJack && nowJack);
-      //till this
+      if (audioModified) {
+            bool wasJack = (preferences.getBool(PREF_IO_JACK_USEJACKMIDI) || preferences.getBool(PREF_IO_JACK_USEJACKAUDIO));
+            bool wasJackAudio = preferences.getBool(PREF_IO_JACK_USEJACKAUDIO);
+            bool wasJackMidi = preferences.getBool(PREF_IO_JACK_USEJACKMIDI);
+            preferences.setPreference(PREF_IO_JACK_USEJACKAUDIO, jackDriver->isChecked() && useJackAudio->isChecked());
+            preferences.setPreference(PREF_IO_JACK_USEJACKMIDI, jackDriver->isChecked() && useJackMidi->isChecked());
+            bool nowJack = (preferences.getBool(PREF_IO_JACK_USEJACKMIDI) || preferences.getBool(PREF_IO_JACK_USEJACKAUDIO));
+            bool jackParametersChanged = (preferences.getBool(PREF_IO_JACK_USEJACKAUDIO) != wasJackAudio
+                        || preferences.getBool(PREF_IO_JACK_USEJACKMIDI) != wasJackMidi
+                        || preferences.getBool(PREF_IO_JACK_REMEMBERLASTCONNECTIONS) != rememberLastMidiConnections->isChecked()
+                        || preferences.getBool(PREF_IO_JACK_TIMEBASEMASTER) != becomeTimebaseMaster->isChecked())
+                        && (wasJack && nowJack);
+            //till this
 
-      preferences.setPreference(PREF_IO_JACK_USEJACKTRANSPORT, jackDriver->isChecked() && useJackTransport->isChecked()); //this
+            preferences.setPreference(PREF_IO_JACK_USEJACKTRANSPORT, jackDriver->isChecked() && useJackTransport->isChecked()); //this
 
-      if (jackParametersChanged) {
-            // Change parameters of JACK driver without unload
-            if (seq) {
-                  seq->driver()->init(true);
-                  if (!seq->init(true))
-                        qDebug("sequencer init failed");
+            if (jackParametersChanged) {
+                  // Change parameters of JACK driver without unload
+                  if (seq) {
+                        if (seq->driver() == nullptr)
+                              qDebug("sequencer driver is null");
+                        seq->driver()->init(true);
+                        if (!seq->init(true))
+                              qDebug("sequencer init failed");
+                        }
                   }
-            }
-      else if (
-         (wasJack != nowJack)
-         || (preferences.getBool(PREF_IO_PORTAUDIO_USEPORTAUDIO) != portaudioDriver->isChecked())
-         || (preferences.getBool(PREF_IO_PULSEAUDIO_USEPULSEAUDIO) != pulseaudioDriver->isChecked())
-#ifdef USE_ALSA
-         || (preferences.getString(PREF_IO_ALSA_DEVICE) != alsaDevice->text())
-         || (preferences.getInt(PREF_IO_ALSA_SAMPLERATE) != alsaSampleRate->currentData().toInt())
-         || (preferences.getInt(PREF_IO_ALSA_PERIODSIZE) != alsaPeriodSize->currentData().toInt())
-         || (preferences.getInt(PREF_IO_ALSA_FRAGMENTS) != alsaFragments->value())
-#endif
-            ) {
+            else if (
+               (wasJack != nowJack)
+               || (preferences.getBool(PREF_IO_PORTAUDIO_USEPORTAUDIO) != portaudioDriver->isChecked())
+               || (preferences.getBool(PREF_IO_PULSEAUDIO_USEPULSEAUDIO) != pulseaudioDriver->isChecked())
+      #ifdef USE_ALSA
+               || (preferences.getString(PREF_IO_ALSA_DEVICE) != alsaDevice->text())
+               || (preferences.getInt(PREF_IO_ALSA_SAMPLERATE) != alsaSampleRate->currentData().toInt())
+               || (preferences.getInt(PREF_IO_ALSA_PERIODSIZE) != alsaPeriodSize->currentData().toInt())
+               || (preferences.getInt(PREF_IO_ALSA_FRAGMENTS) != alsaFragments->value())
+      #endif
+                  ) {
+                  preferences.setPreference(PREF_IO_ALSA_USEALSAAUDIO, alsaDriver->isChecked());
+                  preferences.setPreference(PREF_IO_PORTAUDIO_USEPORTAUDIO, portaudioDriver->isChecked());
+                  preferences.setPreference(PREF_IO_PULSEAUDIO_USEPULSEAUDIO, pulseaudioDriver->isChecked());
+                  preferences.setPreference(PREF_IO_ALSA_DEVICE, alsaDevice->text());
+                  preferences.setPreference(PREF_IO_ALSA_SAMPLERATE, alsaSampleRate->currentData().toInt());
+                  preferences.setPreference(PREF_IO_ALSA_PERIODSIZE, alsaPeriodSize->currentData().toInt());
+                  preferences.setPreference(PREF_IO_ALSA_FRAGMENTS, alsaFragments->value());
 
-            preferences.setPreference(PREF_IO_ALSA_USEALSAAUDIO, alsaDriver->isChecked());
-            preferences.setPreference(PREF_IO_PORTAUDIO_USEPORTAUDIO, portaudioDriver->isChecked());
-            preferences.setPreference(PREF_IO_PULSEAUDIO_USEPULSEAUDIO, pulseaudioDriver->isChecked());
-            preferences.setPreference(PREF_IO_ALSA_DEVICE, alsaDevice->text());
-            preferences.setPreference(PREF_IO_ALSA_SAMPLERATE, alsaSampleRate->currentData().toInt());
-            preferences.setPreference(PREF_IO_ALSA_PERIODSIZE, alsaPeriodSize->currentData().toInt());
-            preferences.setPreference(PREF_IO_ALSA_FRAGMENTS, alsaFragments->value());
-
-            restartAudioEngine();
+                  restartAudioEngine();
+                  }
             }
 
 #ifdef USE_PORTAUDIO
@@ -1209,12 +1250,11 @@ void PreferenceDialog::apply()
       bool languageChanged = l != preferences.getString(PREF_UI_APP_LANGUAGE);
       preferences.setPreference(PREF_UI_APP_LANGUAGE, l);
 
-      preferences.setCustomPreference<MuseScoreStyleType>(PREF_UI_APP_GLOBALSTYLE, MuseScoreStyleType(styleName->currentIndex()));
       if (languageChanged) {
             setMscoreLocale(preferences.getString(PREF_UI_APP_LANGUAGE));
             mscore->update();
             }
-
+      cout << timer.elapsed() << endl;
       if(uiStyleThemeChanged) {
             WorkspacesManager::retranslateAll();
             preferences.setPreference(PREF_APP_WORKSPACE, WorkspacesManager::currentWorkspace()->name());
