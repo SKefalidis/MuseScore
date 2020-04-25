@@ -294,8 +294,32 @@ void PreferenceDialog::start()
                   new BoolPreferenceItem(PREF_IO_JACK_TIMEBASEMASTER, becomeTimebaseMaster),
                   new BoolPreferenceItem(PREF_IO_JACK_REMEMBERLASTCONNECTIONS, rememberLastMidiConnections),
                   new BoolPreferenceItem(PREF_SCORE_NOTE_WARNPITCHRANGE, warnPitchRange),
-                  new StringPreferenceItem(PREF_IMPORT_OVERTURE_CHARSET, importCharsetListOve),
-                  new StringPreferenceItem(PREF_IMPORT_GUITARPRO_CHARSET, importCharsetListGP),
+                  new StringPreferenceItem(PREF_IMPORT_OVERTURE_CHARSET, importCharsetListOve, nullptr,
+                                          [&]() {
+                                                QList<QByteArray> charsets = QTextCodec::availableCodecs();
+                                                qSort(charsets.begin(), charsets.end());
+                                                int idx = 0;
+                                                importCharsetListOve->clear();
+                                                for (QByteArray charset : charsets) {
+                                                      importCharsetListOve->addItem(charset);
+                                                      if (charset == preferences.getString(PREF_IMPORT_OVERTURE_CHARSET))
+                                                            importCharsetListOve->setCurrentIndex(idx);
+                                                      idx++;
+                                                      }
+                                                }),
+                  new StringPreferenceItem(PREF_IMPORT_GUITARPRO_CHARSET, importCharsetListGP, nullptr,
+                                           [&]() {
+                                                QList<QByteArray> charsets = QTextCodec::availableCodecs();
+                                                qSort(charsets.begin(), charsets.end());
+                                                int idx = 0;
+                                                importCharsetListGP->clear();
+                                                for (QByteArray charset : charsets) {
+                                                      importCharsetListGP->addItem(charset);
+                                                      if (charset == preferences.getString(PREF_IMPORT_GUITARPRO_CHARSET))
+                                                            importCharsetListGP->setCurrentIndex(idx);
+                                                      idx++;
+                                                      }
+                                                 }),
                   new DoublePreferenceItem(PREF_SCORE_MAGNIFICATION, scale), // 100 not needed, make it an apply function
             #ifdef USE_PORTMIDI
                   new StringPreferenceItem(PREF_IO_PORTMIDI_INPUTDEVICE, portMidiInput),
@@ -598,23 +622,7 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       //macOS default fonts are not in QFontCombobox because they are "private":
       //https://code.woboq.org/qt5/qtbase/src/widgets/widgets/qfontcombobox.cpp.html#329
 
-//      alsaDriver->setChecked(preferences.getBool(PREF_IO_ALSA_USEALSAAUDIO));
       jackDriver->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKAUDIO) || preferences.getBool(PREF_IO_JACK_USEJACKMIDI));
-//      useJackAudio->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKAUDIO));
-//      portaudioDriver->setChecked(preferences.getBool(PREF_IO_PORTAUDIO_USEPORTAUDIO));
-//      pulseaudioDriver->setChecked(preferences.getBool(PREF_IO_PULSEAUDIO_USEPULSEAUDIO));
-//      useJackMidi->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKMIDI));
-//      useJackTransport->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKTRANSPORT));
-
-//      alsaDevice->setText(preferences.getString(PREF_IO_ALSA_DEVICE));
-
-//      int index = alsaSampleRate->findData(preferences.getInt(PREF_IO_ALSA_SAMPLERATE));
-//      alsaSampleRate->setCurrentIndex(index);
-
-//      index = alsaPeriodSize->findData(preferences.getInt(PREF_IO_ALSA_PERIODSIZE));
-//      alsaPeriodSize->setCurrentIndex(index);
-
-//      alsaFragments->setValue(preferences.getInt(PREF_IO_ALSA_FRAGMENTS));
 
 #ifdef AVSOMR
       useLocalAvsOmr->setChecked(preferences.getBool(PREF_IMPORT_AVSOMR_USELOCAL));
@@ -711,21 +719,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       //
       // score settings
       //
-      QList<QByteArray> charsets = QTextCodec::availableCodecs();
-      qSort(charsets.begin(), charsets.end());
-      int idx = 0;
-      importCharsetListOve->clear();
-      importCharsetListGP->clear();
-      for (QByteArray charset : charsets) {
-            importCharsetListOve->addItem(charset);
-            importCharsetListGP->addItem(charset);
-            if (charset == preferences.getString(PREF_IMPORT_OVERTURE_CHARSET))
-                  importCharsetListOve->setCurrentIndex(idx);
-            if (charset == preferences.getString(PREF_IMPORT_GUITARPRO_CHARSET))
-                  importCharsetListGP->setCurrentIndex(idx);
-            idx++;
-            }
-
       language->blockSignals(true);
       language->clear();
       QString lang = preferences.getString(PREF_UI_APP_LANGUAGE);
