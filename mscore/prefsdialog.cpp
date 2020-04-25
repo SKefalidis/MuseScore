@@ -594,15 +594,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
             preferences.setReturnDefaultValuesMode(true);
 
       advancedWidget->updatePreferences();
-
-      for (auto& x : normalWidgets)
-            x->update();
-
-      for (auto& x : uiRelatedWidgets)
-            x->update();
-
-      for (auto& x : audioRelatedWidgets)
-            x->update();
       
       //macOS default fonts are not in QFontCombobox because they are "private":
       //https://code.woboq.org/qt5/qtbase/src/widgets/widgets/qfontcombobox.cpp.html#329
@@ -748,6 +739,15 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       language->blockSignals(false);
 
       pageVertical->setChecked(MScore::verticalOrientation());
+
+      for (auto& x : normalWidgets)
+            x->update();
+
+      for (auto& x : uiRelatedWidgets)
+            x->update();
+
+      for (auto& x : audioRelatedWidgets)
+            x->update();
 
       if (useDefaultValues)
             preferences.setReturnDefaultValuesMode(false);
@@ -1187,8 +1187,10 @@ void PreferenceDialog::apply()
             if (jackParametersChanged) {
                   // Change parameters of JACK driver without unload
                   if (seq) {
-                        if (seq->driver() == nullptr)
+                        if (seq->driver() == nullptr) {
                               qDebug("sequencer driver is null");
+                              restartAudioEngine();
+                              }
                         seq->driver()->init(true);
                         if (!seq->init(true))
                               qDebug("sequencer init failed");

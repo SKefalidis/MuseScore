@@ -620,9 +620,9 @@ StringPreferenceItem::StringPreferenceItem(QString name, QRadioButton* editor, s
         _editor4(editor)
       {
       connect(_editor4, &QRadioButton::toggled, this, &PreferenceItem::editorValueModified);
-      Q_ASSERT(!applyFunction.operator bool()); // if an apply and an update function are not provided this cannot work
+      Q_ASSERT(applyFunc.operator bool()); // if an apply and an update function are not provided this cannot work
       applyFunction = applyFunc;
-      Q_ASSERT(!updateFunc.operator bool());
+      Q_ASSERT(updateFunc.operator bool());
       updateFunction = updateFunc;
       }
 
@@ -742,9 +742,9 @@ CustomPreferenceItem::CustomPreferenceItem(QString name, QRadioButton* editor, s
         _editor(editor)
       {
       connect(_editor, &QRadioButton::toggled, this, &PreferenceItem::editorValueModified);
-      Q_ASSERT(!applyFunction.operator bool()); // if an apply and an update function are not provided this cannot work
+      Q_ASSERT(applyFunc.operator bool()); // if an apply and an update function are not provided this cannot work
       applyFunction = applyFunc;
-      Q_ASSERT(!updateFunc.operator bool());
+      Q_ASSERT(updateFunc.operator bool());
       updateFunction = updateFunc;
       }
 
@@ -753,9 +753,9 @@ CustomPreferenceItem::CustomPreferenceItem(QString name, QComboBox* editor, std:
         _editor2(editor)
       {
       connect(_editor2, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PreferenceItem::editorValueModified);
-      Q_ASSERT(!applyFunction.operator bool()); // if an apply and an update function are not provided this cannot work
+      Q_ASSERT(applyFunc.operator bool()); // if an apply and an update function are not provided this cannot work
       applyFunction = applyFunc;
-      Q_ASSERT(!updateFunc.operator bool());
+      Q_ASSERT(updateFunc.operator bool());
       updateFunction = updateFunc;
       }
 
