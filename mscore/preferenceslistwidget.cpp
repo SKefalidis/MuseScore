@@ -741,22 +741,24 @@ CustomPreferenceItem::CustomPreferenceItem(QString name, QRadioButton* editor, s
       : PreferenceItem(name),
         _editor(editor)
       {
-      connect(_editor, &QRadioButton::toggled, this, &PreferenceItem::editorValueModified);
       Q_ASSERT(applyFunc.operator bool()); // if an apply and an update function are not provided this cannot work
       applyFunction = applyFunc;
       Q_ASSERT(updateFunc.operator bool());
       updateFunction = updateFunc;
+      updateFunction(); // update on creation is the same as assigning an initival value
+      connect(_editor, &QRadioButton::toggled, this, &PreferenceItem::editorValueModified);
       }
 
 CustomPreferenceItem::CustomPreferenceItem(QString name, QComboBox* editor, std::function<void ()> applyFunc, std::function<void ()> updateFunc)
       : PreferenceItem(name),
         _editor2(editor)
       {
-      connect(_editor2, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PreferenceItem::editorValueModified);
       Q_ASSERT(applyFunc.operator bool()); // if an apply and an update function are not provided this cannot work
       applyFunction = applyFunc;
       Q_ASSERT(updateFunc.operator bool());
       updateFunction = updateFunc;
+      updateFunction(); // update on creation is the same as assigning an initival value
+      connect(_editor2, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PreferenceItem::editorValueModified);
       }
 
 void CustomPreferenceItem::save()

@@ -268,7 +268,19 @@ void PreferenceDialog::start()
                   new BoolPreferenceItem(PREF_IMPORT_MUSICXML_IMPORTBREAKS, importBreaks),
                   new BoolPreferenceItem(PREF_IMPORT_MUSICXML_IMPORTLAYOUT, importLayout),
             #ifdef AVSOMR
-                  new BoolPreferenceItem(PREF_IMPORT_AVSOMR_USELOCAL, useLocalAvsOmr),
+                  new BoolPreferenceItem(PREF_IMPORT_AVSOMR_USELOCAL, useLocalAvsOmr,
+                                          [&]() {
+                                          useLocalAvsOmr->setChecked(preferences.getBool(PREF_IMPORT_AVSOMR_USELOCAL));
+                                          Avs::AvsOmrLocal::instance()->isInstalledAsync([this](bool isInstalled) {
+                                                QString text = QObject::tr("Use local OMR engine");
+                                                if (isInstalled)
+                                                      text += " (" + QObject::tr("Installed") + ")";
+                                                else
+                                                      text += " (" + QObject::tr("Not installed, needs internet connection for installing") + ")";
+
+                                                useLocalAvsOmr->setText(text);
+                                                });
+                                          }),
             #endif
                   new BoolPreferenceItem(PREF_IO_MIDI_ADVANCEONRELEASE, advanceOnRelease),
                   new BoolPreferenceItem(PREF_IO_MIDI_ENABLEINPUT, enableMidiInput),
@@ -322,8 +334,8 @@ void PreferenceDialog::start()
                                                  }),
                   new DoublePreferenceItem(PREF_SCORE_MAGNIFICATION, scale), // 100 not needed, make it an apply function
             #ifdef USE_PORTMIDI
-                  new StringPreferenceItem(PREF_IO_PORTMIDI_INPUTDEVICE, portMidiInput),
-                  new StringPreferenceItem(PREF_IO_PORTMIDI_OUTPUTDEVICE, portMidiOutput),
+                  new StringPreferenceItem(PREF_IO_PORTMIDI_INPUTDEVICE, portMidiInput, nullptr, nullptr),
+                  new StringPreferenceItem(PREF_IO_PORTMIDI_OUTPUTDEVICE, portMidiOutput, nullptr, nullptr),
                   new IntPreferenceItem(PREF_IO_PORTMIDI_OUTPUTLATENCYMILLISECONDS, portMidiOutputLatencyMilliseconds),
             #endif
                   new IntPreferenceItem(PREF_EXPORT_AUDIO_SAMPLERATE, exportAudioSampleRate),
@@ -366,7 +378,8 @@ void PreferenceDialog::start()
                                                       mscore->currentScoreView()->setOffset(0.0, 0.0);
                                                 mscore->scorePageLayoutChanged();
                                                 mscore->update();
-                                                }),
+                                                },
+                                          [&]() { pageVertical->setChecked(MScore::verticalOrientation()); }),
                   new IntPreferenceItem(PREF_IO_MIDI_SHORTESTNOTE, shortestNote,
                                           [&]() { applyShortestNote();  },  // apply function
                                           [&]() { updateShortestNote(); }), // update function
@@ -383,93 +396,127 @@ void PreferenceDialog::start()
                                                       resetElementPositionsAlwaysAsk->setChecked(false);
                                                 }),
                   new StringPreferenceItem(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, resetElementPositionsYes,
-                                           [&]() { // apply function
+                                          [&]() { // apply function
                                                 if (resetElementPositionsYes->isChecked())
                                                       preferences.setPreference(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, "Yes");
-                                                 },
-                                           [&]() { // update function
-                                                 QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
-                                                 if (resPref == "Yes") // "Ask" or unset (or anything else)
-                                                       resetElementPositionsYes->setChecked(true);
-                                                 else
-                                                       resetElementPositionsYes->setChecked(false);
-                                                 }),
+                                                },
+                                          [&]() { // update function
+                                                QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
+                                                if (resPref == "Yes") // "Ask" or unset (or anything else)
+                                                      resetElementPositionsYes->setChecked(true);
+                                                else
+                                                      resetElementPositionsYes->setChecked(false);
+                                                }),
                   new StringPreferenceItem(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, resetElementPositionsNo,
-                                           [&]() { // apply function
+                                          [&]() { // apply function
                                                 if (resetElementPositionsNo->isChecked())
                                                       preferences.setPreference(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, "No");
-                                                 },
-                                           [&]() { // update function
-                                                 QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
-                                                 if (resPref == "No") // "Ask" or unset (or anything else)
-                                                       resetElementPositionsNo->setChecked(true);
-                                                 else
-                                                       resetElementPositionsNo->setChecked(false);
-                                                 }),
+                                                },
+                                          [&]() { // update function
+                                                QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
+                                                if (resPref == "No") // "Ask" or unset (or anything else)
+                                                      resetElementPositionsNo->setChecked(true);
+                                                else
+                                                      resetElementPositionsNo->setChecked(false);
+                                                }),
+                  new StringPreferenceItem(PREF_UI_APP_LANGUAGE, language,
+                                          [&]() { // apply function
+                                                int lang = language->itemData(language->currentIndex()).toInt();
+                                                QString l = lang == 0 ? "system" : mscore->languages().at(lang).key;
+                                                bool languageChanged = l != preferences.getString(PREF_UI_APP_LANGUAGE);
+                                                preferences.setPreference(PREF_UI_APP_LANGUAGE, l);
+
+                                                if (languageChanged) {
+                                                      setMscoreLocale(preferences.getString(PREF_UI_APP_LANGUAGE));
+                                                      mscore->update();
+                                                      }
+                                                },
+                                          [&]() { // update function
+                                                language->blockSignals(true);
+                                                for (int i = 0; i < language->count(); ++i) {
+                                                      if (language->itemText(i).startsWith(preferences.getString(PREF_UI_APP_LANGUAGE))) {
+                                                            language->setCurrentIndex(i);
+                                                            break;
+                                                            }
+                                                      }
+                                                language->blockSignals(false);
+                                                // ???
+                                                language->blockSignals(true);
+                                                language->clear();
+                                                QString lang = preferences.getString(PREF_UI_APP_LANGUAGE);
+                                                int curIdx = 0;
+                                                for(int i = 0; i < mscore->languages().size(); ++i) {
+                                                      language->addItem(mscore->languages().at(i).name, i);
+                                                      if (mscore->languages().at(i).key == lang)
+                                                            curIdx = i;
+                                                      }
+                                                language->setCurrentIndex(curIdx);
+                                                language->blockSignals(false);
+                                                }),
                   new CustomPreferenceItem(PREF_APP_STARTUP_SESSIONSTART, lastSession,
-                                           [&]() { // apply function
+                                          [&]() { // apply function
                                                 if (lastSession->isChecked())
                                                       preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::LAST);
-                                                 },
-                                           [&]() { // update function
-                                                 lastSession->setChecked(preferences.sessionStart() == SessionStart::LAST);
-                                                 }),
+                                                },
+                                          [&]() { // update function
+                                                lastSession->setChecked(preferences.sessionStart() == SessionStart::LAST);
+                                                }),
                   new CustomPreferenceItem(PREF_APP_STARTUP_SESSIONSTART, newSession,
-                                           [&]() { // apply function
+                                          [&]() { // apply function
                                                 if (newSession->isChecked())
                                                       preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::NEW);
-                                                 },
-                                           [&]() { // update function
-                                                 newSession->setChecked(preferences.sessionStart() == SessionStart::NEW);
-                                                 }),
+                                                },
+                                          [&]() { // update function
+                                                newSession->setChecked(preferences.sessionStart() == SessionStart::NEW);
+                                                }),
                   new CustomPreferenceItem(PREF_APP_STARTUP_SESSIONSTART, scoreSession,
-                                           [&]() { // apply function
+                                          [&]() { // apply function
                                                 if (scoreSession->isChecked())
                                                       preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::SCORE);
-                                                 },
-                                           [&]() { // update function
-                                                 scoreSession->setChecked(preferences.sessionStart() == SessionStart::SCORE);
-                                                 }),
+                                                },
+                                          [&]() { // update function
+                                                scoreSession->setChecked(preferences.sessionStart() == SessionStart::SCORE);
+                                                }),
                   new CustomPreferenceItem(PREF_APP_STARTUP_SESSIONSTART, emptySession,
-                                           [&]() { // apply function
-                                                if (emptySession->isChecked())
-                                                      preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::EMPTY);
-                                                 },
-                                           [&]() { // update function
-                                                 emptySession->setChecked(preferences.sessionStart() == SessionStart::EMPTY);
-                                                 }),
+                                          [&]() { // apply function
+                                               if (emptySession->isChecked())
+                                                     preferences.setCustomPreference<SessionStart>(PREF_APP_STARTUP_SESSIONSTART, SessionStart::EMPTY);
+                                                },
+                                          [&]() { // update function
+                                                emptySession->setChecked(preferences.sessionStart() == SessionStart::EMPTY);
+                                                }),
                   new CustomPreferenceItem(PREF_EXPORT_MUSICXML_EXPORTBREAKS, exportAllLayouts,
-                                           [&]() { // apply function
+                                          [&]() { // apply function
                                                 if (exportAllLayouts->isChecked())
                                                       preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::ALL);
-                                                 },
-                                           [&]() { // update function
-                                                 ;
-                                                 }),
+                                                },
+                                          [&]() { // update function
+                                                ;
+                                                }),
                   new CustomPreferenceItem(PREF_EXPORT_MUSICXML_EXPORTBREAKS, exportAllBreaks,
-                                           [&]() { // apply function
+                                          [&]() { // apply function
                                                 if (exportAllBreaks->isChecked())
                                                       preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::ALL);
-                                                 },
-                                           [&]() { // update function
-                                                 exportAllBreaks->setChecked(preferences.musicxmlExportBreaks() == MusicxmlExportBreaks::ALL);
-                                                 }),
+                                                },
+                                          [&]() { // update function
+                                                exportAllBreaks->setChecked(preferences.musicxmlExportBreaks() == MusicxmlExportBreaks::ALL);
+                                                }),
                   new CustomPreferenceItem(PREF_EXPORT_MUSICXML_EXPORTBREAKS, exportManualBreaks,
-                                           [&]() { // apply function
+                                          [&]() { // apply function
                                                 if (exportManualBreaks->isChecked())
                                                       preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::MANUAL);
-                                                 },
-                                           [&]() { // update function
-                                                 exportManualBreaks->setChecked(preferences.musicxmlExportBreaks() == MusicxmlExportBreaks::MANUAL);
-                                                 }),
+                                                },
+                                          [&]() { // update function
+                                                exportManualBreaks->setChecked(preferences.musicxmlExportBreaks() == MusicxmlExportBreaks::MANUAL);
+                                                }),
                   new CustomPreferenceItem(PREF_EXPORT_MUSICXML_EXPORTBREAKS, exportNoBreaks,
-                                           [&]() { // apply function
+                                          [&]() { // apply function
                                                 if (exportNoBreaks->isChecked())
                                                       preferences.setCustomPreference<MusicxmlExportBreaks>(PREF_EXPORT_MUSICXML_EXPORTBREAKS, MusicxmlExportBreaks::NO);
-                                                 },
-                                           [&]() { // update function
-                                                 exportNoBreaks->setChecked(preferences.musicxmlExportBreaks() == MusicxmlExportBreaks::NO);
-                                                 }),
+                                                },
+                                          [&]() { // update function
+                                                exportNoBreaks->setChecked(preferences.musicxmlExportBreaks() == MusicxmlExportBreaks::NO);
+                                                }),
 
       };
 
@@ -625,28 +672,10 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       jackDriver->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKAUDIO) || preferences.getBool(PREF_IO_JACK_USEJACKMIDI));
 
 #ifdef AVSOMR
-      useLocalAvsOmr->setChecked(preferences.getBool(PREF_IMPORT_AVSOMR_USELOCAL));
-      Avs::AvsOmrLocal::instance()->isInstalledAsync([this](bool isInstalled) {
-            QString text = QObject::tr("Use local OMR engine");
-            if (isInstalled)
-                  text += " (" + QObject::tr("Installed") + ")";
-            else
-                  text += " (" + QObject::tr("Not installed, needs internet connection for installing") + ")";
-
-            useLocalAvsOmr->setText(text);
-            });
+      //added as a BoolPreferenceItem
 #else
       groupBox_omr->setVisible(false);
 #endif
-
-      language->blockSignals(true);
-      for (int i = 0; i < language->count(); ++i) {
-            if (language->itemText(i).startsWith(preferences.getString(PREF_UI_APP_LANGUAGE))) {
-                  language->setCurrentIndex(i);
-                  break;
-                  }
-            }
-      language->blockSignals(false);
 
       //
       // initialize local shortcut table
@@ -715,23 +744,6 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
       enableMidiInput->setEnabled(false);
       rcGroup->setEnabled(false);
 #endif
-
-      //
-      // score settings
-      //
-      language->blockSignals(true);
-      language->clear();
-      QString lang = preferences.getString(PREF_UI_APP_LANGUAGE);
-      int curIdx = 0;
-      for(int i = 0; i < mscore->languages().size(); ++i) {
-            language->addItem(mscore->languages().at(i).name, i);
-            if (mscore->languages().at(i).key == lang)
-                  curIdx = i;
-            }
-      language->setCurrentIndex(curIdx);
-      language->blockSignals(false);
-
-      pageVertical->setChecked(MScore::verticalOrientation());
 
       for (auto& x : normalWidgets)
             x->update();
@@ -1140,9 +1152,11 @@ void PreferenceDialog::apply()
       buttonBox->repaint();
 
       std::vector<QString> changedAdvancedProperties = advancedWidget->save();
-      for (auto x : changedAdvancedProperties)
+      for (auto x : changedAdvancedProperties) {
             if (x.startsWith("ui"))
                   uiStyleThemeChanged = true;
+            cout << "here" << endl;
+            }
 
       for (auto& x : modifiedWidgets)
             x->save();
@@ -1150,12 +1164,12 @@ void PreferenceDialog::apply()
       for (auto& x : modifiedUiWidgets) {
             x->save();
             uiStyleThemeChanged = true;
+            cout << x->name().toStdString() << endl;
+            cout << "or here" << endl;
             }
-
-      for (auto& x : modifiedAudioWidgets) {
+      cout << timer.elapsed() << endl;
+      if (modifiedAudioWidgets.size() > 0)
             audioModified = true;
-            break;
-            }
 
 #ifdef AVSOMR
       preferences.setPreference(PREF_IMPORT_AVSOMR_USELOCAL, useLocalAvsOmr->isChecked());
@@ -1221,6 +1235,8 @@ void PreferenceDialog::apply()
 
 #ifdef USE_PORTMIDI
       if (seq->driver() && static_cast<PortMidiDriver*>(static_cast<Portaudio*>(seq->driver())->mididriver())->isSameCoreMidiIacBus(preferences.getString(PREF_IO_PORTMIDI_INPUTDEVICE), preferences.getString(PREF_IO_PORTMIDI_OUTPUTDEVICE))) {
+            preferences.setPreference(PREF_IO_PORTMIDI_INPUTDEVICE, portMidiInput->currentText());
+            preferences.setPreference(PREF_IO_PORTMIDI_OUTPUTDEVICE, portMidiOutput->currentText());
             QMessageBox msgBox;
             msgBox.setWindowTitle(tr("Possible MIDI Loopback"));
             msgBox.setIcon(QMessageBox::Warning);
@@ -1240,15 +1256,7 @@ void PreferenceDialog::apply()
                   }
             Shortcut::dirty = true;
             }
-      int lang = language->itemData(language->currentIndex()).toInt();
-      QString l = lang == 0 ? "system" : mscore->languages().at(lang).key;
-      bool languageChanged = l != preferences.getString(PREF_UI_APP_LANGUAGE);
-      preferences.setPreference(PREF_UI_APP_LANGUAGE, l);
 
-      if (languageChanged) {
-            setMscoreLocale(preferences.getString(PREF_UI_APP_LANGUAGE));
-            mscore->update();
-            }
       cout << timer.elapsed() << endl;
       if(uiStyleThemeChanged) {
             WorkspacesManager::retranslateAll();
@@ -1264,7 +1272,9 @@ void PreferenceDialog::apply()
       mscore->startAutoSave();
       modifiedWidgets.clear();
       modifiedUiWidgets.clear();
+      modifiedAudioWidgets.clear();
       buttonBox->button(QDialogButtonBox::Apply)->setText("Apply");
+      cout << "Final: " << timer.elapsed() << endl;
       }
 
 //---------------------------------------------------------
