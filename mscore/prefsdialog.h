@@ -91,7 +91,6 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       void filterAdvancedPreferences(const QString&);
       void resetAdvancedPreferenceToDefault();
       void restartAudioEngine();
-      void checkForModifications();
       void widgetModified();
       void uiWidgetModified();
       void audioWidgetModified();

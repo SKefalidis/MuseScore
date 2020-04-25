@@ -235,7 +235,6 @@ PreferenceDialog::PreferenceDialog(QWidget* parent)
       connect(advancedSearch, &QLineEdit::textChanged, this, &PreferenceDialog::filterAdvancedPreferences);
       connect(resetPreference, &QPushButton::clicked, this, &PreferenceDialog::resetAdvancedPreferenceToDefault);
       connect(this, &PreferenceDialog::preferencesChanged, mscore->timeline(),  &Timeline::updateTimelineTheme); // this should probably be moved to updateUiStyleAndTheme
-      applySetActive(false);
       MuseScore::restoreGeometry(this);
 #if !defined(Q_OS_MAC) && (!defined(Q_OS_WIN) || defined(FOR_WINSTORE))
       General->removeTab(General->indexOf(tabUpdate)); // updateTab not needed on Linux and not wanted in Windows Store
@@ -533,7 +532,7 @@ void PreferenceDialog::start()
                   new IntPreferenceItem(PREF_UI_CANVAS_MISC_SELECTIONPROXIMITY, proximity),
                   new IntPreferenceItem(PREF_UI_THEME_ICONWIDTH, iconWidth),
                   new IntPreferenceItem(PREF_UI_THEME_ICONHEIGHT, iconHeight),
-                  new StringPreferenceItem(PREF_UI_THEME_FONTFAMILY, fontFamily, [](){;},
+                  new StringPreferenceItem(PREF_UI_THEME_FONTFAMILY, fontFamily, nullptr,
                                           [&]() { // update function
                                                 auto currFontFamily = preferences.getString(PREF_UI_THEME_FONTFAMILY);
                                                 if (-1 == fontFamily->findText(currFontFamily))
@@ -575,6 +574,7 @@ void PreferenceDialog::start()
             connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::audioWidgetModified);
 
       updateValues();
+      applySetActive(false);
       show();
       }
 
@@ -840,7 +840,12 @@ void PreferenceDialog::resetShortcutClicked()
 
       active->setText(1, shortcut->keysToString());
       shortcutsChanged = true;
+      applySetActive(true);
       }
+
+//---------------------------------------------------------
+//   saveShortcutListClicked
+//---------------------------------------------------------
 
 void PreferenceDialog::saveShortcutListClicked()
       {
@@ -848,6 +853,10 @@ void PreferenceDialog::saveShortcutListClicked()
       preferences.setPreference(PREF_APP_PATHS_MYSHORTCUTS, saveFileName);
       Shortcut::saveToNewFile(saveFileName);
       }
+
+//---------------------------------------------------------
+//   loadShortcutListClicked
+//---------------------------------------------------------
 
 void PreferenceDialog::loadShortcutListClicked()
       {
@@ -874,6 +883,7 @@ void PreferenceDialog::clearShortcutClicked()
       s->clear();
       active->setText(1, "");
       shortcutsChanged = true;
+      applySetActive(true);
       }
 
 //--------------------------------------------------------
@@ -1085,30 +1095,18 @@ void PreferenceDialog::buttonBoxClicked(QAbstractButton* button)
             }
       }
 
+//---------------------------------------------------------
+//   applySetActive
+//---------------------------------------------------------
 
 void PreferenceDialog::applySetActive(bool active)
       {
       buttonBox->button(QDialogButtonBox::Apply)->setEnabled(active);
       }
 
-
-void PreferenceDialog::checkForModifications()
-      {
-      if(buttonBox->button(QDialogButtonBox::Apply)->isEnabled() == false) {
-            for (auto& x : normalWidgets) {
-                  if (x->isModified()) {
-                        applySetActive(true);
-                        return;
-                        }
-                  }
-            for (auto& x : uiRelatedWidgets) {
-                  if (x->isModified()) {
-                        applySetActive(true);
-                        return;
-                        }
-                  }
-            }
-      }
+//---------------------------------------------------------
+//   widgetModified
+//---------------------------------------------------------
 
 void PreferenceDialog::widgetModified()
       {
@@ -1118,12 +1116,21 @@ void PreferenceDialog::widgetModified()
       modifiedWidgets.push_back(item);
       }
 
+//---------------------------------------------------------
+//   uiWidgetModified
+//---------------------------------------------------------
+
 void PreferenceDialog::uiWidgetModified()
       {
       applySetActive(true);
       PreferenceItem* item = dynamic_cast<PreferenceItem*>(sender());
       modifiedUiWidgets.push_back(item);
       }
+
+
+//---------------------------------------------------------
+//   audioWidgetModified
+//---------------------------------------------------------
 
 void PreferenceDialog::audioWidgetModified()
       {
@@ -1152,11 +1159,9 @@ void PreferenceDialog::apply()
       buttonBox->repaint();
 
       std::vector<QString> changedAdvancedProperties = advancedWidget->save();
-      for (auto x : changedAdvancedProperties) {
+      for (auto x : changedAdvancedProperties)
             if (x.startsWith("ui"))
                   uiStyleThemeChanged = true;
-            cout << "here" << endl;
-            }
 
       for (auto& x : modifiedWidgets)
             x->save();
@@ -1164,10 +1169,8 @@ void PreferenceDialog::apply()
       for (auto& x : modifiedUiWidgets) {
             x->save();
             uiStyleThemeChanged = true;
-            cout << x->name().toStdString() << endl;
-            cout << "or here" << endl;
             }
-      cout << timer.elapsed() << endl;
+
       if (modifiedAudioWidgets.size() > 0)
             audioModified = true;
 
@@ -1257,15 +1260,15 @@ void PreferenceDialog::apply()
             Shortcut::dirty = true;
             }
 
-      cout << timer.elapsed() << endl;
+
       if(uiStyleThemeChanged) {
             WorkspacesManager::retranslateAll();
             preferences.setPreference(PREF_APP_WORKSPACE, WorkspacesManager::currentWorkspace()->name());
-            mscore->changeWorkspace(WorkspacesManager::currentWorkspace(), true); // with true you don't call preferencesChanged a second time (look at emit preferencesChanged())
-            emit mscore->workspacesChanged();
+//            mscore->changeWorkspace(WorkspacesManager::currentWorkspace(), false); // with true you don't call preferencesChanged a second time (look at emit preferencesChanged())
+            WorkspacesManager::currentWorkspace()->save();
+//            emit mscore->workspacesChanged();
             }
 
-      cout << timer.elapsed() << endl;
       emit preferencesChanged(false, uiStyleThemeChanged);
       uiStyleThemeChanged = false;
       preferences.save();
@@ -1286,6 +1289,7 @@ void PreferenceDialog::resetAllValues()
       updateValues(true);
 
       shortcutsChanged = true;
+      applySetActive(true);
       qDeleteAll(localShortcuts);
       localShortcuts.clear();
       Shortcut::resetToDefault();
@@ -1520,6 +1524,7 @@ void PreferenceDialog::defineShortcutClicked()
       s->addShortcut(sc.getKey());
       active->setText(1, s->keysToString());
       shortcutsChanged = true;
+      applySetActive(true);
       }
 
 
@@ -1604,6 +1609,9 @@ void PreferenceDialog::restartAudioEngine()
       mscore->restartAudioEngine();
       }
 
+//---------------------------------------------------------
+//   updateShortestNote
+//---------------------------------------------------------
 
 void PreferenceDialog::updateShortestNote()
       {
@@ -1633,6 +1641,10 @@ void PreferenceDialog::updateShortestNote()
             }
       shortestNote->setCurrentIndex(shortestNoteIndex);
       }
+
+//---------------------------------------------------------
+//   applyShortestNote
+//---------------------------------------------------------
 
 void PreferenceDialog::applyShortestNote()
       {
