@@ -109,6 +109,7 @@ class DoublePreferenceItem : public PreferenceItem {
       double _initialValue { 0 };
       QDoubleSpinBox* _editor { nullptr };
       QComboBox* _editor2 { nullptr };
+      QSpinBox* _editor3 { nullptr };
       std::function<void()> applyFunction = nullptr;
       std::function<void()> updateFunction = nullptr;
 
@@ -116,6 +117,7 @@ class DoublePreferenceItem : public PreferenceItem {
       DoublePreferenceItem(QString name, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
       DoublePreferenceItem(QString name, QDoubleSpinBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
       DoublePreferenceItem(QString name, QComboBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
+      DoublePreferenceItem(QString name, QSpinBox* editor, std::function<void()> applyFunc = nullptr, std::function<void()> updateFunc = nullptr);
 
       void save() override;
       void update() override;

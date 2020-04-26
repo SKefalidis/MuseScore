@@ -262,7 +262,7 @@ void PreferenceDialog::start()
                   new StringPreferenceItem(PREF_APP_STARTUP_STARTSCORE, sessionScore),
                   new BoolPreferenceItem(PREF_EXPORT_MUSICXML_EXPORTLAYOUT, exportAllLayouts),
                   new IntPreferenceItem(PREF_EXPORT_PDF_DPI, exportPdfDpi),
-//                  new DoublePreferenceItem(PREF_EXPORT_PNG_RESOLUTION, pngResolution),
+                  new DoublePreferenceItem(PREF_EXPORT_PNG_RESOLUTION, pngResolution),
                   new BoolPreferenceItem(PREF_EXPORT_PNG_USETRANSPARENCY, pngTransparent),
                   new BoolPreferenceItem(PREF_IMPORT_MUSICXML_IMPORTBREAKS, importBreaks),
                   new BoolPreferenceItem(PREF_IMPORT_MUSICXML_IMPORTLAYOUT, importLayout),
@@ -331,7 +331,10 @@ void PreferenceDialog::start()
                                                       idx++;
                                                       }
                                                  }),
-                  new DoublePreferenceItem(PREF_SCORE_MAGNIFICATION, scale), // 100 not needed, make it an apply function
+                  new DoublePreferenceItem(PREF_SCORE_MAGNIFICATION, scale,
+                                          [&](){ preferences.setPreference(PREF_SCORE_MAGNIFICATION, scale->value()/100.0); },      // apply function
+                                          [&](){ scale->setValue(preferences.getDouble(PREF_SCORE_MAGNIFICATION) * 100.0); }        // update function
+                                                ),
             #ifdef USE_PORTMIDI
                   new StringPreferenceItem(PREF_IO_PORTMIDI_INPUTDEVICE, portMidiInput, nullptr, nullptr),
                   new StringPreferenceItem(PREF_IO_PORTMIDI_OUTPUTDEVICE, portMidiOutput, nullptr, nullptr),

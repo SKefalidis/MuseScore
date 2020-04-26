@@ -360,6 +360,21 @@ DoublePreferenceItem::DoublePreferenceItem(QString name, QComboBox* editor, std:
       updateFunction = updateFunc;
       }
 
+DoublePreferenceItem::DoublePreferenceItem(QString name, QSpinBox* editor, std::function<void ()> applyFunc, std::function<void ()> updateFunc)
+      : PreferenceItem(name),
+        _initialValue(preferences.getDouble(name)),
+        _editor3(editor)
+      {
+      _editor3->setMaximum(INT_MAX);
+      _editor3->setMinimum(INT_MIN);
+      _editor3->setValue(_initialValue);
+      if (qAbs(_initialValue) < 2.0)
+            _editor->setSingleStep(0.1);
+      connect(_editor3, QOverload<int>::of(&QSpinBox::valueChanged), this, &PreferenceItem::editorValueModified);
+      applyFunction = applyFunc;
+      updateFunction = updateFunc;
+      }
+
 void DoublePreferenceItem::save()
       {
       if (applyFunction.operator bool()) {
@@ -373,6 +388,11 @@ void DoublePreferenceItem::save()
                   }
             else if (_editor2) {
                   double newValue = _editor2->currentData().toDouble();
+                  _initialValue = newValue;
+                  PreferenceItem::save(newValue);
+                  }
+            else if (_editor3) {
+                  double newValue = _editor3->value();
                   _initialValue = newValue;
                   PreferenceItem::save(newValue);
                   }
@@ -397,6 +417,10 @@ void DoublePreferenceItem::update()
                   else
                         _editor2->setCurrentIndex(index);
                   }
+            else if (_editor3) {
+                  double newValue = preferences.getDouble(name());
+                  _editor3->setValue(newValue);
+                  }
             }
       }
 
@@ -410,6 +434,9 @@ void DoublePreferenceItem::setDefaultValue() // needs a default function?
             Q_ASSERT(index != -1);
             _editor2->setCurrentIndex(index);
             }
+      else if (_editor3){
+            _editor3->setValue(preferences.defaultValue(name()).toDouble());
+            }
       if (applyFunction.operator bool())
             applyFunction();
       }
@@ -420,6 +447,8 @@ QWidget* DoublePreferenceItem::editor() const
             return _editor;
       else if (_editor2)
             return _editor2;
+      else if (_editor3)
+            return _editor3;
       else
             Q_ASSERT(false);
       }
@@ -430,6 +459,8 @@ bool DoublePreferenceItem::isModified() const
             return _initialValue != _editor->value();
       else if (_editor2)
             return _initialValue != _editor2->currentData().toDouble();
+      else if (_editor3)
+            return _initialValue != _editor3->value();
       else
             Q_ASSERT(false);
       }
