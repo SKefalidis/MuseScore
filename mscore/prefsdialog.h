@@ -94,6 +94,7 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       void widgetModified();
       void uiWidgetModified();
       void audioWidgetModified();
+      void applyActivate();
 
       void changeSoundfontPaths();
       void updateTranslationClicked();

@@ -199,7 +199,7 @@ class CustomPreferenceItem : public PreferenceItem {
 class PreferencesListWidget : public QTreeWidget, public PreferenceVisitor {
       Q_OBJECT
 
-      QHash<QString, PreferenceItem*> preferenceItems;
+      QHash<QString, PreferenceItem*> _preferenceItems;
 
       void addPreference(PreferenceItem* item);
 
@@ -215,6 +215,8 @@ class PreferencesListWidget : public QTreeWidget, public PreferenceVisitor {
       void visit(QString key, BoolPreference*);
       void visit(QString key, StringPreference*);
       void visit(QString key, ColorPreference*);
+
+      QHash<QString, PreferenceItem*> preferenceItems() const { return _preferenceItems; };
       };
 
 } // namespace Ms

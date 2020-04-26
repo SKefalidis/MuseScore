@@ -576,6 +576,9 @@ void PreferenceDialog::start()
       for (auto& x : audioRelatedWidgets)
             connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::audioWidgetModified);
 
+      for (auto& x : advancedWidget->preferenceItems())
+            connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::applyActivate);
+
       updateValues();
       applySetActive(false);
       show();
@@ -1105,6 +1108,16 @@ void PreferenceDialog::buttonBoxClicked(QAbstractButton* button)
 void PreferenceDialog::applySetActive(bool active)
       {
       buttonBox->button(QDialogButtonBox::Apply)->setEnabled(active);
+      }
+
+
+//---------------------------------------------------------
+//   applyActivate
+//---------------------------------------------------------
+
+void PreferenceDialog::applyActivate()
+      {
+      applySetActive(true);
       }
 
 //---------------------------------------------------------

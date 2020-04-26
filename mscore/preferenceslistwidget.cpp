@@ -52,7 +52,7 @@ void PreferencesListWidget::loadPreferences()
 
 void PreferencesListWidget::updatePreferences()
       {
-      for (PreferenceItem* item : preferenceItems.values())
+      for (PreferenceItem* item : _preferenceItems.values())
             item->update();
       }
 
@@ -60,7 +60,7 @@ void PreferencesListWidget::addPreference(PreferenceItem* item)
       {
       addTopLevelItem(item);
       setItemWidget(item, PREF_VALUE_COLUMN, item->editor());
-      preferenceItems[item->name()] = item;
+      _preferenceItems[item->name()] = item;
       }
 
 void PreferencesListWidget::visit(QString key, IntPreference*)
