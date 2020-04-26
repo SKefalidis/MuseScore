@@ -434,15 +434,15 @@ void PreferenceDialog::start()
                                                       }
                                                 },
                                           [&]() { // update function
-                                                language->blockSignals(true);
-                                                for (int i = 0; i < language->count(); ++i) {
-                                                      if (language->itemText(i).startsWith(preferences.getString(PREF_UI_APP_LANGUAGE))) {
-                                                            language->setCurrentIndex(i);
-                                                            break;
-                                                            }
-                                                      }
-                                                language->blockSignals(false);
-                                                // ???
+//                                                language->blockSignals(true);
+//                                                for (int i = 0; i < language->count(); ++i) {
+//                                                      if (language->itemText(i).startsWith(preferences.getString(PREF_UI_APP_LANGUAGE))) {
+//                                                            language->setCurrentIndex(i);
+//                                                            break;
+//                                                            }
+//                                                      }
+//                                                language->blockSignals(false);
+//                                                // ???
                                                 language->blockSignals(true);
                                                 language->clear();
                                                 QString lang = preferences.getString(PREF_UI_APP_LANGUAGE);
@@ -564,8 +564,6 @@ void PreferenceDialog::start()
                   new IntPreferenceItem(PREF_IO_ALSA_PERIODSIZE, alsaPeriodSize, [](){;}),
                   new IntPreferenceItem(PREF_IO_ALSA_FRAGMENTS, alsaFragments, [](){;}),
       };
-
-      //jack related widgets, if one is modified run the related code in apply
 
       for (auto& x : normalWidgets)
             connect(x, &PreferenceItem::editorValueModified, this, &PreferenceDialog::widgetModified);
