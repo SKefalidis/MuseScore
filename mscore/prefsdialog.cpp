@@ -392,10 +392,7 @@ void PreferenceDialog::start()
                                                 },
                                           [&]() { // update function
                                                 QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
-                                                if (resPref != "Yes" && resPref != "No") // "Ask" or unset (or anything else)
-                                                      resetElementPositionsAlwaysAsk->setChecked(true);
-                                                else
-                                                      resetElementPositionsAlwaysAsk->setChecked(false);
+                                                resetElementPositionsAlwaysAsk->setChecked(resPref != "Yes" && resPref != "No");
                                                 }),
                   new StringPreferenceItem(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, resetElementPositionsYes,
                                           [&]() { // apply function
@@ -404,10 +401,7 @@ void PreferenceDialog::start()
                                                 },
                                           [&]() { // update function
                                                 QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
-                                                if (resPref == "Yes") // "Ask" or unset (or anything else)
-                                                      resetElementPositionsYes->setChecked(true);
-                                                else
-                                                      resetElementPositionsYes->setChecked(false);
+                                                resetElementPositionsYes->setChecked(resPref == "Yes");
                                                 }),
                   new StringPreferenceItem(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS, resetElementPositionsNo,
                                           [&]() { // apply function
@@ -416,12 +410,9 @@ void PreferenceDialog::start()
                                                 },
                                           [&]() { // update function
                                                 QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
-                                                if (resPref == "No") // "Ask" or unset (or anything else)
-                                                      resetElementPositionsNo->setChecked(true);
-                                                else
-                                                      resetElementPositionsNo->setChecked(false);
+                                                resetElementPositionsNo->setChecked(resPref == "No");
                                                 }),
-                  new StringPreferenceItem(PREF_UI_APP_LANGUAGE, language,
+                  new StringPreferenceItem(PREF_UI_APP_LANGUAGE, language, // set to default does not work!!! + apply is re-enabled after applying with this changed!
                                           [&]() { // apply function
                                                 int lang = language->itemData(language->currentIndex()).toInt();
                                                 QString l = lang == 0 ? "system" : mscore->languages().at(lang).key;
@@ -434,26 +425,18 @@ void PreferenceDialog::start()
                                                       }
                                                 },
                                           [&]() { // update function
-//                                                language->blockSignals(true);
-//                                                for (int i = 0; i < language->count(); ++i) {
-//                                                      if (language->itemText(i).startsWith(preferences.getString(PREF_UI_APP_LANGUAGE))) {
-//                                                            language->setCurrentIndex(i);
-//                                                            break;
-//                                                            }
-//                                                      }
-//                                                language->blockSignals(false);
-//                                                // ???
                                                 language->blockSignals(true);
                                                 language->clear();
                                                 QString lang = preferences.getString(PREF_UI_APP_LANGUAGE);
+                                                cout << lang.toStdString() << endl;
                                                 int curIdx = 0;
                                                 for(int i = 0; i < mscore->languages().size(); ++i) {
                                                       language->addItem(mscore->languages().at(i).name, i);
                                                       if (mscore->languages().at(i).key == lang)
                                                             curIdx = i;
                                                       }
-                                                language->setCurrentIndex(curIdx);
                                                 language->blockSignals(false);
+                                                language->setCurrentIndex(curIdx);
                                                 }),
                   new CustomPreferenceItem(PREF_APP_STARTUP_SESSIONSTART, lastSession,
                                           [&]() { // apply function
@@ -669,7 +652,7 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
             preferences.setReturnDefaultValuesMode(true);
 
       advancedWidget->updatePreferences();
-      
+
       //macOS default fonts are not in QFontCombobox because they are "private":
       //https://code.woboq.org/qt5/qtbase/src/widgets/widgets/qfontcombobox.cpp.html#329
 
@@ -1278,9 +1261,8 @@ void PreferenceDialog::apply()
       if(uiStyleThemeChanged) {
             WorkspacesManager::retranslateAll();
             preferences.setPreference(PREF_APP_WORKSPACE, WorkspacesManager::currentWorkspace()->name());
-//            mscore->changeWorkspace(WorkspacesManager::currentWorkspace(), false); // with true you don't call preferencesChanged a second time (look at emit preferencesChanged())
             WorkspacesManager::currentWorkspace()->save();
-//            emit mscore->workspacesChanged();
+            emit mscore->workspacesChanged();
             }
 
       emit preferencesChanged(false, uiStyleThemeChanged);
