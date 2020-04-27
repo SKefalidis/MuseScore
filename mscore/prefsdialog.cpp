@@ -267,19 +267,7 @@ void PreferenceDialog::start()
                   new BoolPreferenceItem(PREF_IMPORT_MUSICXML_IMPORTBREAKS, importBreaks),
                   new BoolPreferenceItem(PREF_IMPORT_MUSICXML_IMPORTLAYOUT, importLayout),
             #ifdef AVSOMR
-                  new BoolPreferenceItem(PREF_IMPORT_AVSOMR_USELOCAL, useLocalAvsOmr,
-                                          [&]() {
-                                          useLocalAvsOmr->setChecked(preferences.getBool(PREF_IMPORT_AVSOMR_USELOCAL));
-                                          Avs::AvsOmrLocal::instance()->isInstalledAsync([this](bool isInstalled) {
-                                                QString text = QObject::tr("Use local OMR engine");
-                                                if (isInstalled)
-                                                      text += " (" + QObject::tr("Installed") + ")";
-                                                else
-                                                      text += " (" + QObject::tr("Not installed, needs internet connection for installing") + ")";
-
-                                                useLocalAvsOmr->setText(text);
-                                                });
-                                          }),
+                  new BoolPreferenceItem(PREF_IMPORT_AVSOMR_USELOCAL, useLocalAvsOmr, [&](){ updateUseLocalAvsOmr(); }),
             #endif
                   new BoolPreferenceItem(PREF_IO_MIDI_ADVANCEONRELEASE, advanceOnRelease),
                   new BoolPreferenceItem(PREF_IO_MIDI_ENABLEINPUT, enableMidiInput),
@@ -305,32 +293,8 @@ void PreferenceDialog::start()
                   new BoolPreferenceItem(PREF_IO_JACK_TIMEBASEMASTER, becomeTimebaseMaster),
                   new BoolPreferenceItem(PREF_IO_JACK_REMEMBERLASTCONNECTIONS, rememberLastMidiConnections),
                   new BoolPreferenceItem(PREF_SCORE_NOTE_WARNPITCHRANGE, warnPitchRange),
-                  new StringPreferenceItem(PREF_IMPORT_OVERTURE_CHARSET, importCharsetListOve, nullptr,
-                                          [&]() {
-                                                QList<QByteArray> charsets = QTextCodec::availableCodecs();
-                                                qSort(charsets.begin(), charsets.end());
-                                                int idx = 0;
-                                                importCharsetListOve->clear();
-                                                for (QByteArray charset : charsets) {
-                                                      importCharsetListOve->addItem(charset);
-                                                      if (charset == preferences.getString(PREF_IMPORT_OVERTURE_CHARSET))
-                                                            importCharsetListOve->setCurrentIndex(idx);
-                                                      idx++;
-                                                      }
-                                                }),
-                  new StringPreferenceItem(PREF_IMPORT_GUITARPRO_CHARSET, importCharsetListGP, nullptr,
-                                           [&]() {
-                                                QList<QByteArray> charsets = QTextCodec::availableCodecs();
-                                                qSort(charsets.begin(), charsets.end());
-                                                int idx = 0;
-                                                importCharsetListGP->clear();
-                                                for (QByteArray charset : charsets) {
-                                                      importCharsetListGP->addItem(charset);
-                                                      if (charset == preferences.getString(PREF_IMPORT_GUITARPRO_CHARSET))
-                                                            importCharsetListGP->setCurrentIndex(idx);
-                                                      idx++;
-                                                      }
-                                                 }),
+                  new StringPreferenceItem(PREF_IMPORT_OVERTURE_CHARSET, importCharsetListOve, nullptr, [&](){ updateCharsetListOve(); }),
+                  new StringPreferenceItem(PREF_IMPORT_GUITARPRO_CHARSET, importCharsetListGP, nullptr, [&](){ updateCharsetListGP(); }),
                   new DoublePreferenceItem(PREF_SCORE_MAGNIFICATION, scale,
                                           [&](){ preferences.setPreference(PREF_SCORE_MAGNIFICATION, scale->value()/100.0); },      // apply function
                                           [&](){ scale->setValue(preferences.getDouble(PREF_SCORE_MAGNIFICATION) * 100.0); }        // update function
@@ -367,21 +331,9 @@ void PreferenceDialog::start()
                                                 preferences.setPreference(PREF_IO_MIDI_SHOWCONTROLSINMIXER, showMidiControls->isChecked());
                                                 emit mixerPreferencesChanged(preferences.getBool(PREF_IO_MIDI_SHOWCONTROLSINMIXER));
                                                 }),
-                  new BoolPreferenceItem(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION, pageVertical,  // is the use of [&] dangerous in this case?
-                                          [&]() { //apply function
-                                                preferences.setPreference(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION, pageVertical->isChecked());
-                                                MScore::setVerticalOrientation(pageVertical->isChecked());
-                                                for (Score* s : mscore->scores()) {
-                                                      s->doLayout();
-                                                      for (Score* ss : s->scoreList())
-                                                            ss->doLayout();
-                                                      }
-                                                if (mscore->currentScoreView())
-                                                      mscore->currentScoreView()->setOffset(0.0, 0.0);
-                                                mscore->scorePageLayoutChanged();
-                                                mscore->update();
-                                                },
-                                          [&]() { pageVertical->setChecked(MScore::verticalOrientation()); }),
+                  new BoolPreferenceItem(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION, pageVertical,
+                                          [&]() { applyPageVertical(); },  // apply function
+                                          [&]() { pageVertical->setChecked(MScore::verticalOrientation()); }), // update function
                   new IntPreferenceItem(PREF_IO_MIDI_SHORTESTNOTE, shortestNote,
                                           [&]() { applyShortestNote();  },  // apply function
                                           [&]() { updateShortestNote(); }), // update function
@@ -412,32 +364,7 @@ void PreferenceDialog::start()
                                                 QString resPref = preferences.getString(PREF_IMPORT_COMPATIBILITY_RESET_ELEMENT_POSITIONS);
                                                 resetElementPositionsNo->setChecked(resPref == "No");
                                                 }),
-                  new StringPreferenceItem(PREF_UI_APP_LANGUAGE, language, // set to default does not work!!! + apply is re-enabled after applying with this changed!
-                                          [&]() { // apply function
-                                                int lang = language->itemData(language->currentIndex()).toInt();
-                                                QString l = lang == 0 ? "system" : mscore->languages().at(lang).key;
-                                                bool languageChanged = l != preferences.getString(PREF_UI_APP_LANGUAGE);
-                                                preferences.setPreference(PREF_UI_APP_LANGUAGE, l);
-
-                                                if (languageChanged) {
-                                                      setMscoreLocale(preferences.getString(PREF_UI_APP_LANGUAGE));
-                                                      mscore->update();
-                                                      }
-                                                },
-                                          [&]() { // update function
-                                                language->blockSignals(true);
-                                                language->clear();
-                                                QString lang = preferences.getString(PREF_UI_APP_LANGUAGE);
-                                                cout << lang.toStdString() << endl;
-                                                int curIdx = 0;
-                                                for(int i = 0; i < mscore->languages().size(); ++i) {
-                                                      language->addItem(mscore->languages().at(i).name, i);
-                                                      if (mscore->languages().at(i).key == lang)
-                                                            curIdx = i;
-                                                      }
-                                                language->blockSignals(false);
-                                                language->setCurrentIndex(curIdx);
-                                                }),
+                  new StringPreferenceItem(PREF_UI_APP_LANGUAGE, language, [&](){ languageApply(); }, [&](){ languageUpdate(); }),
                   new CustomPreferenceItem(PREF_APP_STARTUP_SESSIONSTART, lastSession,
                                           [&]() { // apply function
                                                 if (lastSession->isChecked())
@@ -1061,6 +988,125 @@ void PreferenceDialog::updateBgView(bool useColor)
             }
       }
 
+
+//---------------------------------------------------------
+//   languageUpdate
+//---------------------------------------------------------
+
+void PreferenceDialog::languageUpdate()
+      {
+      language->blockSignals(true);
+      language->clear();
+      QString lang = preferences.getString(PREF_UI_APP_LANGUAGE);
+      cout << lang.toStdString() << endl;
+      int curIdx = 0;
+      for(int i = 0; i < mscore->languages().size(); ++i) {
+            language->addItem(mscore->languages().at(i).name, i);
+            if (mscore->languages().at(i).key == lang)
+                  curIdx = i;
+            }
+      language->blockSignals(false);
+      language->setCurrentIndex(curIdx);
+      }
+
+//---------------------------------------------------------
+//   languageUpdate
+//---------------------------------------------------------
+
+void PreferenceDialog::languageApply()
+      {
+      int lang = language->itemData(language->currentIndex()).toInt();
+      QString l = lang == 0 ? "system" : mscore->languages().at(lang).key;
+      bool languageChanged = l != preferences.getString(PREF_UI_APP_LANGUAGE);
+      preferences.setPreference(PREF_UI_APP_LANGUAGE, l);
+
+      if (languageChanged) {
+            setMscoreLocale(preferences.getString(PREF_UI_APP_LANGUAGE));
+            mscore->update();
+            }
+      }
+
+
+//---------------------------------------------------------
+//   updateCharsetListGP
+//---------------------------------------------------------
+
+void PreferenceDialog::updateCharsetListGP()
+      {
+      QList<QByteArray> charsets = QTextCodec::availableCodecs();
+      qSort(charsets.begin(), charsets.end());
+      int idx = 0;
+      importCharsetListGP->clear();
+      for (QByteArray charset : charsets) {
+            importCharsetListGP->addItem(charset);
+            if (charset == preferences.getString(PREF_IMPORT_GUITARPRO_CHARSET))
+                  importCharsetListGP->setCurrentIndex(idx);
+            idx++;
+            }
+      }
+
+//---------------------------------------------------------
+//   updateCharsetListOve
+//---------------------------------------------------------
+
+void PreferenceDialog::updateCharsetListOve()
+      {
+      QList<QByteArray> charsets = QTextCodec::availableCodecs();
+      qSort(charsets.begin(), charsets.end());
+      int idx = 0;
+      importCharsetListOve->clear();
+      for (QByteArray charset : charsets) {
+            importCharsetListOve->addItem(charset);
+            if (charset == preferences.getString(PREF_IMPORT_OVERTURE_CHARSET))
+                  importCharsetListOve->setCurrentIndex(idx);
+            idx++;
+            }
+      }
+
+#ifdef AVSOMR
+//---------------------------------------------------------
+//   updateUseLocalAvsOmr
+//---------------------------------------------------------
+
+void PreferenceDialog::updateUseLocalAvsOmr()
+      {
+      useLocalAvsOmr->setChecked(preferences.getBool(PREF_IMPORT_AVSOMR_USELOCAL));
+      Avs::AvsOmrLocal::instance()->isInstalledAsync([this](bool isInstalled) {
+            QString text = QObject::tr("Use local OMR engine");
+            if (isInstalled)
+                  text += " (" + QObject::tr("Installed") + ")";
+            else
+                  text += " (" + QObject::tr("Not installed, needs internet connection for installing") + ")";
+
+            useLocalAvsOmr->setText(text);
+            });
+      }
+#else
+void PreferenceDialog::updateUseLocalAvsOmr()
+      {
+      ;
+      }
+#endif
+
+//---------------------------------------------------------
+//   applyPageVertical
+//---------------------------------------------------------
+
+void PreferenceDialog::applyPageVertical()
+      {
+      preferences.setPreference(PREF_UI_CANVAS_SCROLL_VERTICALORIENTATION, pageVertical->isChecked());
+      MScore::setVerticalOrientation(pageVertical->isChecked());
+      for (Score* s : mscore->scores()) {
+            s->doLayout();
+            for (Score* ss : s->scoreList())
+                  ss->doLayout();
+            }
+      if (mscore->currentScoreView())
+            mscore->currentScoreView()->setOffset(0.0, 0.0);
+      mscore->scorePageLayoutChanged();
+      mscore->update();
+      }
+
 //---------------------------------------------------------
 //   buttonBoxClicked
 //---------------------------------------------------------
@@ -1269,9 +1315,11 @@ void PreferenceDialog::apply()
       uiStyleThemeChanged = false;
       preferences.save();
       mscore->startAutoSave();
+
       modifiedWidgets.clear();
       modifiedUiWidgets.clear();
       modifiedAudioWidgets.clear();
+
       buttonBox->button(QDialogButtonBox::Apply)->setText("Apply");
       cout << "Final: " << timer.elapsed() << endl;
       }

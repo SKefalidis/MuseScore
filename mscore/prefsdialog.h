@@ -56,6 +56,12 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       void applySetActive(bool active);
       void updateShortestNote();
       void applyShortestNote();
+      void languageUpdate();
+      void languageApply();
+      void updateCharsetListGP();
+      void updateCharsetListOve();
+      void updateUseLocalAvsOmr();
+      void applyPageVertical();
 
    private slots:
       void buttonBoxClicked(QAbstractButton*);
@@ -111,7 +117,6 @@ class PreferenceDialog : public AbstractDialog, private Ui::PrefsDialogBase {
       ~PreferenceDialog();
       void start();
       void updateRemote();
-
       };
 
 //---------------------------------------------------------
