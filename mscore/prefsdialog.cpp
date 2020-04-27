@@ -296,7 +296,7 @@ void PreferenceDialog::start()
                   new StringPreferenceItem(PREF_IMPORT_OVERTURE_CHARSET, importCharsetListOve, nullptr, [&](){ updateCharsetListOve(); }),
                   new StringPreferenceItem(PREF_IMPORT_GUITARPRO_CHARSET, importCharsetListGP, nullptr, [&](){ updateCharsetListGP(); }),
                   new DoublePreferenceItem(PREF_SCORE_MAGNIFICATION, scale,
-                                          [&](){ preferences.setPreference(PREF_SCORE_MAGNIFICATION, scale->value()/100.0); },      // apply function
+                                          [&](){ preferences.setPreference(PREF_SCORE_MAGNIFICATION, scale->value() / 100.0); },      // apply function
                                           [&](){ scale->setValue(preferences.getDouble(PREF_SCORE_MAGNIFICATION) * 100.0); }        // update function
                                                 ),
             #ifdef USE_PORTMIDI
@@ -585,10 +585,8 @@ void PreferenceDialog::updateValues(bool useDefaultValues)
 
       jackDriver->setChecked(preferences.getBool(PREF_IO_JACK_USEJACKAUDIO) || preferences.getBool(PREF_IO_JACK_USEJACKMIDI));
 
-#ifdef AVSOMR
-      //added as a BoolPreferenceItem
-#else
-      groupBox_omr->setVisible(false);
+#ifndef AVSOMR
+    groupBox_omr->setVisible(false);
 #endif
 
       //
@@ -998,7 +996,6 @@ void PreferenceDialog::languageUpdate()
       language->blockSignals(true);
       language->clear();
       QString lang = preferences.getString(PREF_UI_APP_LANGUAGE);
-      cout << lang.toStdString() << endl;
       int curIdx = 0;
       for(int i = 0; i < mscore->languages().size(); ++i) {
             language->addItem(mscore->languages().at(i).name, i);
@@ -1010,7 +1007,7 @@ void PreferenceDialog::languageUpdate()
       }
 
 //---------------------------------------------------------
-//   languageUpdate
+//   languageApply
 //---------------------------------------------------------
 
 void PreferenceDialog::languageApply()
@@ -1018,9 +1015,9 @@ void PreferenceDialog::languageApply()
       int lang = language->itemData(language->currentIndex()).toInt();
       QString l = lang == 0 ? "system" : mscore->languages().at(lang).key;
       bool languageChanged = l != preferences.getString(PREF_UI_APP_LANGUAGE);
-      preferences.setPreference(PREF_UI_APP_LANGUAGE, l);
 
       if (languageChanged) {
+            preferences.setPreference(PREF_UI_APP_LANGUAGE, l);
             setMscoreLocale(preferences.getString(PREF_UI_APP_LANGUAGE));
             mscore->update();
             }
@@ -1155,7 +1152,7 @@ void PreferenceDialog::widgetModified()
       {
       // πρέπει να βλέπω αν αλλαξε τιμη απο την αρχικη ή αν επεστρεψε πισω στην αρχικη τιμη!!!
       applySetActive(true);
-      PreferenceItem* item = dynamic_cast<PreferenceItem*>(sender());
+      PreferenceItem* item = static_cast<PreferenceItem*>(sender());
       modifiedWidgets.push_back(item);
       }
 
@@ -1166,7 +1163,7 @@ void PreferenceDialog::widgetModified()
 void PreferenceDialog::uiWidgetModified()
       {
       applySetActive(true);
-      PreferenceItem* item = dynamic_cast<PreferenceItem*>(sender());
+      PreferenceItem* item = static_cast<PreferenceItem*>(sender());
       modifiedUiWidgets.push_back(item);
       }
 
@@ -1178,7 +1175,7 @@ void PreferenceDialog::uiWidgetModified()
 void PreferenceDialog::audioWidgetModified()
       {
       applySetActive(true);
-      PreferenceItem* item = dynamic_cast<PreferenceItem*>(sender());
+      PreferenceItem* item = static_cast<PreferenceItem*>(sender());
       modifiedAudioWidgets.push_back(item);
       }
 
@@ -1321,7 +1318,7 @@ void PreferenceDialog::apply()
       modifiedAudioWidgets.clear();
 
       buttonBox->button(QDialogButtonBox::Apply)->setText("Apply");
-      cout << "Final: " << timer.elapsed() << endl;
+      qDebug() << "Final: " << timer.elapsed() << endl;
       }
 
 //---------------------------------------------------------
