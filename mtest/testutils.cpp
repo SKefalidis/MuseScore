@@ -143,6 +143,15 @@ MasterScore* MTest::readCreatedScore(const QString& name)
       }
 
 //---------------------------------------------------------
+//   readAlbum
+//---------------------------------------------------------
+
+Album* MTest::readAlbum(const QString& name)
+      {
+
+      }
+
+//---------------------------------------------------------
 //   saveScore
 //---------------------------------------------------------
 
@@ -151,6 +160,15 @@ bool MTest::saveScore(Score* score, const QString& name) const
       QFileInfo fi(name);
 //      MScore::testMode = true;
       return score->Score::saveFile(fi);
+      }
+
+//---------------------------------------------------------
+//   saveAlbum
+//---------------------------------------------------------
+
+bool MTest::saveAlbum(Album*, const QString& name) const
+      {
+
       }
 
 //---------------------------------------------------------
@@ -196,6 +214,15 @@ bool MTest::saveCompareScore(Score* score, const QString& saveName, const QStrin
       if (!saveScore(score, saveName))
             return false;
       return compareFiles(saveName, compareWith);
+      }
+
+//---------------------------------------------------------
+//   saveCompareAlbum
+//---------------------------------------------------------
+
+bool MTest::saveCompareAlbum(Album*, const QString& saveName, const QString& compareWith) const
+      {
+
       }
 
 //---------------------------------------------------------

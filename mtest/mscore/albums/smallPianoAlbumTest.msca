@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<museScore version="3.01" full-version="4.0.0-Development">
+  <Album>
+    <name>My Album</name>
+    <Score>
+      <alias>Piano1</alias>
+      <path>/home/boop/Documents/GSoC_2020/mscore/MuseScore/mtest/mscore/albums/Piano1.mscx</path>
+      <enabled>1</enabled>
+      </Score>
+    <Score>
+      <alias>Piano2</alias>
+      <path>/home/boop/Documents/GSoC_2020/mscore/MuseScore/mtest/mscore/albums/Piano2.mscx</path>
+      <enabled>0</enabled>
+      </Score>
+    <Score>
+      <alias>Piano3</alias>
+      <path>/home/boop/Documents/GSoC_2020/mscore/MuseScore/mtest/mscore/albums/Piano3.mscx</path>
+      <enabled>1</enabled>
+      </Score>
+    </Album>
+  </museScore>

@@ -1727,14 +1727,14 @@ void Score::respace(std::vector<ChordRest*>* elements)
 
 void LayoutContext::getNextPage()
       {
-      if (!page || curPage >= score->npages()) {
-            page = new Page(score);
-            score->pages().push_back(page);
+      if (!page || curPage >= dominantScore->npages()) {
+            page = new Page(dominantScore);
+            dominantScore->pages().push_back(page);
             prevSystem = nullptr;
             pageOldMeasure = nullptr;
             }
       else {
-            page = score->pages()[curPage];
+            page = dominantScore->pages()[curPage];
             QList<System*>& systems = page->systems();
             pageOldMeasure = systems.isEmpty() ? nullptr : systems.back()->measures().back();
             const int i = systems.indexOf(curSystem);
@@ -1748,16 +1748,16 @@ void LayoutContext::getNextPage()
                   systems.clear();
             prevSystem = systems.empty() ? nullptr : systems.back();
             }
-      page->bbox().setRect(0.0, 0.0, score->loWidth(), score->loHeight());
+      page->bbox().setRect(0.0, 0.0, dominantScore->loWidth(), dominantScore->loHeight());
       page->setNo(curPage);
       qreal x = 0.0;
       qreal y = 0.0;
       if (curPage) {
-            Page* prevPage = score->pages()[curPage - 1];
+            Page* prevPage = dominantScore->pages()[curPage - 1];
             if (MScore::verticalOrientation())
                   y = prevPage->pos().y() + page->height() + MScore::verticalPageGap;
             else {
-                  qreal gap = (curPage + score->pageNumberOffset()) & 1 ? MScore::horizontalPageGapOdd : MScore::horizontalPageGapEven;
+                  qreal gap = (curPage + dominantScore->pageNumberOffset()) & 1 ? MScore::horizontalPageGapOdd : MScore::horizontalPageGapEven;
                   x = prevPage->pos().x() + page->width() + gap;
                   }
             }
@@ -4173,6 +4173,10 @@ void Score::layoutSystemElements(System* system, LayoutContext& lc)
 
 //---------------------------------------------------------
 //   collectPage
+//    append systems to the page until you find a page break
+//    or run out of Movements (MasterScores)
+//
+//    called after LayoutContext::getNextPage()
 //---------------------------------------------------------
 
 void LayoutContext::collectPage()
@@ -4182,8 +4186,10 @@ void LayoutContext::collectPage()
       //qreal y         = prevSystem ? prevSystem->y() + prevSystem->height() : page->tm();
       qreal ey        = page->height() - page->bm();
 
+      int movementsSize = dominantScore->movements()->size();
       System* nextSystem = 0;
-      int systemIdx = -1;
+      systemIdx = continuing ? systemIdx : -1; // if the page changed before the movement ended, we need to continue that movement on the next page so we need the previous systemIdx
+      continuing = false;
 
       qreal y = page->systems().isEmpty() ? page->tm() : page->system(0)->y() + page->system(0)->height();
       // re-calculate positions for systems before current
@@ -4198,15 +4204,19 @@ void LayoutContext::collectPage()
             y += cs->height();
             }
 
-      for (int k = 0;;++k) {
+      //
+      // collect and add systems to the page (until the page is filled or a page break is encountered)
+      //
+      for (;;) {
             //
             // calculate distance to previous system
             //
             qreal distance;
-            if (prevSystem)
+            if (prevSystem) { // if this is not the first system on this page
                   distance = prevSystem->minDistance(curSystem);
-            else {
-                  // this is the first system on page
+                  }
+            else {            // if this is the first system on this page
+
                   if (curSystem->vbox())
                         distance = 0.0;
                   else {
@@ -4226,39 +4236,60 @@ void LayoutContext::collectPage()
                                           else
                                                 distance = qMax(distance, sp->gap());
                                           }
-//TODO::ws                                    distance = qMax(distance, -m->staffShape(0).top());
                                     }
                               }
                         if (!fixedDistance)
                               distance = qMax(distance, curSystem->minTop());
                         }
                   }
-//TODO-ws ??
-//          distance += score->staves().front()->userDist();
 
+            //
+            // add the current system to the page
+            // curSystem is initially set in doLayoutRange()
+            // after that it is set in the end of this loop
+            //
             y += distance;
             curSystem->setPos(page->lm(), y);
             page->appendSystem(curSystem);
             y += curSystem->height();
 
             //
-            //  check for page break or if next system will fit on page
+            // find the next system to add to the page (if it does not fit or if there is a page break exit the loop)
             //
             bool collected = false;
             if (rangeDone) {
+                  //
+                  // FIXME: this works but needs to be simplified/rewritten if possible
                   // take next system unchanged
+                  // essentially we either take the next system of the current movement, or we go to the next movement and take
+                  // its first system
+                  //
+
+                  // this is why we save systemIdx between calls (via continuing) if the movement has changed, otherwise the movement that started on the previous page
+                  // would not be printed
                   if (systemIdx > 0) {
                         nextSystem = score->systems().value(systemIdx++);
-                        if (!nextSystem) {
-                              // TODO: handle next movement
+                        if (!nextSystem) { // if we have used all the systems of this movement go to the next movement
+                              if (score->isMaster()) {
+                                    MasterScore* ms = movementIndex < movementsSize ? dominantScore->movements()->at(movementIndex++) : nullptr;
+                                    if (ms) {
+                                          score     = ms;
+                                          systemIdx = 0;
+                                          nextSystem = score->systems().value(systemIdx++);
+                                          }
+                                    }
+                              }
+                        else {
+                              collected = true;
                               }
                         }
                   else {
+                        //FIXME: systemList is used and systems are appended to a score, this is confusing and not explained
                         nextSystem = systemList.empty() ? 0 : systemList.takeFirst();
                         if (nextSystem)
                               score->systems().append(nextSystem);
                         else if (score->isMaster()) {
-                              MasterScore* ms = static_cast<MasterScore*>(score)->next();
+                              MasterScore* ms = movementIndex < movementsSize ? dominantScore->movements()->at(movementIndex++) : nullptr;
                               if (ms) {
                                     score     = ms;
                                     systemIdx = 0;
@@ -4272,7 +4303,7 @@ void LayoutContext::collectPage()
                   if (nextSystem)
                         collected = true;
                   if (!nextSystem && score->isMaster()) {
-                        MasterScore* ms = static_cast<MasterScore*>(score)->next();
+                        MasterScore* ms = movementIndex < movementsSize ? dominantScore->movements()->at(movementIndex++) : nullptr;
                         if (ms) {
                               score = ms;
                               QList<System*>& systems = ms->systems();
@@ -4288,6 +4319,7 @@ void LayoutContext::collectPage()
                                     nextMeasure        = ms->measures()->first();
                                     ms->getNextMeasure(*this);
                                     nextSystem         = ms->collectSystem(*this);
+                                    collected = true;
                                     ms->setScoreFont(ScoreFont::fontFactory(ms->styleSt(Sid::MusicalSymbolFont)));
                                     ms->setNoteHeadWidth(ms->scoreFont()->width(SymId::noteheadBlack, ms->spatium() / SPATIUM20));
                                     }
@@ -4295,15 +4327,21 @@ void LayoutContext::collectPage()
                                     rangeDone = true;
                                     systemIdx = 0;
                                     nextSystem = score->systems().value(systemIdx++);
+                                    collected = true;
                                     }
                               }
                         }
                   }
+
             prevSystem = curSystem;
             Q_ASSERT(curSystem != nextSystem);
             curSystem  = nextSystem;
 
-            bool breakPage = !curSystem || (breakPages && prevSystem->pageBreak());
+            // if curSystem != nullptr add it to the page in the next iteration of the loop
+            // if this is the last iteration of this loop (because we found a pageBreak or the page is filled)
+            // curSystem will be the first system of the next page
+
+            bool breakPage = !curSystem || (breakPages && prevSystem->pageBreak()); // checks if we ran out of systems or if we encountered a pageBreak
 
             if (!breakPage) {
                   qreal dist = prevSystem->minDistance(curSystem) + curSystem->height();
@@ -4315,7 +4353,7 @@ void LayoutContext::collectPage()
                         qreal margin = qMax(curSystem->minBottom(), curSystem->spacerDistance(false));
                         dist += qMax(margin, slb);
                         }
-                  breakPage = (y + dist) >= ey && breakPages;
+                  breakPage = (y + dist) >= ey && breakPages; // checks if the page is filled
                   }
             if (breakPage) {
                   qreal dist = qMax(prevSystem->minBottom(), prevSystem->spacerDistance(false));
@@ -4323,12 +4361,15 @@ void LayoutContext::collectPage()
                   layoutPage(page, ey - (y + dist));
                   // if we collected a system we cannot fit onto this page,
                   // we need to collect next page in order to correctly set system positions
-                  if (collected)
+                  if (collected) { // έχει γίνει κατάχρηση της collected
                         pageOldMeasure = nullptr;
+                        continuing = true;
+                        }
                   break;
                   }
             }
 
+      // call layout for individual elements?
       Fraction stick = Fraction(-1,1);
       for (System* s : page->systems()) {
             Score* currentScore = s->score();
@@ -4395,7 +4436,6 @@ void LayoutContext::collectPage()
             qreal height = s ? s->pos().y() + s->height() + s->minBottom() : page->tm();
             page->bbox().setRect(0.0, 0.0, score->loWidth(), height + page->bm());
             }
-
       page->rebuildBspTree();
       }
 
@@ -4579,14 +4619,18 @@ void Score::doLayoutRange(const Fraction& st, const Fraction& et)
 void LayoutContext::layout()
       {
       MeasureBase* lmb;
+      dominantScore = static_cast<MasterScore*>(score); // set the first score (masterscore = movement) as the dominant
+      movementIndex = 1; // the next movement is the second movement
       do {
             getNextPage();
             collectPage();
 
-            if (page && !page->systems().isEmpty())
+            if (page && !page->systems().isEmpty()) {
                   lmb = page->systems().back()->measures().back();
-            else
+                  }
+            else {
                   lmb = nullptr;
+                  }
 
             // we can stop collecting pages when:
             // 1) we reach the end of score (curSystem is nullptr)
@@ -4598,7 +4642,7 @@ void LayoutContext::layout()
             //    pageOldMeasure will be last measure from previous layout if range was completed on or before this page
             //    it will be nullptr if this page was never laid out or if we collected a system for next page
             } while (curSystem && !(rangeDone && lmb == pageOldMeasure));
-            // && page->system(0)->measures().back()->tick() > endTick // FIXME: perhaps the first measure was meant? Or last system?
+//             && page->systems().back()->measures().back()->tick() > endTick)); // FIXME: perhaps the first measure was meant? Or last system?
 
       if (!curSystem) {
             // The end of the score. The remaining systems are not needed...

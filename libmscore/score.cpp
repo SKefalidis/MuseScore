@@ -4744,7 +4744,8 @@ void MasterScore::rebuildAndUpdateExpressive(Synthesizer* synth)
 
 bool Score::isTopScore() const
       {
-      return !(isMaster() && static_cast<const MasterScore*>(this)->prev());
+//      return !(isMaster() && static_cast<const MasterScore*>(this)->prev());
+      return true; // temporary, trying to get rid of the MasterScore list
       }
 
 //---------------------------------------------------------

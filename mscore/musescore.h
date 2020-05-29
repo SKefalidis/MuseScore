@@ -660,7 +660,10 @@ class MuseScore : public QMainWindow, public MuseScoreCore {
       void loadFile(const QUrl&);
       QTemporaryFile* getTemporaryScoreFileCopy(const QFileInfo& info, const QString& baseNameTemplate);
       QNetworkAccessManager* networkManager();
-      virtual Score* openScore(const QString& fn, bool switchTab = true);
+      virtual MasterScore* openScore(const QString& fn, bool switchTab = true);
+      void openAlbum(const QString& fn);
+      void readAlbumScore(XmlReader& reader);
+      bool saveAlbum();
       bool hasToCheckForUpdate();
       bool hasToCheckForExtensionsUpdate();
       static bool unstable();

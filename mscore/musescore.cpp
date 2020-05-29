@@ -20,6 +20,7 @@
 #include "cloud/loginmanager.h"
 #include "cloud/uploadscoredialog.h"
 
+#include "albummanager.h"
 #include "musescoredialogs.h"
 #include "scoreview.h"
 #include "libmscore/style.h"
@@ -1343,8 +1344,9 @@ MuseScore::MuseScore()
                   }
 
             if (strcmp(i, "album") == 0) { //enable Album feature in experimental mode
-                  if (enableExperimental)
-                        menuFile->addAction(getAction("album"));
+//                  if (enableExperimental)
+                  menuFile->addAction(getAction("album"));
+                  menuFile->addAction(getAction("album-save"));
                   continue;
                   }
             else
@@ -3263,7 +3265,14 @@ void MuseScore::removeTab()
 void MuseScore::removeTab(int i)
       {
       MasterScore* score = scoreList.value(i);
-
+      if (score->partOfActiveAlbum()) {
+            for (auto x : albumManager->albumScores()) {
+                  if (x->score == score) {
+                        x->score = nullptr;
+                        }
+                  }
+//            albumManager->albumScores().at(i)->score = nullptr;
+            }
       if (score == 0)
             return;
 
@@ -6163,6 +6172,8 @@ void MuseScore::cmd(QAction* a, const QString& cmd)
             openFiles();
       else if (cmd == "file-save")
             saveFile();
+      else if (cmd == "album-save")
+            saveAlbum();
       else if (cmd == saveOnlineMenuItem)
             showUploadScoreDialog();
       else if (cmd == "file-export")

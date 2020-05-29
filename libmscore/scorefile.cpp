@@ -264,11 +264,8 @@ void Score::write(XmlWriter& xml, bool selectionOnly)
       {
       if (isMaster()) {
             MasterScore* score = static_cast<MasterScore*>(this);
-            while (score->prev())
-                  score = score->prev();
-            while (score) {
-                  score->writeMovement(xml, selectionOnly);
-                  score = score->next();
+            for (auto x : *score->movements()) {
+                  x->writeMovement(xml, selectionOnly);
                   }
             }
       else

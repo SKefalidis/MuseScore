@@ -327,6 +327,7 @@ void ScoreTab::setCurrent(int n)
             else {
                   tab2->setVisible(false);
                   }
+            score->doLayout(); // used for the temporary score of album-mode, otherwise the individual scores have incorrectly placed elements
             }
       else {
             tab2->setVisible(false);

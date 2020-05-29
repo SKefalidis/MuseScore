@@ -214,6 +214,7 @@ subdirs (
         libmscore/utils
         mscore/workspaces
         mscore/palette
+        mscore/albums
         importmidi
         capella
         biab

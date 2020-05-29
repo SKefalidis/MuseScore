@@ -25,6 +25,7 @@ namespace Ms {
 class MuseScore;
 class ScoreView;
 class Score;
+class MasterScore;
 enum class MagIdx : char;
 
 //---------------------------------------------------------

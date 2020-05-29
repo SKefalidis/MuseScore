@@ -422,7 +422,7 @@ class Score : public QObject, public ScoreElement {
    private:
       static std::set<Score*> validScores;
       int _linkId { 0 };
-      MasterScore* _masterScore { 0 };
+      MasterScore* _masterScore { 0 }; // γιατί; τι είναι αυτό;
       QList<MuseScoreView*> viewer;
       Excerpt* _excerpt  { 0 };
 
@@ -488,6 +488,8 @@ class Score : public QObject, public ScoreElement {
 
       qreal _noteHeadWidth { 0.0 };       // cached value
       QString accInfo;                    ///< information used by the screen-reader
+
+      bool _partOfActiveAlbum { false };
 
       //------------------
 
@@ -1220,6 +1222,9 @@ class Score : public QObject, public ScoreElement {
       void layoutLyrics(System*);
       void createBeams(LayoutContext&, Measure*);
 
+      bool partOfActiveAlbum() const      { return _partOfActiveAlbum;  }
+      void setPartOfActiveAlbum(bool b)   { _partOfActiveAlbum = b;     }
+
       constexpr static double defaultTempo()  { return _defaultTempo; }
 
       friend class ChangeSynthesizerState;
@@ -1250,9 +1255,7 @@ class MasterScore : public Score {
       std::vector<PartChannelSettingsLink> _playbackSettingsLinks;
       Score* _playbackScore = nullptr;
       Revisions* _revisions;
-      MasterScore* _next      { 0 };
-      MasterScore* _prev      { 0 };
-      Movements* _movements   { 0 };
+      Movements* _movements   { 0 }; // δηλαδη ενα masterscore περιεχει masterscores... αλλά ταυτοχρονα ειναι και σε λίστα
 
       bool _readOnly          { false };
 
@@ -1284,8 +1287,6 @@ class MasterScore : public Score {
       QFileInfo info;
 
       bool read(XmlReader&);
-      void setPrev(MasterScore* s) { _prev = s; }
-      void setNext(MasterScore* s) { _next = s; }
 
    public:
       MasterScore();
@@ -1313,8 +1314,6 @@ class MasterScore : public Score {
       virtual QQueue<MidiInputEvent>* midiInputQueue() override       { return &_midiInputQueue;    }
       virtual std::list<MidiInputEvent>* activeMidiPitches() override { return &_activeMidiPitches; }
 
-      MasterScore* next() const                                       { return _next;      }
-      MasterScore* prev() const                                       { return _prev;      }
       virtual Movements* movements() override                         { return _movements; }
       virtual const Movements* movements() const override             { return _movements; }
       void setMovements(Movements* m);

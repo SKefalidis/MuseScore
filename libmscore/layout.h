@@ -17,6 +17,12 @@ namespace Ms {
 
 class Segment;
 class Page;
+class Score;
+class MasterScore;
+class System;
+class MeasureBase;
+class Fraction;
+class Spanner;
 
 //---------------------------------------------------------
 //   LayoutContext
@@ -24,11 +30,15 @@ class Page;
 //---------------------------------------------------------
 
 struct LayoutContext {
-      Score* score             { 0    };
+      MasterScore* dominantScore    { nullptr };
+      Score* score                  { nullptr };
+      int movementIndex        { -1 };
       bool startWithLongNames  { true };
       bool firstSystem         { true };
-      Page* page               { 0 };
-      int curPage              { 0 };      // index in Score->page()s
+      Page* page               { nullptr };
+      int curPage              { 0 };      // index in Score->pages()
+      int systemIdx            { -1 };
+      bool continuing          { false };
       Fraction tick            { 0, 1 };
 
       QList<System*> systemList;          // reusable systems
