@@ -25,6 +25,7 @@
 #include "libmscore/xml.h"
 #include "libmscore/undo.h"
 #include "scoretab.h"
+#include "libmscore/system.h"
 
 using namespace std;
 
@@ -143,13 +144,19 @@ void AlbumManager::changeMode(bool throwaway)
     } else if (albumModeButton->isChecked()) {
         scoreModeButton->setChecked(false);
         if (!tempScore) {
-            tempScore = _items.at(0)->albumItem->score->clone(); // TODO: clone breaks editing sync for the 1st movement
+            tempScore = _items.at(0)->albumItem->score->clone(); // clone breaks editing sync for the 1st movement
+            while (tempScore->systems().size() > 1) { // remove the measures of the cloned masterscore, that way editing is synced
+                for(auto x : tempScore->systems().last()->measures()) {
+                    tempScore->removeElement(x);
+                }
+                tempScore->systems().removeLast();
+            }
             mscore->setCurrentScoreView(mscore->appendScore(tempScore));
             mscore->getTab1()->setTabText(mscore->getTab1()->count() - 1, "Temporary Album Score");
             for (auto item : _items) {
-                if (item == _items.at(0)) {
-                    continue;
-                }
+//                if (item == _items.at(0)) { If I clone and I use the cloned masterscore's measures I don't need to add it again.
+//                    continue;
+//                }
                 cout << "adding score: " << item->albumItem->score->title().toStdString() << endl;
                 tempScore->addMovement(item->albumItem->score);
             }
