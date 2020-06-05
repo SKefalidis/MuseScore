@@ -13,6 +13,7 @@
 #include <QtTest/QtTest>
 #include <QTextStream>
 #include "config.h"
+#include "libmscore/album.h"
 #include "libmscore/score.h"
 #include "libmscore/note.h"
 #include "libmscore/chord.h"
@@ -144,6 +145,17 @@ MasterScore* MTest::readCreatedScore(const QString& name)
 }
 
 //---------------------------------------------------------
+//   readAlbum
+//---------------------------------------------------------
+
+Album* MTest::readAlbum(const QString& name)
+{
+    Album* album = new Album();
+    album->loadFromFile(name);
+    return album;
+}
+
+//---------------------------------------------------------
 //   saveScore
 //---------------------------------------------------------
 
@@ -152,6 +164,15 @@ bool MTest::saveScore(Score* score, const QString& name) const
     QFileInfo fi(name);
 //      MScore::testMode = true;
     return score->Score::saveFile(fi);
+}
+
+//---------------------------------------------------------
+//   saveAlbum
+//---------------------------------------------------------
+
+bool MTest::saveAlbum(Album* album, const QString& name) const
+{
+    return album->saveToFile(name);
 }
 
 //---------------------------------------------------------
@@ -196,6 +217,18 @@ bool MTest::compareFiles(const QString& saveName, const QString& compareWith) co
 bool MTest::saveCompareScore(Score* score, const QString& saveName, const QString& compareWith) const
 {
     if (!saveScore(score, saveName)) {
+        return false;
+    }
+    return compareFiles(saveName, compareWith);
+}
+
+//---------------------------------------------------------
+//   saveCompareAlbum
+//---------------------------------------------------------
+
+bool MTest::saveCompareAlbum(Album* album, const QString& saveName, const QString& compareWith) const
+{
+    if (!saveAlbum(album, saveName)) {
         return false;
     }
     return compareFiles(saveName, compareWith);

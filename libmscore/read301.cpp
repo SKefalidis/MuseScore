@@ -294,17 +294,7 @@ bool MasterScore::read(XmlReader& e)
 
 void MasterScore::addMovement(MasterScore* score)
 {
-    score->_movements = _movements;
     _movements->push_back(score);
-    MasterScore* ps = 0;
-    for (MasterScore* s : *_movements) {
-        s->setPrev(ps);
-        if (ps) {
-            ps->setNext(s);
-        }
-        s->setNext(0);
-        ps = s;
-    }
 }
 
 //---------------------------------------------------------

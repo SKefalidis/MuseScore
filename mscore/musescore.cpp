@@ -31,6 +31,8 @@
 #include "cloud/uploadscoredialog.h"
 #include "cloud/logindialog.h"
 
+#include "albummanager.h"
+#include "libmscore/album.h"
 #include "musescoredialogs.h"
 #include "scoreview.h"
 #include "libmscore/style.h"
@@ -1430,9 +1432,9 @@ MuseScore::MuseScore()
         }
 
         if (strcmp(i, "album") == 0) {     //enable Album feature in experimental mode
-            if (enableExperimental) {
-                menuFile->addAction(getAction("album"));
-            }
+//                  if (enableExperimental)
+            menuFile->addAction(getAction("album"));
+            menuFile->addAction(getAction("album-save"));
             continue;
         } else {
             menuFile->addAction(getAction(i));
@@ -2603,6 +2605,35 @@ void MuseScore::addRecentScore(const QString& scorePath)
     }
 }
 
+//---------------------------------------------------------
+//   addRecentAlbum
+///     TODO: does not work correctly,
+///     create a separate _recentAlbums container
+//---------------------------------------------------------
+
+void MuseScore::addRecentAlbum(Album* album)
+{
+    QString path = album->_fileInfo.absoluteFilePath();
+    addRecentScore(path);
+    if (startcenter) {
+        startcenter->updateRecentScores();
+    }
+}
+
+void MuseScore::addRecentAlbum(const QString &albumPath)
+{
+    if (albumPath.isEmpty()) {
+        return;
+    }
+    QFileInfo fi(albumPath);
+    QString absoluteFilePath = fi.absoluteFilePath();
+    _recentScores.removeAll(absoluteFilePath);
+    _recentScores.prepend(absoluteFilePath);
+    if (_recentScores.size() > RECENT_LIST_SIZE) {
+        _recentScores.removeLast();
+    }
+}
+
 #if 0
 //---------------------------------------------------------
 //   updateTabNames
@@ -3491,7 +3522,14 @@ void MuseScore::removeTab()
 void MuseScore::removeTab(int i)
 {
     MasterScore* score = scoreList.value(i);
-
+    if (score->partOfActiveAlbum()) {
+        for (auto x : albumManager->albumScores()) {
+            if (x->score == score) {
+                x->score = nullptr;
+            }
+        }
+//            albumManager->albumScores().at(i)->score = nullptr;
+    }
     if (score == 0) {
         return;
     }
@@ -6599,6 +6637,8 @@ void MuseScore::cmd(QAction* a, const QString& cmd)
         openFiles();
     } else if (cmd == "file-save") {
         saveFile();
+    } else if (cmd == "album-save") {
+        saveAlbum();
     } else if (cmd == saveOnlineMenuItem) {
         showUploadScoreDialog();
     } else if (cmd == "file-export") {

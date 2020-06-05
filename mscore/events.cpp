@@ -1139,6 +1139,7 @@ static const char* stateName(ViewState s)
 
 void ScoreView::seqStopped()
 {
+    std::cout << "seqStopped" << std::endl;
     changeState(ViewState::NORMAL);
 }
 
@@ -1197,6 +1198,7 @@ void ScoreView::changeState(ViewState s)
         endFotoDrag();
         break;
     case ViewState::PLAY:
+        std::cout << "stop play" << std::endl;
         seq->stop();
         break;
     case ViewState::EDIT:
