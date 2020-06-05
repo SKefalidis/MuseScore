@@ -112,6 +112,8 @@ class Seq : public QObject, public Sequencer
 
     mutable QMutex mutex;
 
+    MasterScore* dominantScore;
+    int nextMovementIndex;
     MasterScore* cs;
     ScoreView* cv;
     bool running;                         // true if sequencer is available
@@ -269,6 +271,7 @@ public:
     void setController(int, int, int);
     virtual void sendEvent(const NPlayEvent&);
     void setScoreView(ScoreView*);
+    void setNextScore();
     MasterScore* score() const { return cs; }
     ScoreView* viewer() const { return cv; }
     void initInstruments(bool realTime = false);

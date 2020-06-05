@@ -81,6 +81,7 @@ class MediaDialog;
 class Workspace;
 class WorkspaceDialog;
 class AlbumManager;
+class Album;
 class WebPageDockWidget;
 class ChordList;
 class Capella;
@@ -463,6 +464,7 @@ class MuseScore : public QMainWindow, public MuseScoreCore, public mu::framework
     virtual void resizeEvent(QResizeEvent*);
     void showModeText(const QString&);
     void addRecentScore(const QString& scorePath);
+    void addRecentAlbum(const QString& albumPath);
 
     void updateViewModeCombo();
     void switchLayoutMode(LayoutMode);
@@ -619,6 +621,7 @@ public:
     QProgressBar* showProgressBar();
     void hideProgressBar();
     void addRecentScore(Score*);
+    void addRecentAlbum(Album*);
     QFileDialog* saveAsDialog();
     QFileDialog* saveCopyDialog();
     EditStyle* styleDlg() { return _styleDlg; }
@@ -667,7 +670,9 @@ public:
     void loadFile(const QUrl&);
     QTemporaryFile* getTemporaryScoreFileCopy(const QFileInfo& info, const QString& baseNameTemplate);
     QNetworkAccessManager* networkManager();
-    virtual Score* openScore(const QString& fn, bool switchTab = true);
+    virtual MasterScore* openScore(const QString& fn, bool switchTab = true);
+    void openAlbum(const QString& fn);
+    bool saveAlbum();
     bool hasToCheckForUpdate();
     bool hasToCheckForExtensionsUpdate();
     static bool unstable();
