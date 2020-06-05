@@ -89,7 +89,7 @@ AlbumManager::~AlbumManager()
 
 //---------------------------------------------------------
 //   eventFilter
-///    Used to handle drag & drop.
+///     Used to handle drag & drop.
 //---------------------------------------------------------
 
 bool AlbumManager::eventFilter(QObject* obj, QEvent* ev)
@@ -131,7 +131,7 @@ void AlbumManager::hideEvent(QHideEvent* event)
 
 //---------------------------------------------------------
 //   changeMode
-///   Change between score mode and album mode.
+///     Change between score mode and album mode.
 //---------------------------------------------------------
 
 void AlbumManager::changeMode(bool throwaway)
@@ -166,6 +166,7 @@ void AlbumManager::changeMode(bool throwaway)
 
 //---------------------------------------------------------
 //   playAlbum
+///     TODO: rethink this
 //---------------------------------------------------------
 
 void AlbumManager::playAlbum()
@@ -220,8 +221,8 @@ void AlbumManager::startPlayback()
 
 //---------------------------------------------------------
 //   updateScoreOrder
-///    Called when the scoreList/View is reordered.\n
-///    (e.g. Drag&Drop)
+///     Called when the scoreList/View is reordered.\n
+///     (e.g. Drag&Drop)
 //---------------------------------------------------------
 
 void AlbumManager::updateScoreOrder(QModelIndex sourceParent, int sourceStart, int sourceEnd,
@@ -245,7 +246,7 @@ end:;
 
 //---------------------------------------------------------
 //   openSettingsDialog
-///   (Re)Open the settings dialog menu.
+///     (Re)Open the settings dialog menu.
 //---------------------------------------------------------
 
 void AlbumManager::openSettingsDialog(bool throwaway)
@@ -271,7 +272,7 @@ std::vector<AlbumItem*> AlbumManager::albumScores() const
 
 //---------------------------------------------------------
 //   getScoreTitle
-///   TODO: What does this do and why?
+///     TODO: What does this do and why?
 //---------------------------------------------------------
 
 static QString getScoreTitle(Score* score)
@@ -293,8 +294,8 @@ static QString getScoreTitle(Score* score)
 
 //---------------------------------------------------------
 //   addClicked
-///   Add an existing score to the Album.\n
-///   Opens a dialog to select a Score from the filesystem.
+///     Add an existing score to the Album.\n
+///     Opens a dialog to select a Score from the filesystem.
 //---------------------------------------------------------
 
 void AlbumManager::addClicked(bool throwaway)
@@ -323,7 +324,7 @@ void AlbumManager::addClicked(bool throwaway)
 
 //---------------------------------------------------------
 //   addNewClicked
-///   Add a new Score to the Album.
+///     Add a new Score to the Album.
 //---------------------------------------------------------
 
 void AlbumManager::addNewClicked(bool throwaway)
@@ -338,9 +339,9 @@ void AlbumManager::addNewClicked(bool throwaway)
 
 //---------------------------------------------------------
 //   addAlbumItem
-///   add the given AlbumItem to the AlbumManager
-///   creates the corresponding scoreList/View item
-///   the AlbumItem and Widget are saved in a new AlbumManagerItem
+///     add the given AlbumItem to the AlbumManager
+///     creates the corresponding scoreList/View item
+///     the AlbumItem and Widget are saved in a new AlbumManagerItem
 //---------------------------------------------------------
 
 void AlbumManager::addAlbumItem(AlbumItem *albumItem)
@@ -367,8 +368,8 @@ void AlbumManager::addAlbumItem(AlbumItem *albumItem)
 
 //---------------------------------------------------------
 //   updateDurations
-///   Calculates and updates (the labels of) the duration
-///   of the Album and of each individual score.
+///     Calculates and updates (the labels of) the duration
+///     of the Album and of each individual score.
 //---------------------------------------------------------
 
 void AlbumManager::updateDurations()
@@ -416,7 +417,7 @@ void AlbumManager::updateDurations()
 
 //---------------------------------------------------------
 //   upClicked
-///   Up arrow clicked.
+///     Up arrow clicked.
 //---------------------------------------------------------
 
 void AlbumManager::upClicked(bool throwaway)
@@ -431,7 +432,7 @@ void AlbumManager::upClicked(bool throwaway)
 
 //---------------------------------------------------------
 //   downClicked
-///    Down arrow clicked.
+///     Down arrow clicked.
 //---------------------------------------------------------
 
 void AlbumManager::downClicked(bool throwaway)
@@ -446,14 +447,14 @@ void AlbumManager::downClicked(bool throwaway)
 
 //---------------------------------------------------------
 //   itemDoubleClicked
-///   Called when one of the Widgets in the scoreList/View
-///   gets clicked. \n
-///   In Score mode:
-///   This either opens the clicked Score or changes to the
-///   corresponding tab if it is already open. \n
-///   TODO In Album mode:
-///   This centers the view to the part of the tempScore
-///   where the clicked Score begins.
+///     Called when one of the Widgets in the scoreList/View
+///     gets clicked. \n
+///     In Score mode:
+///     This either opens the clicked Score or changes to the
+///     corresponding tab if it is already open. \n
+///     TODO In Album mode:
+///     This centers the view to the part of the tempScore
+///     where the clicked Score begins.
 //---------------------------------------------------------
 
 void AlbumManager::itemDoubleClicked(QTableWidgetItem* item)
@@ -475,7 +476,7 @@ void AlbumManager::itemDoubleClicked(QTableWidgetItem* item)
 
 //---------------------------------------------------------
 //   swap
-///   Swap the 2 given AlbumScores.
+///     Swap the 2 given AlbumScores.
 //---------------------------------------------------------
 
 void AlbumManager::swap(int indexA, int indexB)
@@ -553,8 +554,8 @@ void AlbumManager::setAlbum(Album* a)
 
 //---------------------------------------------------------
 //   updateButtons
-///   Activates/Deactivates buttons depending on the selected row
-///   and whether there are Scores in the Album.
+///     Activates/Deactivates buttons depending on the selected row
+///     and whether there are Scores in the Album.
 //---------------------------------------------------------
 
 void AlbumManager::updateButtons()
@@ -574,8 +575,8 @@ void AlbumManager::updateButtons()
 
 //---------------------------------------------------------
 //   itemChanged
-///   Called when the state of the item changes.
-///   Updates the duration and whether is it enabled.
+///     Called when the state of the item changes.
+///     Updates the duration and whether is it enabled.
 //---------------------------------------------------------
 
 void AlbumManager::itemChanged(QTableWidgetItem* item)
