@@ -20,9 +20,11 @@
 #include "globals.h"
 #include "musescore.h"
 #include "scoreview.h"
+#include "albummanager.h"
 
 #include "audio/exports/exportmidi.h"
 
+#include "libmscore/album.h"
 #include "libmscore/xml.h"
 #include "libmscore/element.h"
 #include "libmscore/note.h"
@@ -282,7 +284,7 @@ void MuseScore::openFiles(bool switchTab, bool singleFile)
 {
     QString allExt
         =
-            "*.mscz *.mscx *.mxl *.musicxml *.xml *.mid *.midi *.kar *.md *.mgu *.sgu *.cap *.capx *.ove *.scw *.bmw *.bww *.gtp *.gp3 *.gp4 *.gp5 *.gpx *.gp *.ptb *.mscz, *.mscx,";
+            "*.mscz *.mscx *.mxl *.musicxml *.xml *.mid *.midi *.kar *.md *.mgu *.sgu *.cap *.capx *.ove *.scw *.bww *.gtp *.gp3 *.gp4 *.gp5 *.gpx *.gp *.ptb *.mscz, *.mscx, *.msca *.album";
 #ifdef AVSOMR
     allExt += " *.msmr";   // omr project with omr data and musicxml or score
 #endif
@@ -299,7 +301,8 @@ void MuseScore::openFiles(bool switchTab, bool singleFile)
            << tr("Bagpipe Music Writer Files (experimental)") + " (*.bmw *.bww)"
            << tr("Guitar Pro Files") + " (*.gtp *.gp3 *.gp4 *.gp5 *.gpx *.gp)"
            << tr("Power Tab Editor Files (experimental)") + " (*.ptb)"
-           << tr("MuseScore Backup Files") + " (*.mscz, *.mscx,)";
+           << tr("MuseScore Backup Files") + " (*.mscz, *.mscx,)"
+           << tr("MuseScore Album Files") + " (*.msca *.album)";
 
     doLoadFiles(filter, switchTab, singleFile);
 }
@@ -336,16 +339,73 @@ void MuseScore::doLoadFiles(const QStringList& filter, bool switchTab, bool sing
     QString filterStr = filter.join(";;");
     QStringList files = getOpenScoreNames(filterStr, tr("Load Score"), singleFile);
     for (const QString& s : files) {
+        if (s.split(".").last() == "msca" || s.split(".").last() == "album") {
+            openAlbum(s);
+            continue;
+        }
         openScore(s, switchTab);
     }
     mscore->tourHandler()->showDelayedWelcomeTour();
 }
 
 //---------------------------------------------------------
+//   openAlbum
+//---------------------------------------------------------
+
+void MuseScore::openAlbum(const QString& fn)
+{
+    showAlbumManager();
+    Album* newAlbum = new Album();
+    newAlbum->loadFromFile(fn);
+    albumManager->setAlbum(newAlbum);
+}
+
+//---------------------------------------------------------
+//   saveAlbum
+//---------------------------------------------------------
+
+bool MuseScore::saveAlbum()
+{
+    QString fileBaseName = albumManager->albumTitleEdit->text();
+    QString fileName = albumManager->albumTitleEdit->text();
+    QString name = createDefaultFileName(fileBaseName);
+    QString albumType = tr("AlbumFile") + " (*.msca)";
+
+    QSettings set;
+    if (mscore->lastSaveDirectory.isEmpty()) {
+        mscore->lastSaveDirectory
+            = set.value("lastSaveDirectory", preferences.getString(PREF_APP_PATHS_MYSCORES)).toString();
+    }
+    QString saveDirectory = mscore->lastSaveDirectory;
+
+    if (saveDirectory.isEmpty()) {
+        saveDirectory = preferences.getString(PREF_APP_PATHS_MYSCORES);
+    }
+
+    QString fname = QString("%1/%2").arg(saveDirectory).arg(name);
+    QString filter;
+    filter = albumType;
+    if (QFileInfo(fname).suffix().isEmpty()) {
+        fname += ".msca";
+    }
+
+    fileBaseName = mscore->getSaveScoreName(tr("Save Score"), fname, filter);
+    if (fileBaseName.isEmpty()) {
+        return false;
+    }
+
+    albumManager->album()->saveToFile(fileBaseName);
+    mscore->lastSaveDirectory = albumManager->album()->_fileInfo.absolutePath();
+    addRecentAlbum(albumManager->album());
+    writeSessionFile(false);
+    return true;
+}
+
+//---------------------------------------------------------
 //   openScore
 //---------------------------------------------------------
 
-Score* MuseScore::openScore(const QString& fn, bool switchTab)
+MasterScore* MuseScore::openScore(const QString& fn, bool switchTab)
 {
     //
     // make sure we load a file only once

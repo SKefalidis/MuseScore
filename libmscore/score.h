@@ -508,6 +508,8 @@ private:
     QString accInfo;                      ///< information about selected element(s) for use by screen-readers
     QString accMessage;                   ///< temporary status message for use by screen-readers
 
+    bool _partOfActiveAlbum { false };
+
     //------------------
 
     friend class mu::domain::notation::NotationInteraction;
@@ -1282,6 +1284,9 @@ public:
     void layoutLyrics(System*);
     void createBeams(LayoutContext&, Measure*);
 
+    bool partOfActiveAlbum() const { return _partOfActiveAlbum; }
+    void setPartOfActiveAlbum(bool b) { _partOfActiveAlbum = b; }
+
     constexpr static double defaultTempo() { return _defaultTempo; }
 
     friend class ChangeSynthesizerState;
@@ -1316,8 +1321,6 @@ class MasterScore : public Score
     std::vector<PartChannelSettingsLink> _playbackSettingsLinks;
     Score* _playbackScore = nullptr;
     Revisions* _revisions;
-    MasterScore* _next      { 0 };
-    MasterScore* _prev      { 0 };
     Movements* _movements   { 0 };
 
     bool _readOnly          { false };
@@ -1350,8 +1353,6 @@ class MasterScore : public Score
     QFileInfo info;
 
     bool read(XmlReader&);
-    void setPrev(MasterScore* s) { _prev = s; }
-    void setNext(MasterScore* s) { _next = s; }
 
 public:
     MasterScore();
@@ -1359,7 +1360,9 @@ public:
     virtual ~MasterScore();
     MasterScore* clone();
 
-    virtual bool isMaster() const override { return true; }
+    virtual ElementType type() const override { return ElementType::SCORE; }
+
+    virtual bool isMaster() const override { return true; } // should this be removed?
     virtual bool readOnly() const override { return _readOnly; }
     void setReadOnly(bool ro) { _readOnly = ro; }
     virtual UndoStack* undoStack() const override { return _movements->undo(); }
@@ -1379,8 +1382,6 @@ public:
     virtual QQueue<MidiInputEvent>* midiInputQueue() override { return &_midiInputQueue; }
     virtual std::list<MidiInputEvent>* activeMidiPitches() override { return &_activeMidiPitches; }
 
-    MasterScore* next() const { return _next; }
-    MasterScore* prev() const { return _prev; }
     virtual Movements* movements() override { return _movements; }
     virtual const Movements* movements() const override { return _movements; }
     void setMovements(Movements* m);
@@ -1477,6 +1478,18 @@ public:
     virtual MStyle& style() override { return movements()->style(); }
     virtual const MStyle& style() const override { return movements()->style(); }
 };
+
+static inline MasterScore* toMasterScore(ScoreElement* e)
+{
+    Q_ASSERT(!e || e->isMasterScore());
+    return static_cast<MasterScore*>(e);
+}
+
+static inline const MasterScore* toMasterScore(const ScoreElement* e)
+{
+    Q_ASSERT(!e || e->isMasterScore());
+    return static_cast<const MasterScore*>(e);
+}
 
 //---------------------------------------------------------
 //   ScoreLoad
