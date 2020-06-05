@@ -40,13 +40,8 @@ public:
     virtual void setCurrentView(int /*tabIdx*/, int /*idx*/) {}
 
     virtual int appendScore(MasterScore* s) { scoreList.append(s); return 0; }
-<<<<<<< HEAD
     virtual void endCmd(const bool /*isCmdFromInspector*/ = false, const bool /*undoRedo*/ = false) {}
-    virtual Score* openScore(const QString& /*fn*/, bool /*switchTab*/) { return 0; }
-=======
-    virtual void endCmd() {}
     virtual MasterScore* openScore(const QString& /*fn*/, bool /*switchTab*/) { return 0; }
->>>>>>> Squash for commit.
     QList<MasterScore*>& scores() { return scoreList; }
     virtual void updateInspector() {}
 };
