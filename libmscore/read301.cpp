@@ -298,6 +298,18 @@ void MasterScore::addMovement(MasterScore* score)
 }
 
 //---------------------------------------------------------
+//   removeMovement
+//---------------------------------------------------------
+
+void MasterScore::removeMovement(MasterScore *score)
+{
+    auto x = std::find(_movements->begin(), _movements->end(), score);
+    if (x != movements()->end()) {
+        _movements->erase(x);
+    }
+}
+
+//---------------------------------------------------------
 //   read301
 //---------------------------------------------------------
 
