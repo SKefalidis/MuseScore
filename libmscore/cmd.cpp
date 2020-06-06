@@ -318,6 +318,7 @@ void Score::update(bool resetCmdState)
         ms->deletePostponed();
         if (cs.layoutRange()) {
             for (Score* s : ms->scoreList()) {
+                std::cout << "from there" << std::endl;
                 s->doLayoutRange(cs.startTick(), cs.endTick());
             }
             updateAll = true;

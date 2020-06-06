@@ -4679,6 +4679,7 @@ void LayoutContext::collectPage()
 
 void Score::doLayout()
 {
+    std::cout << "from here" << std::endl;
     doLayoutRange(Fraction(0,1), Fraction(-1,1));
 }
 
@@ -4707,6 +4708,8 @@ void Score::doLayoutRange(const Fraction& st, const Fraction& et)
     Fraction stick(st);
     Fraction etick(et);
     Q_ASSERT(!(stick == Fraction(-1,1) && etick == Fraction(-1,1)));
+
+    std::cout << this->title().toStdString() << std::endl;
 
     if (!last() || (lineMode() && !firstMeasure())) {
         qDebug("empty score");

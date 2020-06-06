@@ -362,7 +362,7 @@ class MasterScore;
 //    by itself as a complete composition.
 //    A MuseScore score file can contain several movements represented as
 //    MasterScore's. A MasterScore can have several parts represented
-//    as Score. MasterScores are connected in a double linked list.
+//    as Score.
 //-----------------------------------------------------------------------------
 
 class Movements : public std::vector<MasterScore*>
@@ -1387,6 +1387,7 @@ public:
     virtual const Movements* movements() const override { return _movements; }
     void setMovements(Movements* m);
     void addMovement(MasterScore* score);
+    void removeMovement(MasterScore* score);
 
     virtual void setUpdateAll() override;
 
