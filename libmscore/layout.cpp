@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL
 //=============================================================================
 
+#include "album.h"
 #include "accidental.h"
 #include "barline.h"
 #include "beam.h"
@@ -4702,6 +4703,12 @@ public:
 
 void Score::doLayoutRange(const Fraction& st, const Fraction& et)
 {
+    if (Album::scoreInActiveAlbum(this->masterScore()) && this != Album::activeAlbum->getDominant()) {
+        Album::activeAlbum->getDominant()->doLayout();
+        std::cout << "hijacked" << std::endl;
+        return;
+    }
+
     CmdStateLocker cmdStateLocker(this);
     LayoutContext lc(this);
 
