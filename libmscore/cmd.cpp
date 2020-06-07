@@ -314,6 +314,7 @@ void Score::update(bool resetCmdState)
 {
     bool updateAll = false;
     for (MasterScore* ms : *movements()) {
+//    MasterScore * ms = movements()->at(0);
         CmdState& cs = ms->cmdState();
         ms->deletePostponed();
         if (cs.layoutRange()) {

@@ -557,6 +557,8 @@ void AlbumManager::setAlbum(Album* a)
         addAlbumItem(item);
     }
     scoreList->blockSignals(false);
+
+    Album::activeAlbum = _album;
 }
 
 //---------------------------------------------------------

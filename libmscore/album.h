@@ -63,11 +63,15 @@ public:
     MasterScore* removeScore(MasterScore* score);
     MasterScore* removeScore(int index);
     void swap(int indexA, int indexB);
+    static bool scoreInActiveAlbum(MasterScore* score);
+    MasterScore* getDominant();
 
     bool loadFromFile(const QString& path);
     void readAlbum(XmlReader& reader);
     bool saveToFile(const QString &path);
     void writeAlbum(XmlWriter& writer);
+
+    static Album* activeAlbum;
 };
 
 }     // namespace Ms
