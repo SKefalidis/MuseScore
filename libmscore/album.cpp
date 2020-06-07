@@ -123,6 +123,8 @@ void AlbumItem::writeAlbumItem(XmlWriter &writer)
 //---------------------------------------------------------
 //---------------------------------------------------------
 
+Album* Album::activeAlbum = nullptr;
+
 Album::Album()
 {
 
@@ -166,6 +168,32 @@ MasterScore* Album::removeScore(int index)
 void Album::swap(int indexA, int indexB)
 {
     std::swap(_albumItems.at(indexA), _albumItems.at(indexB));
+}
+
+//---------------------------------------------------------
+//   scoreInAlbum
+//---------------------------------------------------------
+
+bool Album::scoreInActiveAlbum(MasterScore *score)
+{
+    if (!activeAlbum)
+        return false;
+
+    for (auto x : activeAlbum->_albumItems) {
+        if (x->score == score) {
+            return true;
+        }
+    }
+    return false;
+}
+
+//---------------------------------------------------------
+//   getDominant
+//---------------------------------------------------------
+
+MasterScore *Album::getDominant()
+{
+    return _albumItems.front()->score;
 }
 
 //---------------------------------------------------------
