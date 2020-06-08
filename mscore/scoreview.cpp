@@ -210,10 +210,12 @@ ScoreView::ScoreView(QWidget* parent)
 
 //---------------------------------------------------------
 //   setScore
+//      TODO: add dominant score
 //---------------------------------------------------------
 
 void ScoreView::setScore(Score* s)
 {
+    std::cout << "setting score" << std::endl;
     if (_score) {
         if (_score->isMaster()) {
             MasterScore* ms = static_cast<MasterScore*>(s);
@@ -1275,6 +1277,8 @@ void ScoreView::paint(const QRect& r, QPainter& p)
         p.drawTiledPixmap(r, *_fgPixmap, r.topLeft()
                           - QPoint(lrint(_matrix.dx()), lrint(_matrix.dy())));
     }
+
+    std::cout << _score << "   " << this << std::endl;
 
     p.setTransform(_matrix);
     QRectF fr = imatrix.mapRect(QRectF(r));

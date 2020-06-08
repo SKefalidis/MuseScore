@@ -4703,11 +4703,11 @@ public:
 
 void Score::doLayoutRange(const Fraction& st, const Fraction& et)
 {
-    if (Album::scoreInActiveAlbum(this->masterScore()) && this != Album::activeAlbum->getDominant()) {
-        Album::activeAlbum->getDominant()->doLayout();
-        std::cout << "hijacked" << std::endl;
-        return;
-    }
+//    if (Album::scoreInActiveAlbum(this->masterScore()) && this != Album::activeAlbum->getDominant()) {
+//        Album::activeAlbum->getDominant()->doLayout();
+//        std::cout << "hijacked" << std::endl;
+//        return;
+//    }
 
     CmdStateLocker cmdStateLocker(this);
     LayoutContext lc(this);
@@ -4874,7 +4874,7 @@ void Score::doLayoutRange(const Fraction& st, const Fraction& et)
 void LayoutContext::layout()
 {
     MeasureBase* lmb;
-    dominantScore = toMasterScore(score);   // set the first score (masterscore = movement) as the dominant
+    dominantScore = score->masterScore();   // set the first score (masterscore = movement) as the dominant
     movementIndex = 1;   // the next movement is the second movement
     do{
         getNextPage();
