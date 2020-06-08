@@ -125,6 +125,7 @@ ScoreView::ScoreView(QWidget* parent)
 
     state       = ViewState::NORMAL;
     _score      = 0;
+    _drawingScore = nullptr;
     _omrView    = 0;
     dropTarget  = 0;
 
@@ -216,6 +217,7 @@ ScoreView::ScoreView(QWidget* parent)
 void ScoreView::setScore(Score* s)
 {
     std::cout << "setting score" << std::endl;
+    _drawingScore = s;
     if (_score) {
         if (_score->isMaster()) {
             MasterScore* ms = static_cast<MasterScore*>(s);
@@ -1075,7 +1077,7 @@ void ScoreView::drawAnchorLines(QPainter& painter)
 //---------------------------------------------------------
 void ScoreView::paintEvent(QPaintEvent* ev)
 {
-    if (!_score) {
+    if (!_drawingScore) {
         return;
     }
     QPainter vp(this);
@@ -1090,11 +1092,11 @@ void ScoreView::paintEvent(QPaintEvent* ev)
     _curLoopIn->paint(&vp);
     _curLoopOut->paint(&vp);
     _cursor->paint(&vp);
-    if (_score->layoutMode() == LayoutMode::LINE) {
+    if (_drawingScore->layoutMode() == LayoutMode::LINE) {
         _controlCursor->paint(&vp);
     }
 
-    if (_score->layoutMode() == LayoutMode::LINE) {
+    if (_drawingScore->layoutMode() == LayoutMode::LINE) {
         _continuousPanel->paint(ev->rect(), vp);
     }
 
@@ -1136,7 +1138,7 @@ void ScoreView::paintPageBorder(QPainter& p, Page* page)
     p.setPen(QPen(QColor(0,0,0,102), 1));
     p.drawRect(r);
 
-    if (_score->showPageborders()) {
+    if (_drawingScore->showPageborders()) {
         // show page margins
         p.setBrush(Qt::NoBrush);
         p.setPen(MScore::frameMarginColor);
@@ -1252,7 +1254,7 @@ void ScoreView::paint(const QRect& r, QPainter& p)
                           - QPoint(lrint(_matrix.dx()), lrint(_matrix.dy())));
     }
 
-    std::cout << _score << "   " << this << std::endl;
+    std::cout << _drawingScore << "   " << this << std::endl;
 
     p.setTransform(_matrix);
     QRectF fr = imatrix.mapRect(QRectF(r));
@@ -1313,9 +1315,9 @@ void ScoreView::paint(const QRect& r, QPainter& p)
     // ------------
 
     QRegion r1(r);
-    if ((_score->layoutMode() == LayoutMode::LINE) || (_score->layoutMode() == LayoutMode::SYSTEM)) {
-        if (_score->pages().size() > 0) {
-            Page* page = _score->pages().front();
+    if ((_drawingScore->layoutMode() == LayoutMode::LINE) || (_drawingScore->layoutMode() == LayoutMode::SYSTEM)) {
+        if (_drawingScore->pages().size() > 0) {
+            Page* page = _drawingScore->pages().front();
             QList<Element*> ell = page->items(fr);
 
             // AvsOmr -----
@@ -1330,7 +1332,7 @@ void ScoreView::paint(const QRect& r, QPainter& p)
             drawElements(p, ell, editElement);
         }
     } else {
-        for (Page* page : _score->pages()) {
+        for (Page* page : _drawingScore->pages()) {
             QRectF pr(page->abbox().translated(page->pos()));
             if (pr.right() < fr.left()) {
                 continue;
@@ -1431,7 +1433,7 @@ void ScoreView::paint(const QRect& r, QPainter& p)
         p.fillRect(dropRectangle, QColor(80, 0, 0, 80));
     }
 
-    const Selection& sel = _score->selection();
+    const Selection& sel = _drawingScore->selection();
     if (sel.isRange()) {
         Segment* ss = sel.startSegment();
         Segment* es = sel.endSegment();
@@ -1568,7 +1570,7 @@ void ScoreView::paint(const QRect& r, QPainter& p)
     }
 
     p.setWorldMatrixEnabled(false);
-    if (_score->layoutMode() != LayoutMode::LINE && _score->layoutMode() != LayoutMode::SYSTEM && !r1.isEmpty()) {
+    if (_drawingScore->layoutMode() != LayoutMode::LINE && _drawingScore->layoutMode() != LayoutMode::SYSTEM && !r1.isEmpty()) {
         p.setClipRegion(r1);      // only background
         if (_bgPixmap == 0 || _bgPixmap->isNull()) {
             p.fillRect(r, _bgColor);

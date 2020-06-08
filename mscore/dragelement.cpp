@@ -95,7 +95,7 @@ void ScoreView::doDragElement(QMouseEvent* ev)
         _score->addRefresh(g->drag(editData));
     }
 
-    _score->update();
+//    _score->update();
     QVector<QLineF> anchorLines;
 
     for (Element* e : sel.elements()) {
@@ -125,7 +125,7 @@ void ScoreView::doDragElement(QMouseEvent* ev)
         }
     }
     updateGrips();
-    _score->update();
+//    _score->update(); // here
 }
 
 //---------------------------------------------------------
