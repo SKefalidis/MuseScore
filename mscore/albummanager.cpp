@@ -193,6 +193,9 @@ void AlbumManager::playAlbum()
             }
 
             if (i == 0) {
+                if (albumModeButton->isChecked()) { // skip the first cause it's empty
+                    seq->setNextScore();
+                }
                 seq->start();
             } else {
                 QTimer::singleShot(_album->playbackDelay, this, &AlbumManager::startPlayback);

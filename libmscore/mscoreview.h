@@ -16,6 +16,7 @@
 namespace Ms {
 class Element;
 class Score;
+class MasterScore;
 class Slur;
 class Note;
 class Page;
@@ -32,6 +33,7 @@ class MuseScoreView
 {
 protected:
     Score* _score;
+    MasterScore* dominantScore;
 
 public:
     virtual ~MuseScoreView() = default;
