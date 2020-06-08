@@ -275,7 +275,7 @@ void Score::endCmd(const bool isCmdFromInspector, bool rollback)
         undoStack()->current()->unwind();
     }
 
-    update(false);
+//    update(false);
 
     if (MScore::debugMode) {
         qDebug("===endCmd() %d", undoStack()->current()->childCount());

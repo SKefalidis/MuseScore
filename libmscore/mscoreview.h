@@ -33,7 +33,7 @@ class MuseScoreView
 {
 protected:
     Score* _score;
-    MasterScore* dominantScore;
+    Score* _drawingScore;
 
 public:
     virtual ~MuseScoreView() = default;

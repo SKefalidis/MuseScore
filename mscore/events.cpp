@@ -350,7 +350,7 @@ void ScoreView::mouseReleaseEvent(QMouseEvent* mouseEvent)
             _score->select(elementToSelect);
             modifySelection = false;
             elementToSelect = nullptr;
-            _score->update();
+//            _score->update();
             mscore->endCmd();
         }
         break;
@@ -455,7 +455,7 @@ void ScoreView::mousePressEventNormal(QMouseEvent* ev)
                 e->score()->updateCapo();
                 mscore->play(e);
             }
-            setScore(e->score()); // this is the line that causes other movements to disappear, should this change to setScore?
+            _score = e->score(); // this is the line that causes other movements to disappear, should this change to setScore?
             _score->setUpdateAll();
         }
     } else {
@@ -479,7 +479,7 @@ void ScoreView::mousePressEventNormal(QMouseEvent* ev)
             modifySelection = true;
         }
     }
-    _score->update();
+//    _score->update();
     mscore->endCmd();
 }
 
@@ -518,7 +518,7 @@ void ScoreView::mousePressEvent(QMouseEvent* ev)
                 if (editData.grip[i].adjusted(-a, -a, a, a).contains(editData.startMove)) {
                     editData.curGrip = Grip(i);
                     updateGrips();
-                    score()->update();
+//                    score()->update();
                     gripFound = true;
                     break;
                 }
@@ -604,7 +604,7 @@ void ScoreView::mousePressEvent(QMouseEvent* ev)
             mousePressEventNormal(ev);
         } else {
             editData.element->mousePress(editData);
-            score()->update();
+//            score()->update();
             if (editData.element->isTextBase() && mscore->textTools()) {
                 mscore->textTools()->updateTools(editData);
             }
