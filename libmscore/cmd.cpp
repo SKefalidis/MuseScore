@@ -320,6 +320,7 @@ void Score::update(bool resetCmdState)
         if (cs.layoutRange()) {
             for (Score* s : ms->scoreList()) {
                 std::cout << "from there" << std::endl;
+                // scoreview do drag edit called when editing and relayout
                 s->doLayoutRange(cs.startTick(), cs.endTick());
             }
             updateAll = true;

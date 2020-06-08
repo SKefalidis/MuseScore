@@ -455,7 +455,7 @@ void ScoreView::mousePressEventNormal(QMouseEvent* ev)
                 e->score()->updateCapo();
                 mscore->play(e);
             }
-            _score = e->score();
+            setScore(e->score()); // this is the line that causes other movements to disappear, should this change to setScore?
             _score->setUpdateAll();
         }
     } else {

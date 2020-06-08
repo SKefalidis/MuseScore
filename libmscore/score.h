@@ -442,7 +442,7 @@ private:
     static std::set<Score*> validScores;
     int _linkId { 0 };
     MasterScore* _masterScore { 0 };
-    QList<MuseScoreView*> viewer;
+    QList<MuseScoreView*> viewer; // what does this do? This probably is the list that renders everything when I add movements to a masterscore
     Excerpt* _excerpt  { 0 };
 
     QString _mscoreVersion;
