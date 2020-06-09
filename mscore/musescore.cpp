@@ -2787,7 +2787,6 @@ void MuseScore::askResetOldScorePositions(Score* score)
 
 void MuseScore::setCurrentScoreView(int idx)
 {
-    std::cout << "setting scoreview" << std::endl;
     tab1->blockSignals(ctab != tab1);
     setCurrentView(0, idx);
     tab1->blockSignals(false);
@@ -2817,7 +2816,6 @@ void MuseScore::setCurrentView(int tabIdx, int idx)
 
 void MuseScore::setCurrentScoreView(ScoreView* view)
 {
-    std::cout << "setting scoreview 2" << std::endl;
     cv = view;
     if (cv) {
         ctab = (tab2 && tab2->view() == view) ? tab2 : tab1;

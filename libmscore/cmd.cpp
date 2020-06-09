@@ -278,10 +278,8 @@ void Score::endCmd(const bool isCmdFromInspector, bool rollback)
     }
 
     update(false);
-    if (Album::scoreInActiveAlbum(this->masterScore())) {
-        std::cout << "worked?" << std::endl;
+    if (Album::scoreInActiveAlbum(this->masterScore())) { // relayout the album score so that this score does not go to the top
         Album::activeAlbum->getDominant()->doLayout();
-        std::cout << "yep" << std::endl;
     }
 
     if (MScore::debugMode) {

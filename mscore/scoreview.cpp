@@ -216,7 +216,6 @@ ScoreView::ScoreView(QWidget* parent)
 
 void ScoreView::setScore(Score* s)
 {
-    std::cout << "setting score" << std::endl;
     _drawingScore = s;
     if (_score) {
         if (_score->isMaster()) {
