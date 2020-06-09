@@ -210,7 +210,6 @@ Seq::~Seq()
 
 void Seq::setScoreView(ScoreView* v)
 {
-    std::cout << "setScoreView" << std::endl;
     if (oggInit) {
         ov_clear(&vf);
         oggInit = false;
@@ -248,7 +247,6 @@ void Seq::setScoreView(ScoreView* v)
 
 void Seq::setNextScore()
 {
-    std::cout << "next score" << std::endl;
     if (nextMovementIndex < dominantScore->movements()->size()) {
         cs = dominantScore->movements()->at(nextMovementIndex);
         nextMovementIndex++;
@@ -419,7 +417,6 @@ void Seq::start()
 
 void Seq::stop()
 {
-    std::cout << "stop" << std::endl;
     const bool seqStopped = (state == Transport::STOP);
     const bool driverStopped = !_driver || _driver->getState() == Transport::STOP;
     if (seqStopped && driverStopped) {
@@ -456,7 +453,6 @@ void Seq::stop()
 
 void Seq::stopWait()
 {
-    std::cout << "stop wait" << std::endl;
     stop();
     QWaitCondition sleep;
     int idx = 0;
@@ -821,7 +817,6 @@ void Seq::process(unsigned framesPerPeriod, float* buffer)
         }
         // Got a message from JACK Transport panel: Stop
         else if (state == Transport::PLAY && driverState == Transport::STOP) {
-            std::cout << "HERE IT IS" << std::endl;
             setNextScore();
             state = Transport::STOP;
             // Muting all notes
