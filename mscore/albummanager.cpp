@@ -146,7 +146,7 @@ void AlbumManager::changeMode(bool throwaway)
         if (!tempScore) {
             tempScore = _items.at(0)->albumItem->score->clone(); // clone breaks editing sync for the 1st movement
             while (tempScore->systems().size() > 1) { // remove the measures of the cloned masterscore, that way editing is synced
-                for(auto x : tempScore->systems().last()->measures()) {
+                for (auto x : tempScore->systems().last()->measures()) {
                     tempScore->removeElement(x);
                 }
                 tempScore->systems().removeLast();

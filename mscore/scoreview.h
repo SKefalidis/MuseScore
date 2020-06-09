@@ -125,8 +125,6 @@ enum class ViewState {
     FOTO_LASSO,
 };
 
-// TODO: add dominant score. Draw dominant score, edit score.
-
 //---------------------------------------------------------
 //   ScoreView
 //---------------------------------------------------------
