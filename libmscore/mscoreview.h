@@ -32,8 +32,8 @@ enum class HairpinType : signed char;
 class MuseScoreView
 {
 protected:
-    Score* _score;
-    Score* _drawingScore;
+    Score* _score;          // used for editing the score
+    Score* _drawingScore;   // used for drawing the score
 
 public:
     virtual ~MuseScoreView() = default;
