@@ -17,6 +17,8 @@
 
 #include <assert.h>
 
+
+#include "album.h"
 #include "types.h"
 #include "musescoreCore.h"
 #include "score.h"
@@ -275,7 +277,12 @@ void Score::endCmd(const bool isCmdFromInspector, bool rollback)
         undoStack()->current()->unwind();
     }
 
-//    update(false);
+    update(false);
+    if (Album::scoreInActiveAlbum(this->masterScore())) {
+        std::cout << "worked?" << std::endl;
+        Album::activeAlbum->getDominant()->doLayout();
+        std::cout << "yep" << std::endl;
+    }
 
     if (MScore::debugMode) {
         qDebug("===endCmd() %d", undoStack()->current()->childCount());
@@ -314,12 +321,10 @@ void Score::update(bool resetCmdState)
 {
     bool updateAll = false;
     for (MasterScore* ms : *movements()) {
-//    MasterScore * ms = movements()->at(0);
         CmdState& cs = ms->cmdState();
         ms->deletePostponed();
         if (cs.layoutRange()) {
             for (Score* s : ms->scoreList()) {
-                std::cout << "from there" << std::endl;
                 // scoreview do drag edit called when editing and relayout
                 s->doLayoutRange(cs.startTick(), cs.endTick());
             }
