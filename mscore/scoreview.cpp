@@ -1253,7 +1253,6 @@ void ScoreView::paint(const QRect& r, QPainter& p)
         p.drawTiledPixmap(r, *_fgPixmap, r.topLeft()
                           - QPoint(lrint(_matrix.dx()), lrint(_matrix.dy())));
     }
-    std::cout << _drawingScore << "   " << this << std::endl;
 
     p.setTransform(_matrix);
     QRectF fr = imatrix.mapRect(QRectF(r));
