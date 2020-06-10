@@ -351,7 +351,7 @@ void ScoreView::mouseReleaseEvent(QMouseEvent* mouseEvent)
             modifySelection = false;
             elementToSelect = nullptr;
             _score->update();
-            _drawingScore->update();
+//            _drawingScore->update();
             _drawingScore->doLayout();
             mscore->endCmd();
         }
@@ -482,7 +482,7 @@ void ScoreView::mousePressEventNormal(QMouseEvent* ev)
         }
     }
     _score->update();
-    _drawingScore->update();
+//    _drawingScore->update();
     _drawingScore->doLayout();
     mscore->endCmd();
 }
@@ -523,7 +523,7 @@ void ScoreView::mousePressEvent(QMouseEvent* ev)
                     editData.curGrip = Grip(i);
                     updateGrips();
                     _score->update();
-                    _drawingScore->update();
+//                    _drawingScore->update();
                     _drawingScore->doLayout();
                     gripFound = true;
                     break;
@@ -611,7 +611,7 @@ void ScoreView::mousePressEvent(QMouseEvent* ev)
         } else {
             editData.element->mousePress(editData);
             _score->update();
-            _drawingScore->update();
+//            _drawingScore->update();
             _drawingScore->doLayout();
             if (editData.element->isTextBase() && mscore->textTools()) {
                 mscore->textTools()->updateTools(editData);
