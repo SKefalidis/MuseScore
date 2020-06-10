@@ -1076,12 +1076,25 @@ void ScoreView::drawAnchorLines(QPainter& painter)
 //---------------------------------------------------------
 void ScoreView::paintEvent(QPaintEvent* ev)
 {
+    static bool b = false;
+
+    if(b) {
+        b = false;
+        return;
+    }
+
     if (!_drawingScore) {
         return;
     }
     QPainter vp(this);
     vp.setRenderHint(QPainter::Antialiasing, preferences.getBool(PREF_UI_CANVAS_MISC_ANTIALIASEDDRAWING));
     vp.setRenderHint(QPainter::TextAntialiasing, true);
+
+    for (auto x : *_drawingScore->masterScore()->movements()) {
+        x->doLayout();
+    }
+    _drawingScore->doLayout();
+    b = true;
 
     paint(ev->rect(), vp);
 
