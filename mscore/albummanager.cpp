@@ -154,6 +154,7 @@ void AlbumManager::changeMode(bool throwaway)
             tempScore->setEmptyMovement(true);
             mscore->setCurrentScoreView(mscore->appendScore(tempScore));
             mscore->getTab1()->setTabText(mscore->getTab1()->count() - 1, "Temporary Album Score");
+            tempScore->setName("Temporary Album Score");
             for (auto item : _items) {
 //                if (item == _items.at(0)) { If I clone and I use the cloned masterscore's measures I don't need to add it again.
 //                    continue;
