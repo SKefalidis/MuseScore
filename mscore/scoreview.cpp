@@ -1117,11 +1117,13 @@ void ScoreView::paintEvent(QPaintEvent* ev)
     vp.setRenderHint(QPainter::Antialiasing, preferences.getBool(PREF_UI_CANVAS_MISC_ANTIALIASEDDRAWING));
     vp.setRenderHint(QPainter::TextAntialiasing, true);
 
-    for (auto x : *_drawingScore->masterScore()->movements()) {
-        x->doLayout();
+    if (_score != _drawingScore) { // only run for multi-movement scores
+        for (auto x : *_drawingScore->masterScore()->movements()) {
+            x->doLayout();
+        }
+        _drawingScore->doLayout();
+        b = true;
     }
-    _drawingScore->doLayout();
-    b = true;
 
     paint(ev->rect(), vp);
 

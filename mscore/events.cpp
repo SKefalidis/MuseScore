@@ -351,8 +351,10 @@ void ScoreView::mouseReleaseEvent(QMouseEvent* mouseEvent)
             modifySelection = false;
             elementToSelect = nullptr;
             _score->update();
-            _drawingScore->update(); // seems to fix a bug where the individual scores wouldn;t be redrawn before doing something after changing from the album-mode score
-            _drawingScore->doLayout();
+            if (_score != _drawingScore) { // only run for multi-movement scores
+                _drawingScore->update(); // seems to fix a bug where the individual scores wouldn;t be redrawn before doing something after changing from the album-mode score
+                _drawingScore->doLayout();
+            }
             mscore->endCmd();
         }
         break;
@@ -482,8 +484,10 @@ void ScoreView::mousePressEventNormal(QMouseEvent* ev)
         }
     }
     _score->update();
-    _drawingScore->update(); // seems to fix a bug where the individual scores wouldn;t be redrawn before doing something after changing from the album-mode score
-    _drawingScore->doLayout();
+    if (_score != _drawingScore) { // only run for multi-movement scores
+        _drawingScore->update(); // seems to fix a bug where the individual scores wouldn;t be redrawn before doing something after changing from the album-mode score
+        _drawingScore->doLayout();
+    }
     mscore->endCmd();
 }
 
@@ -523,8 +527,10 @@ void ScoreView::mousePressEvent(QMouseEvent* ev)
                     editData.curGrip = Grip(i);
                     updateGrips();
                     _score->update();
-                    _drawingScore->update(); // seems to fix a bug where the individual scores wouldn;t be redrawn before doing something after changing from the album-mode score
-                    _drawingScore->doLayout();
+                    if (_score != _drawingScore) { // only run for multi-movement scores
+                        _drawingScore->update(); // seems to fix a bug where the individual scores wouldn;t be redrawn before doing something after changing from the album-mode score
+                        _drawingScore->doLayout();
+                    }
                     gripFound = true;
                     break;
                 }
@@ -611,8 +617,10 @@ void ScoreView::mousePressEvent(QMouseEvent* ev)
         } else {
             editData.element->mousePress(editData);
             _score->update();
-            _drawingScore->update(); // seems to fix a bug where the individual scores wouldn;t be redrawn before doing something after changing from the album-mode score
-            _drawingScore->doLayout();
+            if (_score != _drawingScore) { // only run for multi-movement scores
+                _drawingScore->update(); // seems to fix a bug where the individual scores wouldn;t be redrawn before doing something after changing from the album-mode score
+                _drawingScore->doLayout();
+            }
             if (editData.element->isTextBase() && mscore->textTools()) {
                 mscore->textTools()->updateTools(editData);
             }
