@@ -151,6 +151,7 @@ void AlbumManager::changeMode(bool throwaway)
                 }
                 tempScore->systems().removeLast();
             }
+            tempScore->setEmptyMovement(true);
             mscore->setCurrentScoreView(mscore->appendScore(tempScore));
             mscore->getTab1()->setTabText(mscore->getTab1()->count() - 1, "Temporary Album Score");
             for (auto item : _items) {
