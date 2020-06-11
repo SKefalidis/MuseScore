@@ -1322,6 +1322,8 @@ class MasterScore : public Score
     Score* _playbackScore = nullptr;
     Revisions* _revisions;
     Movements* _movements   { 0 };
+    bool _emptyMovement     { false };  // used in album-mode for setting the selected score in scoreview
+                                        // to something other than the empty one
 
     bool _readOnly          { false };
 
@@ -1387,6 +1389,9 @@ public:
     void setMovements(Movements* m);
     void addMovement(MasterScore* score);
     void removeMovement(MasterScore* score);
+
+    bool emptyMovement() const      { return _emptyMovement; };
+    void setEmptyMovement(bool b)   { _emptyMovement = b; };
 
     virtual void setUpdateAll() override;
 
