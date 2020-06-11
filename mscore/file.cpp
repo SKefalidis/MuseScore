@@ -358,6 +358,8 @@ void MuseScore::openAlbum(const QString& fn)
     Album* newAlbum = new Album();
     newAlbum->loadFromFile(fn);
     albumManager->setAlbum(newAlbum);
+    addRecentAlbum(albumManager->album());
+    writeSessionFile(false);
 }
 
 //---------------------------------------------------------

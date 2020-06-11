@@ -2467,11 +2467,15 @@ void MuseScore::selectScore(QAction* action)
     case QVariant::Map: {
         QVariantMap pathMap = actionData.toMap();
 
-        MasterScore* score = readScore(pathMap.value("filePath").toString());
-        if (score) {
-            setCurrentScoreView(appendScore(score));
-            addRecentScore(score);
-            writeSessionFile(false);
+        if (pathMap.value("filePath").toString().endsWith(".msca") || pathMap.value("filePath").toString().endsWith(".album")) { // open album
+            openAlbum(pathMap.value("filePath").toString());
+        } else { // open score
+            MasterScore* score = readScore(pathMap.value("filePath").toString());
+            if (score) {
+                setCurrentScoreView(appendScore(score));
+                addRecentScore(score);
+                writeSessionFile(false);
+            }
         }
         break;
     }
@@ -2607,8 +2611,6 @@ void MuseScore::addRecentScore(const QString& scorePath)
 
 //---------------------------------------------------------
 //   addRecentAlbum
-///     TODO: does not work correctly,
-///     create a separate _recentAlbums container
 //---------------------------------------------------------
 
 void MuseScore::addRecentAlbum(Album* album)
