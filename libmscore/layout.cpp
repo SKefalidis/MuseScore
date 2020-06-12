@@ -4704,6 +4704,7 @@ void Score::doLayoutRange(const Fraction& st, const Fraction& et)
 {
     CmdStateLocker cmdStateLocker(this);
     LayoutContext lc(this);
+    lc.dominantScore = masterScore();
 
     Fraction stick(st);
     Fraction etick(et);
