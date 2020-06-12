@@ -23,7 +23,7 @@ class MasterScore;
 class Score;
 class AlbumManagerDialog;
 class Album;
-class AlbumItem;
+struct AlbumItem;
 
 //---------------------------------------------------------
 //   AlbumManagerItem
