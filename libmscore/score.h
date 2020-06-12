@@ -1363,9 +1363,9 @@ public:
     virtual ~MasterScore();
     MasterScore* clone();
 
-    virtual ElementType type() const override { return ElementType::SCORE; }
+    virtual ElementType type() const override { return ElementType::MASTERSCORE; }
 
-    virtual bool isMaster() const override { return true; } // should this be removed?
+    virtual bool isMaster() const override { return true; } // TODO: should this be removed?
     virtual bool readOnly() const override { return _readOnly; }
     void setReadOnly(bool ro) { _readOnly = ro; }
     virtual UndoStack* undoStack() const override { return _movements->undo(); }

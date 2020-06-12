@@ -1426,8 +1426,7 @@ MuseScore::MuseScore()
             continue;
         }
 
-        if (strcmp(i, "album") == 0) {     //enable Album feature in experimental mode
-//                  if (enableExperimental)
+        if (strcmp(i, "album") == 0) {
             menuFile->addAction(getAction("album"));
             menuFile->addAction(getAction("album-save"));
             continue;
