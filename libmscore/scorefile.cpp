@@ -276,7 +276,7 @@ void Score::writeMovement(XmlWriter& xml, bool selectionOnly)
 void Score::write(XmlWriter& xml, bool selectionOnly)
 {
     if (isMaster()) {
-        MasterScore* score = static_cast<MasterScore*>(this);
+        MasterScore* score = toMasterScore(this);
         for (auto x : *score->movements()) {
             x->writeMovement(xml, selectionOnly);
         }

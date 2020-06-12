@@ -376,6 +376,15 @@ void AlbumManager::addAlbumItem(AlbumItem *albumItem)
     _items.push_back(albumManagerItem);
     scoreList->blockSignals(false);
     updateDurations();
+
+    // update the combined score to reflect the changes
+    if (tempScore) {
+//        mscore->openScore(albumItem->_fileInfo.absoluteFilePath());
+//        tempScore->addMovement(albumItem->score);
+//        tempScore->update();
+//        tempScore->doLayout(); // position the movements correctly
+//        mscore->currentScoreView()->update(); // repaint
+    }
 }
 
 //---------------------------------------------------------
@@ -524,6 +533,7 @@ void AlbumManager::swap(int indexA, int indexB)
     if (tempScore) {
         std::swap(tempScore->movements()->at(indexA + 1), tempScore->movements()->at(indexB + 1));
         // these should probably only run if the current tab is the one with the tempScore
+//        tempScore->update(); probably not needed
         tempScore->doLayout(); // position the movements correctly
         mscore->currentScoreView()->update(); // repaint
     }
