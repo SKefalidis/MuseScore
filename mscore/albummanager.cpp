@@ -641,6 +641,7 @@ AlbumManagerItem::AlbumManagerItem(AlbumItem* item, QTableWidgetItem* listItem, 
     albumItem->score->setPartOfActiveAlbum(true);
     this->listItem = listItem;
     this->listDurationItem = listDurationItem;
+    setEnabled(albumItem->enabled);
 }
 
 AlbumManagerItem::~AlbumManagerItem()
