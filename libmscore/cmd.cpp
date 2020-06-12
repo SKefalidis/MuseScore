@@ -323,7 +323,6 @@ void Score::update(bool resetCmdState)
         ms->deletePostponed();
         if (cs.layoutRange()) {
             for (Score* s : ms->scoreList()) {
-                // scoreview do drag edit called when editing and relayout
                 s->doLayoutRange(cs.startTick(), cs.endTick());
             }
             updateAll = true;
