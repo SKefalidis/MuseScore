@@ -211,7 +211,6 @@ ScoreView::ScoreView(QWidget* parent)
 
 //---------------------------------------------------------
 //   setScore
-//      TODO: add dominant score
 //---------------------------------------------------------
 
 void ScoreView::setScore(Score* s)
