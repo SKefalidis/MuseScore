@@ -519,6 +519,14 @@ void AlbumManager::swap(int indexA, int indexB)
     // update the duration labels
     updateDurations();
     scoreList->blockSignals(false);
+
+    // update the combined score to reflect the changes
+    if (tempScore) {
+        std::swap(tempScore->movements()->at(indexA + 1), tempScore->movements()->at(indexB + 1));
+        // these should probably only run if the current tab is the one with the tempScore
+        tempScore->doLayout(); // position the movements correctly
+        mscore->currentScoreView()->update(); // repaint
+    }
 }
 
 //---------------------------------------------------------
