@@ -308,6 +308,8 @@ std::vector<AlbumItem*> AlbumManager::albumScores() const
 //   addClicked
 ///     Add an existing score to the Album.\n
 ///     Opens a dialog to select a Score from the filesystem.
+///     TODO: if the score is already opened openScore returns nullptr,
+///     so this does not work
 //---------------------------------------------------------
 
 void AlbumManager::addClicked(bool throwaway)
@@ -315,20 +317,8 @@ void AlbumManager::addClicked(bool throwaway)
     QStringList files = mscore->getOpenScoreNames(
         tr("MuseScore Files") + " (*.mscz *.mscx);;", tr("Load Score")
         );
-    QList<MasterScore*> scores;
     for (const QString& fn : files) {
-        MasterScore* score = mscore->readScore(fn);
-        Movements* m = score->movements();
-        for (MasterScore* ms : *m) {
-            scores.push_back(ms);
-            ms->setMovements(0);
-        }
-        delete m;
-    }
-    if (scores.empty()) {
-        return;
-    }
-    for (MasterScore* score : scores) {
+        MasterScore* score = mscore->openScore(fn);
         _album->addScore(score);
         addAlbumItem(_album->_albumItems.back());
     }
@@ -379,11 +369,10 @@ void AlbumManager::addAlbumItem(AlbumItem *albumItem)
 
     // update the combined score to reflect the changes
     if (tempScore) {
-//        mscore->openScore(albumItem->_fileInfo.absoluteFilePath());
-//        tempScore->addMovement(albumItem->score);
-//        tempScore->update();
-//        tempScore->doLayout(); // position the movements correctly
-//        mscore->currentScoreView()->update(); // repaint
+        tempScore->addMovement(albumItem->score);
+        tempScore->update();
+        tempScore->doLayout(); // position the movements correctly
+        mscore->currentScoreView()->update(); // repaint
     }
 }
 
