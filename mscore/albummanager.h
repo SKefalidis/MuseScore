@@ -57,8 +57,10 @@ private:
     std::vector<AlbumManagerItem*> _items     {};
     MasterScore* tempScore                    { nullptr };
 
-    int dragEnterIndex                        { -1 };
-    int dropIndex                             { -1 };
+    int dragEnterIndex      { -1 };
+    int dropIndex           { -1 };
+    int playbackIndex       { -1 };
+    bool continuing         { false };
 
     virtual void hideEvent(QHideEvent*) override;
     void updateDurations();
@@ -78,6 +80,7 @@ private slots:
     void changeMode(bool throwaway = false);
     void playAlbum(); // TODO: move to libmscore
     void playAlbum(bool throwaway);
+    void rewindAlbum(bool throwaway = false);
     void startPlayback();
     void updateScoreOrder(QModelIndex sourceParent, int sourceStart, int sourceEnd, QModelIndex destinationParent,
                           int destinationRow);
