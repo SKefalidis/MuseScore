@@ -52,6 +52,8 @@ AlbumManager::AlbumManager(QWidget* parent)
     // buttons
     up->setIcon(*icons[int(Icons::arrowUp_ICON)]);
     down->setIcon(*icons[int(Icons::arrowDown_ICON)]);
+    playButton->setIcon(*icons[int(Icons::play_ICON)]);
+    rewindButton->setIcon(*icons[int(Icons::start_ICON)]);
 
     connect(add,                &QPushButton::clicked,  this, &AlbumManager::addClicked);
     connect(addNew,             &QPushButton::clicked,  this, &AlbumManager::addNewClicked);
@@ -62,7 +64,8 @@ AlbumManager::AlbumManager(QWidget* parent)
     connect(albumModeButton,    &QRadioButton::toggled, this, &AlbumManager::changeMode);
     connect(scoreModeButton,    &QRadioButton::toggled, this, &AlbumManager::changeMode);
     connect(settingsButton,     &QPushButton::clicked,  this, &AlbumManager::openSettingsDialog);
-    connect(playButton,         &QPushButton::clicked,  this, static_cast<void (AlbumManager::*)(bool)>(&AlbumManager::playAlbum));
+    connect(playButton,         &QToolButton::clicked,  this, static_cast<void (AlbumManager::*)(bool)>(&AlbumManager::playAlbum));
+    connect(rewindButton,       &QToolButton::clicked,  this, static_cast<void (AlbumManager::*)(bool)>(&AlbumManager::rewindAlbum));
     connect(scoreList,          &QTableWidget::itemChanged, this,             &AlbumManager::itemChanged);
     connect(scoreList,          &QTableWidget::itemDoubleClicked, this,       &AlbumManager::itemDoubleClicked);
     connect(scoreList,          &QTableWidget::itemSelectionChanged, this,    &AlbumManager::updateButtons);
@@ -179,47 +182,78 @@ void AlbumManager::changeMode(bool throwaway)
 //---------------------------------------------------------
 
 void AlbumManager::playAlbum()
-{
-    static int i { -1 };
-    i++;
+{ 
+    static bool connectionEstablished { false };
 
-    if (i < _items.size()) {
-        if (_items.at(i)->albumItem->enabled) {
-            if (scoreModeButton->isChecked()) {
-                if (_items.at(i)->albumItem->score) {
-                    mscore->openScore(_items.at(i)->albumItem->_fileInfo.absoluteFilePath());         // what if the files have not been saved?
+    // pause playback
+    if (!playButton->isChecked() && seq->isPlaying()) {
+        disconnect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
+        seq->stop();
+        connectionEstablished = false;
+        continuing = true;
+        return;
+    }
+
+    // connection used to move to the next score automatically during playback
+    if (!connectionEstablished) {
+        connect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
+        connectionEstablished = true;
+    }
+
+    if (!continuing) {
+        // setup score to play
+        playbackIndex++; // starts from -1
+        if (playbackIndex < _items.size()) {
+            if (_items.at(playbackIndex)->albumItem->enabled) {
+                if (scoreModeButton->isChecked()) {
+                    if (_items.at(playbackIndex)->albumItem->score) {
+                        mscore->openScore(_items.at(playbackIndex)->albumItem->_fileInfo.absoluteFilePath());         // what if the files have not been saved?
+                    } else {
+                        _items.at(playbackIndex)->albumItem->score = mscore->openScore(_items.at(playbackIndex)->albumItem->_fileInfo.absoluteFilePath());
+                    }
+                    mscore->currentScoreView()->gotoMeasure(_items.at(playbackIndex)->albumItem->score->firstMeasure());       // rewind before playing
                 } else {
-                    _items.at(i)->albumItem->score = mscore->openScore(_items.at(i)->albumItem->_fileInfo.absoluteFilePath());
+                    seq->setNextScore(); // first movement is empty
                 }
-                mscore->currentScoreView()->gotoMeasure(_items.at(i)->albumItem->score->firstMeasure());       // rewind before playing
-            }
-
-            if (i == 0) {
-                if (albumModeButton->isChecked()) { // skip the first cause it's empty
+                // start playback
+                if (playbackIndex == 0) {
+                    startPlayback();
+                } else {
+                    QTimer::singleShot(_album->playbackDelay, this, &AlbumManager::startPlayback);
+                }
+            } else {
+                playAlbum();
+                if (albumModeButton->isChecked()) {
                     seq->setNextScore();
                 }
-                seq->start();
-            } else {
-                QTimer::singleShot(_album->playbackDelay, this, &AlbumManager::startPlayback);
-            }
-            if (i == 0) {
-                connect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
             }
         } else {
-            if (albumModeButton->isChecked()) {
-                seq->setNextScore();
-            }
-            playAlbum();
+            rewindAlbum();
+            disconnect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
+            connectionEstablished = false;
+            continuing = false;
+            playButton->setChecked(false);
         }
     } else {
-        i = -1;
-        disconnect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
+        startPlayback();
+        continuing = false;
     }
 }
 
 void AlbumManager::playAlbum(bool throwaway)
 {
     playAlbum();
+}
+
+//---------------------------------------------------------
+//   rewindAlbum
+//---------------------------------------------------------
+
+void AlbumManager::rewindAlbum(bool throwaway)
+{
+    playbackIndex = -1;
+    seq->setNextScore(0); // after the last one is the first movement, which is empty
+    continuing = false;
 }
 
 //---------------------------------------------------------

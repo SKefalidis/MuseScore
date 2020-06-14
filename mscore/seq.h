@@ -272,6 +272,8 @@ public:
     virtual void sendEvent(const NPlayEvent&);
     void setScoreView(ScoreView*);
     void setNextScore();
+    void setNextScore(int i);
+    void setNextMovementIndex(int i) { nextMovementIndex = i; }
     MasterScore* score() const { return cs; }
     ScoreView* viewer() const { return cv; }
     void initInstruments(bool realTime = false);
