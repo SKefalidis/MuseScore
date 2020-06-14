@@ -247,12 +247,36 @@ void Seq::setScoreView(ScoreView* v)
 
 void Seq::setNextScore()
 {
-    if (nextMovementIndex < dominantScore->movements()->size()) {
+    if (nextMovementIndex < dominantScore->movements()->size() && nextMovementIndex >= 0) {
         cs = dominantScore->movements()->at(nextMovementIndex);
         nextMovementIndex++;
     } else {
         cs = dominantScore;
         nextMovementIndex = 1;
+    }
+
+    midi = MidiRenderer(cs);
+    midi.setMinChunkSize(10);
+
+    if (!heartBeatTimer->isActive()) {
+        heartBeatTimer->start(20);        // msec
+    }
+    playlistChanged = true;
+    _synti->reset();
+    if (cs) {
+        initInstruments();
+        connect(cs, SIGNAL(playlistChanged()), this, SLOT(setPlaylistChanged()));
+    }
+}
+
+void Seq::setNextScore(int i)
+{
+    if (i < dominantScore->movements()->size() && i >= 0) {
+        cs = dominantScore->movements()->at(i);
+        nextMovementIndex = i + 1;
+    } else {
+        cs = dominantScore;
+        nextMovementIndex = i + 1;
     }
 
     midi = MidiRenderer(cs);
@@ -817,7 +841,7 @@ void Seq::process(unsigned framesPerPeriod, float* buffer)
         }
         // Got a message from JACK Transport panel: Stop
         else if (state == Transport::PLAY && driverState == Transport::STOP) {
-            setNextScore();
+//            setNextScore(); // advance to the next movement automatically
             state = Transport::STOP;
             // Muting all notes
             stopNotes(-1, true);
