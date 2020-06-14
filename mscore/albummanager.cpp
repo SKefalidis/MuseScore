@@ -233,11 +233,14 @@ void AlbumManager::playAlbum()
             connectionEstablished = false;
             continuing = false;
             playButton->setChecked(false);
+            return;
         }
     } else {
         startPlayback();
         continuing = false;
     }
+
+    mscore->currentScoreView()->setActiveScore(_items.at(playbackIndex)->albumItem->score);
 }
 
 void AlbumManager::playAlbum(bool throwaway)

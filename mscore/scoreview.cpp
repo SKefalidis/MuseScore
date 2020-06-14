@@ -554,6 +554,11 @@ void ScoreView::setForeground(const QColor& color)
     update();
 }
 
+void ScoreView::setActiveScore(Score* s)
+{
+    _score = s;
+}
+
 //---------------------------------------------------------
 //   dataChanged
 //---------------------------------------------------------
