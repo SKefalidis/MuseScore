@@ -1362,7 +1362,7 @@ public:
     virtual ~MasterScore();
     MasterScore* clone();
 
-    virtual ElementType type() const override { return ElementType::MASTERSCORE; }
+    virtual ElementType type() const override { return ElementType::SCORE; } // TODO: if I change it to MasterScore scores are not drawn in album-mode
 
     virtual bool isMaster() const override { return true; } // TODO: should this be removed?
     virtual bool readOnly() const override { return _readOnly; }
