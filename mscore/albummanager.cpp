@@ -163,6 +163,13 @@ void AlbumManager::changeMode(bool throwaway)
 //                    continue;
 //                }
                 cout << "adding score: " << item->albumItem->score->title().toStdString() << endl;
+
+                // add section break to the end of the movement (TODO: don't add if a break exists already)
+                LayoutBreak* lb = new LayoutBreak(item->albumItem->score);
+                lb->setLayoutBreakType(LayoutBreak::Type::SECTION);
+                item->albumItem->score->lastMeasure()->add(lb);
+                item->albumItem->score->update();
+
                 tempScore->addMovement(item->albumItem->score);
             }
             tempScore->setLayoutAll();
@@ -184,6 +191,7 @@ void AlbumManager::changeMode(bool throwaway)
 void AlbumManager::playAlbum()
 { 
     static bool connectionEstablished { false };
+    static qreal pause { 3 };
 
     // pause playback
     if (!playButton->isChecked() && seq->isPlaying()) {
@@ -200,11 +208,16 @@ void AlbumManager::playAlbum()
         connectionEstablished = true;
     }
 
+    if (playbackIndex == -1) {
+        playbackIndex++;
+    }
+
     if (!continuing) {
-        // setup score to play
-        playbackIndex++; // starts from -1
         if (playbackIndex < _items.size()) {
             if (_items.at(playbackIndex)->albumItem->enabled) {
+                //
+                // setup score to play
+                //
                 if (scoreModeButton->isChecked()) {
                     if (_items.at(playbackIndex)->albumItem->score) {
                         mscore->openScore(_items.at(playbackIndex)->albumItem->_fileInfo.absoluteFilePath());         // what if the files have not been saved?
@@ -213,21 +226,27 @@ void AlbumManager::playAlbum()
                     }
                     mscore->currentScoreView()->gotoMeasure(_items.at(playbackIndex)->albumItem->score->firstMeasure());       // rewind before playing
                 } else {
-                    seq->setNextScore(); // first movement is empty
+                    seq->setNextScore(playbackIndex + 1); // first movement is empty
+                    mscore->currentScoreView()->gotoMeasure(seq->score()->firstMeasure());       // rewind before playing
                 }
+                //
                 // start playback
+                //
                 if (playbackIndex == 0) {
                     startPlayback();
+                    pause = seq->score()->lastMeasure()->pause() * 1000;
+                    std::cout << pause << std::endl;
                 } else {
-                    QTimer::singleShot(_album->playbackDelay, this, &AlbumManager::startPlayback);
+                    QTimer::singleShot(pause, this, &AlbumManager::startPlayback);
+                    pause = seq->score()->lastMeasure()->pause() * 1000;
+                    std::cout << pause << std::endl;
                 }
-            } else {
+                playbackIndex++;
+            } else { // skip this score
+                playbackIndex++;
                 playAlbum();
-                if (albumModeButton->isChecked()) {
-                    seq->setNextScore();
-                }
             }
-        } else {
+        } else { // album ended, reset for
             rewindAlbum();
             disconnect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
             connectionEstablished = false;
@@ -240,7 +259,7 @@ void AlbumManager::playAlbum()
         continuing = false;
     }
 
-    mscore->currentScoreView()->setActiveScore(_items.at(playbackIndex)->albumItem->score);
+    mscore->currentScoreView()->setActiveScore(_items.at(playbackIndex - 1)->albumItem->score);
 }
 
 void AlbumManager::playAlbum(bool throwaway)
@@ -254,8 +273,7 @@ void AlbumManager::playAlbum(bool throwaway)
 
 void AlbumManager::rewindAlbum(bool throwaway)
 {
-    playbackIndex = -1;
-    seq->setNextScore(0); // after the last one is the first movement, which is empty
+    playbackIndex = 0;
     continuing = false;
 }
 
