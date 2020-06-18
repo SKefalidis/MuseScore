@@ -96,7 +96,7 @@ void ScoreView::doDragElement(QMouseEvent* ev)
     }
 
     _score->update();
-    _drawingScore->doLayout(); // probably redundant
+//    _drawingScore->doLayout(); // probably redundant
     QVector<QLineF> anchorLines;
 
     for (Element* e : sel.elements()) {
@@ -121,7 +121,7 @@ void ScoreView::doDragElement(QMouseEvent* ev)
     }
     updateGrips();
     _score->update();
-    _drawingScore->doLayout(); // relayout the album score so that this score does not go to the beginning
+//    _drawingScore->doLayout(); // relayout the album score so that this score does not go to the beginning
 }
 
 //---------------------------------------------------------
