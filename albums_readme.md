@@ -1,11 +1,8 @@
 Notes:
  - !FIX LINKER AND CI ERRORS!
  - fix mtest path
- - Toolbar icons don't highlight as they should, but they are functional (mostly)
  - Change from album mode to score mode
  - Save in album mode?
- - Play album in album mode (it works but sometimes it skips movements)
  - page view? continuous view?
- - performance in album mode
- - page spacing after the first couple of pages
- - viewport scrolling for multipage multimovement scores
+ - performance in album mode (slight improvement but there is work to be done)
+ - changing movement while editing in album-mode
