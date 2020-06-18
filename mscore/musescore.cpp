@@ -6421,7 +6421,7 @@ void MuseScore::endCmd(const bool isCmdFromInspector, const bool undoRedo)
     }
     if (cs) {
         setPos(cs->inputState().tick());
-        updateInputState(cs);
+        updateInputState(cv->score());
         updateUndoRedo();
         dirtyChanged(cs);
         scoreCmpTool->updateDiff();
