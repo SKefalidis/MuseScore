@@ -1666,6 +1666,12 @@ void ScoreView::constraintCanvas(int* dxx, int* dyy)
     Page* firstPage = score()->pages().front();
     Page* lastPage  = score()->pages().back();
 
+    int movementsCount = _drawingScore->masterScore()->movements()->size();
+    if (movementsCount> 1) {
+        firstPage = _drawingScore->masterScore()->pages().front();
+        lastPage = _drawingScore->masterScore()->pages().back();
+    }
+
     if (firstPage && lastPage) {
         QPointF offsetPt(xoffset(), yoffset());
         QRectF firstPageRect(firstPage->pos().x() * mag(),
