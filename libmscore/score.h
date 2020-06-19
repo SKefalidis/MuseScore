@@ -671,7 +671,7 @@ public:
     bool appendScore(Score*, bool addPageBreak = false, bool addSectionBreak = true);
 
     void write(XmlWriter&, bool onlySelection);
-    void writeMovement(XmlWriter&, bool onlySelection);
+    void writeMovement(XmlWriter&, bool onlySelection, bool isTopScore);
 
     QList<Staff*>& staves() { return _staves; }
     const QList<Staff*>& staves() const { return _staves; }
@@ -1270,7 +1270,7 @@ public:
     void localTimeDelete();
     void globalTimeDelete();
 
-    bool isTopScore() const;
+//    bool isTopScore() const;
 
     Text* headerText(int index) const { return movements()->headersText()[index]; }
     Text* footerText(int index) const { return movements()->footersText()[index]; }
