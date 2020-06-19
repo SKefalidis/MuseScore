@@ -83,7 +83,7 @@ static void writeMeasure(XmlWriter& xml, MeasureBase* m, int staffIdx, bool writ
 //   writeMovement
 //---------------------------------------------------------
 
-void Score::writeMovement(XmlWriter& xml, bool selectionOnly)
+void Score::writeMovement(XmlWriter& xml, bool selectionOnly, bool isTopScore)
 {
     // if we have multi measure rests and some parts are hidden,
     // then some layout information is missing:
@@ -156,7 +156,7 @@ void Score::writeMovement(XmlWriter& xml, bool selectionOnly)
     }
     xml.tag("currentLayer", _currentLayer);
 
-    if (isTopScore() && !MScore::testMode) {
+    if (isTopScore && !MScore::testMode) {
         _synthesizerState.write(xml);
     }
 
@@ -166,7 +166,7 @@ void Score::writeMovement(XmlWriter& xml, bool selectionOnly)
     xml.tag("Division", MScore::division);
     xml.setCurTrack(-1);
 
-    if (isTopScore()) {                   // only top score
+    if (isTopScore) {                   // only top score
         style().save(xml, true);           // save only differences to buildin style
     }
     xml.tag("showInvisible",   _showInvisible);
@@ -278,11 +278,13 @@ void Score::write(XmlWriter& xml, bool selectionOnly)
     if (isMaster()) {
 //        MasterScore* score = toMasterScore(this); crashes because MasterScore's type is still SCORE
         MasterScore* score = static_cast<MasterScore*>(this);
+        bool isTopScore = true;
         for (auto x : *score->movements()) {
-            x->writeMovement(xml, selectionOnly);
+            x->writeMovement(xml, selectionOnly, isTopScore);
+            isTopScore = false;
         }
     } else {
-        writeMovement(xml, selectionOnly);
+        writeMovement(xml, selectionOnly, true);
     }
 }
 
