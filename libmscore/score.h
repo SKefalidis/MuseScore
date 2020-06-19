@@ -1485,17 +1485,17 @@ public:
     virtual const MStyle& style() const override { return movements()->style(); }
 };
 
-static inline MasterScore* toMasterScore(ScoreElement* e)
-{
-    Q_ASSERT(!e || e->isMasterScore());
-    return static_cast<MasterScore*>(e);
-}
+//static inline MasterScore* toMasterScore(ScoreElement* e)
+//{
+//    Q_ASSERT(!e || e->isMasterScore());
+//    return static_cast<MasterScore*>(e);
+//}
 
-static inline const MasterScore* toMasterScore(const ScoreElement* e)
-{
-    Q_ASSERT(!e || e->isMasterScore());
-    return static_cast<const MasterScore*>(e);
-}
+//static inline const MasterScore* toMasterScore(const ScoreElement* e)
+//{
+//    Q_ASSERT(!e || e->isMasterScore());
+//    return static_cast<const MasterScore*>(e);
+//}
 
 //---------------------------------------------------------
 //   ScoreLoad

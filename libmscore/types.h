@@ -38,7 +38,7 @@ enum class ElementType {
     PART,
     STAFF,
     SCORE,
-    MASTERSCORE,
+//    MASTERSCORE,
     SYMBOL,
     TEXT,
     MEASURE_NUMBER,
