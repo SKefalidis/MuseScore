@@ -5165,10 +5165,10 @@ void MasterScore::rebuildAndUpdateExpressive(Synthesizer* synth)
 //      TODO: use me!
 //---------------------------------------------------------
 
-bool Score::isTopScore() const
-{
-    return (isMaster() && static_cast<MasterScore const *>(this)->movements()->size() > 1);
-}
+//bool Score::isTopScore() const
+//{
+//    return (isMaster() && static_cast<MasterScore const *>(this)->movements()->size() > 1);
+//}
 
 //---------------------------------------------------------
 //   Movements
