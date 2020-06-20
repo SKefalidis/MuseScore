@@ -29,8 +29,8 @@ class Spanner;
 //---------------------------------------------------------
 
 struct LayoutContext {
-    MasterScore* dominantScore    { nullptr };
-    Score* score                  { nullptr };
+    Score* dominantScore     { nullptr };
+    Score* score             { nullptr };
     int movementIndex        { -1 };
     bool startWithLongNames  { true };
     bool firstSystem         { true };
