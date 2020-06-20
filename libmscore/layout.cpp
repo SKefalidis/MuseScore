@@ -4414,7 +4414,7 @@ void LayoutContext::collectPage()
     //qreal y         = prevSystem ? prevSystem->y() + prevSystem->height() : page->tm();
     qreal ey        = page->height() - page->bm();
 
-    int movementsSize = dominantScore->movements()->size();
+    int movementsSize = dominantScore->isMaster() ? static_cast<MasterScore*>(dominantScore)->movements()->size() : -1;
     System* nextSystem = 0;
     systemIdx = continuing ? systemIdx : -1;   // if the page changed before the movement ended, we need to continue that movement on the next page so we need the previous systemIdx
     continuing = false;
@@ -4499,7 +4499,7 @@ void LayoutContext::collectPage()
                 if (!nextSystem) {         // if we have used all the systems of this movement go to the next movement
                     if (score->isMaster()) {
                         MasterScore* ms = movementIndex
-                                          < movementsSize ? dominantScore->movements()->at(movementIndex++) : nullptr;
+                                          < movementsSize ? static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex++) : nullptr;
                         if (ms) {
                             score     = ms;
                             systemIdx = 0;
@@ -4516,7 +4516,7 @@ void LayoutContext::collectPage()
                     score->systems().append(nextSystem);
                 } else if (score->isMaster()) {
                     MasterScore* ms = movementIndex
-                                      < movementsSize ? dominantScore->movements()->at(movementIndex++) : nullptr;
+                                      < movementsSize ? static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex++) : nullptr;
                     if (ms) {
                         score     = ms;
                         systemIdx = 0;
@@ -4531,7 +4531,7 @@ void LayoutContext::collectPage()
             }
             if (!nextSystem && score->isMaster()) {
                 MasterScore* ms = movementIndex
-                                  < movementsSize ? dominantScore->movements()->at(movementIndex++) : nullptr;
+                                  < movementsSize ? static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex++) : nullptr;
                 if (ms) {
                     score = ms;
                     QList<System*>& systems = ms->systems();
@@ -4866,7 +4866,7 @@ void Score::doLayoutRange(const Fraction& st, const Fraction& et)
 void LayoutContext::layout()
 {
     MeasureBase* lmb;
-    dominantScore = score->masterScore();   // set the first score (masterscore = movement) as the dominant
+    dominantScore = score;   // set the first score (masterscore = movement) as the dominant
     movementIndex = 1;   // the next movement is the second movement
     do{
         getNextPage();
@@ -4895,8 +4895,8 @@ void LayoutContext::layout()
         qDeleteAll(systemList);
         systemList.clear();
         // ...and the remaining pages too
-        while (score->npages() > curPage) {
-            delete score->pages().takeLast();
+        while (dominantScore->npages() > curPage) {
+            delete dominantScore->pages().takeLast();
         }
     } else {
         Page* p = curSystem->page();
