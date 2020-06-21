@@ -151,7 +151,7 @@ MasterScore* MTest::readCreatedScore(const QString& name)
 Album* MTest::readAlbum(const QString& name)
 {
     Album* album = new Album();
-    album->loadFromFile(name);
+    album->loadFromFile(root + "/" + name);
     return album;
 }
 
@@ -162,7 +162,6 @@ Album* MTest::readAlbum(const QString& name)
 bool MTest::saveScore(Score* score, const QString& name) const
 {
     QFileInfo fi(name);
-//      MScore::testMode = true;
     return score->Score::saveFile(fi);
 }
 
@@ -172,7 +171,9 @@ bool MTest::saveScore(Score* score, const QString& name) const
 
 bool MTest::saveAlbum(Album* album, const QString& name) const
 {
-    return album->saveToFile(name);
+    QFileInfo fi(name);
+    qDebug() << fi.absolutePath();
+    return album->saveToFile(fi.absolutePath() + "/" + name, false); // absolutePath disabled for testing
 }
 
 //---------------------------------------------------------
@@ -228,6 +229,8 @@ bool MTest::saveCompareScore(Score* score, const QString& saveName, const QStrin
 
 bool MTest::saveCompareAlbum(Album* album, const QString& saveName, const QString& compareWith) const
 {
+    std::cout << saveName.toStdString() << std::endl;
+    std::cout << compareWith.toStdString() << std::endl;
     if (!saveAlbum(album, saveName)) {
         return false;
     }

@@ -103,11 +103,13 @@ void AlbumItem::readAlbumItem(XmlReader &reader)
 //---------------------------------------------------------
 
 
-void AlbumItem::writeAlbumItem(XmlWriter &writer)
+void AlbumItem::writeAlbumItem(XmlWriter &writer, bool absolutePathEnabled)
 {
     writer.stag("Score");
     writer.tag("alias", "");
-    writer.tag("path", _fileInfo.absoluteFilePath());
+    if (absolutePathEnabled) {
+        writer.tag("path", _fileInfo.absoluteFilePath());
+    }
     QDir dir(album->_fileInfo.dir());
     QString relativePath = dir.relativeFilePath(_fileInfo.absoluteFilePath());
     writer.tag("relativePath", relativePath);
@@ -240,7 +242,7 @@ void Album::readAlbum(XmlReader &reader)
 //   saveToFile
 //---------------------------------------------------------
 
-bool Album::saveToFile(const QString &path)
+bool Album::saveToFile(const QString &path, bool absolutePathEnabled)
 {
     std::cout << "Saving album to file..." << std::endl;
     QFile f(path);
@@ -253,7 +255,7 @@ bool Album::saveToFile(const QString &path)
     XmlWriter writer(nullptr, &f);
     writer.header();
     writer.stag(QStringLiteral("museScore version=\"" MSC_VERSION"\""));
-    writeAlbum(writer);
+    writeAlbum(writer, absolutePathEnabled);
     writer.etag();
     f.close();
     return true;
@@ -263,12 +265,12 @@ bool Album::saveToFile(const QString &path)
 //   writeAlbum
 //---------------------------------------------------------
 
-void Album::writeAlbum(XmlWriter &writer)
+void Album::writeAlbum(XmlWriter &writer, bool absolutePathEnabled)
 {
     writer.stag("Album");
     writer.tag("name", _albumTitle);
     for (auto& aItem : _albumItems) {
-        aItem->writeAlbumItem(writer);
+        aItem->writeAlbumItem(writer, absolutePathEnabled);
     }
     writer.etag();
 }
