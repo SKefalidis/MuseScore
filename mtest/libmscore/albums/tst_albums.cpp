@@ -62,8 +62,9 @@ void TestAlbums::saveAlbumTest(const char* file)
     MScore::debugMode = true;
     Album* album = readAlbum(DIR + QString(file) + ".msca");
     QVERIFY(album);
-    QVERIFY(saveAlbum(album, QString(file) + "_auto" + ".msca"));
-    QVERIFY(saveCompareAlbum(album, QString(file) + "_auto" + ".msca", DIR + QString(file) + ".msca"));
+    QFileInfo fi(QString(file) + "_auto" + ".msca");
+    QVERIFY(saveAlbum(album, fi.absoluteFilePath()));   // wrong path, but not deleted for debugging
+    QVERIFY(saveCompareAlbum(album, DIR + QString(file) + "_auto" + ".msca", DIR + QString(file) + ".msca"));
     delete album;
 }
 
