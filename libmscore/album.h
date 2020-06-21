@@ -43,7 +43,7 @@ struct AlbumItem {
     void setEnabled(bool b);
     void setScore(MasterScore* score);
     void readAlbumItem(XmlReader& reader);
-    void writeAlbumItem(XmlWriter& writer);
+    void writeAlbumItem(XmlWriter& writer, bool absolutePathEnabled);
 };
 
 //---------------------------------------------------------
@@ -68,8 +68,8 @@ public:
 
     bool loadFromFile(const QString& path);
     void readAlbum(XmlReader& reader);
-    bool saveToFile(const QString &path);
-    void writeAlbum(XmlWriter& writer);
+    bool saveToFile(const QString &path, bool absolutePathEnabled = true);
+    void writeAlbum(XmlWriter& writer, bool absolutePathEnabled);
 
     static Album* activeAlbum;
 };

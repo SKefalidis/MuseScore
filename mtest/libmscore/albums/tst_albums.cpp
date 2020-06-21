@@ -23,7 +23,7 @@
 #include "libmscore/album.h"
 #include "mscore/preferences.h"
 
-#define DIR QString("/home/boop/Documents/GSoC_2020/mscore/MuseScore/mtest/libmscore/albums/")
+#define DIR QString("libmscore/albums/")
 
 using namespace Ms;
 
@@ -60,10 +60,10 @@ void TestAlbums::initTestCase()
 void TestAlbums::saveAlbumTest(const char* file)
 {
     MScore::debugMode = true;
-    Album* album = readAlbum(DIR + file + ".msca");
+    Album* album = readAlbum(DIR + QString(file) + ".msca");
     QVERIFY(album);
-    QVERIFY(saveAlbum(album, DIR + QString(file) + "_auto" + ".msca"));
-    QVERIFY(saveCompareAlbum(album, DIR + QString(file) + "_auto" + ".msca", QString("libmscore/albums/") + file + ".msca"));
+    QVERIFY(saveAlbum(album, QString(file) + "_auto" + ".msca"));
+    QVERIFY(saveCompareAlbum(album, QString(file) + "_auto" + ".msca", DIR + QString(file) + ".msca"));
     delete album;
 }
 
