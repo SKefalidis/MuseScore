@@ -171,9 +171,7 @@ bool MTest::saveScore(Score* score, const QString& name) const
 
 bool MTest::saveAlbum(Album* album, const QString& name) const
 {
-    QFileInfo fi(name);
-    qDebug() << fi.absolutePath();
-    return album->saveToFile(fi.absolutePath() + "/" + name, false); // absolutePath disabled for testing
+    return album->saveToFile(name, false); // absolutePath disabled for testing
 }
 
 //---------------------------------------------------------
@@ -229,12 +227,12 @@ bool MTest::saveCompareScore(Score* score, const QString& saveName, const QStrin
 
 bool MTest::saveCompareAlbum(Album* album, const QString& saveName, const QString& compareWith) const
 {
-    std::cout << saveName.toStdString() << std::endl;
-    std::cout << compareWith.toStdString() << std::endl;
-    if (!saveAlbum(album, saveName)) {
+    if (!saveAlbum(album, root + "/" + saveName)) {
         return false;
     }
-    return compareFiles(saveName, compareWith);
+    bool b = compareFilesFromPaths(root + "/" + saveName, root + "/" + compareWith);
+    QFile::remove(root + "/" + saveName); // remove this line to not delete the generated file
+    return b;
 }
 
 //---------------------------------------------------------
