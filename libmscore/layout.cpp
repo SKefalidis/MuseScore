@@ -1789,7 +1789,7 @@ void Score::respace(std::vector<ChordRest*>* elements)
 }
 
 //---------------------------------------------------------
-//   getNextPage
+//   getNextPage.
 //---------------------------------------------------------
 
 void LayoutContext::getNextPage()
@@ -4401,10 +4401,10 @@ void Score::layoutSystemElements(System* system, LayoutContext& lc)
 
 //---------------------------------------------------------
 //   collectPage
-//    append systems to the page until you find a page break
-//    or run out of Movements (MasterScores)
-//
-//    called after LayoutContext::getNextPage()
+///    append systems to the page until you find a page break
+///    or run out of Movements (MasterScores)
+///
+///    called after LayoutContext::getNextPage()
 //---------------------------------------------------------
 
 void LayoutContext::collectPage()
@@ -4704,7 +4704,6 @@ void Score::doLayoutRange(const Fraction& st, const Fraction& et)
 {
     CmdStateLocker cmdStateLocker(this);
     LayoutContext lc(this);
-    lc.dominantScore = masterScore();
 
     Fraction stick(st);
     Fraction etick(et);
@@ -4866,8 +4865,8 @@ void Score::doLayoutRange(const Fraction& st, const Fraction& et)
 void LayoutContext::layout()
 {
     MeasureBase* lmb;
-    dominantScore = score;   // set the first score (masterscore = movement) as the dominant
-    movementIndex = 1;   // the next movement is the second movement
+    dominantScore = score;  // set the first score (masterscore = movement) as the dominant
+    movementIndex = 1;      // the next movement is the second movement
     do{
         getNextPage();
         collectPage();

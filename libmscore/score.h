@@ -669,7 +669,7 @@ public:
     bool appendScore(Score*, bool addPageBreak = false, bool addSectionBreak = true);
 
     void write(XmlWriter&, bool onlySelection);
-    void writeMovement(XmlWriter&, bool onlySelection, bool isTopScore);
+    void writeMovement(XmlWriter&, bool onlySelection, bool isTopMovement);
 
     QList<Staff*>& staves() { return _staves; }
     const QList<Staff*>& staves() const { return _staves; }
@@ -1322,7 +1322,7 @@ class MasterScore : public Score
     Score* _playbackScore = nullptr;
     Revisions* _revisions;
     Movements* _movements   { 0 };
-    bool _emptyMovement     { false };  // used in album-mode for setting the selected score in scoreview
+    bool m_emptyMovement     { false };  // used in album-mode for setting the selected score in scoreview
                                         // to something other than the empty one
 
     bool _readOnly          { false };
@@ -1390,8 +1390,8 @@ public:
     void addMovement(MasterScore* score);
     void removeMovement(MasterScore* score);
 
-    bool emptyMovement() const      { return _emptyMovement; };
-    void setEmptyMovement(bool b)   { _emptyMovement = b; };
+    bool emptyMovement() const      { return m_emptyMovement; };
+    void setEmptyMovement(bool b)   { m_emptyMovement = b; };
 
     virtual void setUpdateAll() override;
 

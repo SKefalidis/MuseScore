@@ -42,7 +42,7 @@ AlbumItem::AlbumItem(Album* album, MasterScore *score, bool enabled) : AlbumItem
     std::cout << "New album item..." << std::endl;
     this->score = score;
     this->enabled = enabled;
-    _fileInfo.setFile(score->importedFilePath());
+    fileInfo.setFile(score->importedFilePath());
     score->setPartOfActiveAlbum(true);
     std::cout << "album item created..." << std::endl;
 }
@@ -81,12 +81,12 @@ void AlbumItem::readAlbumItem(XmlReader &reader)
         if (tag == "name") {
             reader.readElementText();
         } else if (tag == "path") {
-            _fileInfo.setFile(reader.readElementText());
+            fileInfo.setFile(reader.readElementText());
         } else if (tag == "relativePath") {
-            if (!_fileInfo.exists()) {
+            if (!fileInfo.exists()) {
                 QDir dir(album->_fileInfo.dir());
                 QString relativePath = reader.readElementText();
-                _fileInfo.setFile(dir, relativePath);
+                fileInfo.setFile(dir, relativePath);
             } else {
                 reader.readElementText();
             }
@@ -108,10 +108,10 @@ void AlbumItem::writeAlbumItem(XmlWriter &writer, bool absolutePathEnabled)
     writer.stag("Score");
     writer.tag("alias", "");
     if (absolutePathEnabled) {
-        writer.tag("path", _fileInfo.absoluteFilePath());
+        writer.tag("path", fileInfo.absoluteFilePath());
     }
     QDir dir(album->_fileInfo.dir());
-    QString relativePath = dir.relativeFilePath(_fileInfo.absoluteFilePath());
+    QString relativePath = dir.relativeFilePath(fileInfo.absoluteFilePath());
     writer.tag("relativePath", relativePath);
     writer.tag("enabled", enabled);
     writer.etag();
@@ -152,15 +152,13 @@ void Album::addScore(MasterScore *score, bool enabled)
 //   removeScore
 //---------------------------------------------------------
 
-MasterScore* Album::removeScore(MasterScore *score)
+void Album::removeScore(MasterScore *score)
 {
-    return nullptr;
 }
 
-MasterScore* Album::removeScore(int index)
+void Album::removeScore(int index)
 {
     _albumItems.erase(_albumItems.begin() + index);
-    return nullptr;
 }
 
 //---------------------------------------------------------

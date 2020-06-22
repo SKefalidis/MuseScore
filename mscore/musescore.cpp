@@ -1409,7 +1409,7 @@ MuseScore::MuseScore()
     openRecent = menuFile->addMenu("");
 
     connect(openRecent, SIGNAL(aboutToShow()), SLOT(openRecentMenu()));
-    connect(openRecent, SIGNAL(triggered(QAction*)), SLOT(selectScore(QAction*)));
+    connect(openRecent, SIGNAL(triggered(QAction*)), SLOT(selectFile(QAction*)));
 
     for (auto i : {
             "",
@@ -2306,7 +2306,7 @@ void MuseScore::updateMenus()
     updateMenu(menuDebug,       "menu-debug",        "Debug");
 #endif
     connect(openRecent,     SIGNAL(aboutToShow()),       SLOT(openRecentMenu()));
-    connect(openRecent,     SIGNAL(triggered(QAction*)), SLOT(selectScore(QAction*)));
+    connect(openRecent,     SIGNAL(triggered(QAction*)), SLOT(selectFile(QAction*)));
     connect(menuWorkspaces, SIGNAL(aboutToShow()),       SLOT(showWorkspaceMenu()));
     setMenuTitles();
 #ifdef SCRIPT_INTERFACE
@@ -2440,11 +2440,11 @@ void MuseScore::aboutMusicXML()
 }
 
 //---------------------------------------------------------
-//   selectScore
+//   selectFile
 //    "open recent"
 //---------------------------------------------------------
 
-void MuseScore::selectScore(QAction* action)
+void MuseScore::selectFile(QAction* action)
 {
     QVariant actionData = action->data();
 
