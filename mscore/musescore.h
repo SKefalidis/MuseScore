@@ -498,7 +498,7 @@ private slots:
     void askForHelp();
     void leaveFeedback(QString medium);
     void openRecentMenu();
-    void selectScore(QAction*);
+    void selectFile(QAction*);
     void startPreferenceDialog();
     void preferencesChanged(bool fromWorkspace = false);
     void seqStarted();

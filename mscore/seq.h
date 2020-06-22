@@ -112,7 +112,7 @@ class Seq : public QObject, public Sequencer
 
     mutable QMutex mutex;
 
-    MasterScore* dominantScore;
+    MasterScore* topMovement;
     int nextMovementIndex;
     MasterScore* cs;
     ScoreView* cv;
@@ -271,8 +271,8 @@ public:
     void setController(int, int, int);
     virtual void sendEvent(const NPlayEvent&);
     void setScoreView(ScoreView*);
-    void setNextScore();
-    void setNextScore(int i);
+    void setNextMovement();
+    void setNextMovement(int i);
     void setNextMovementIndex(int i) { nextMovementIndex = i; }
     MasterScore* score() const { return cs; }
     ScoreView* viewer() const { return cv; }

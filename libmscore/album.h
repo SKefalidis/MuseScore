@@ -32,18 +32,19 @@ class XmlWriter;
 //---------------------------------------------------------
 
 struct AlbumItem {
-    Album* album;
-    MasterScore* score                  { nullptr };
-    bool enabled                        { true };
-    QFileInfo _fileInfo                 { "-" };
-
     AlbumItem(Album* album);
     AlbumItem(Album* album, MasterScore* score, bool enabled = true);
     ~AlbumItem();
+
     void setEnabled(bool b);
     void setScore(MasterScore* score);
     void readAlbumItem(XmlReader& reader);
     void writeAlbumItem(XmlWriter& writer, bool absolutePathEnabled);
+
+    Album* album            { nullptr };
+    MasterScore* score      { nullptr };
+    bool enabled            { true };
+    QFileInfo fileInfo      { "-" };
 };
 
 //---------------------------------------------------------
@@ -53,15 +54,10 @@ struct AlbumItem {
 class Album {
 
 public:
-    int playbackDelay { 1000 };
-    std::vector<AlbumItem*> _albumItems {};
-    QString _albumTitle                 { "" };
-    QFileInfo _fileInfo                 {};
-
     Album();
     void addScore(MasterScore* score, bool enabled = true);
-    MasterScore* removeScore(MasterScore* score);
-    MasterScore* removeScore(int index);
+    void removeScore(MasterScore* score);
+    void removeScore(int index);
     void swap(int indexA, int indexB);
     static bool scoreInActiveAlbum(MasterScore* score);
     MasterScore* getDominant();
@@ -72,6 +68,11 @@ public:
     void writeAlbum(XmlWriter& writer, bool absolutePathEnabled);
 
     static Album* activeAlbum;
+
+    int playbackDelay                   { 1000 };
+    std::vector<AlbumItem*> _albumItems {};
+    QString _albumTitle                 { "" };
+    QFileInfo _fileInfo                 {};
 };
 
 }     // namespace Ms
