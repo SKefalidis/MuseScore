@@ -150,7 +150,7 @@ Seq::Seq()
     running         = false;
     playlistChanged = false;
     cs              = 0;
-    dominantScore   = nullptr;
+    topMovement   = nullptr;
     nextMovementIndex   = -1;
     cv              = 0;
     tackRemain        = 0;
@@ -223,8 +223,8 @@ void Seq::setScoreView(ScoreView* v)
         disconnect(cs, SIGNAL(playlistChanged()), this, SLOT(setPlaylistChanged()));
     }
     cs = cv ? cv->score()->masterScore() : 0;
-    dominantScore = cs;
-    nextMovementIndex = dominantScore ? 1 : 0;
+    topMovement = cs;
+    nextMovementIndex = topMovement ? 1 : 0;
     midi = MidiRenderer(cs);
     midi.setMinChunkSize(10);
 
@@ -245,13 +245,13 @@ void Seq::setScoreView(ScoreView* v)
 ///     FIXME: probably crahses if the score is closed
 //---------------------------------------------------------
 
-void Seq::setNextScore()
+void Seq::setNextMovement()
 {
-    if (nextMovementIndex < dominantScore->movements()->size() && nextMovementIndex >= 0) {
-        cs = dominantScore->movements()->at(nextMovementIndex);
+    if (nextMovementIndex < topMovement->movements()->size() && nextMovementIndex >= 0) {
+        cs = topMovement->movements()->at(nextMovementIndex);
         nextMovementIndex++;
     } else {
-        cs = dominantScore;
+        cs = topMovement;
         nextMovementIndex = 1;
     }
 
@@ -269,13 +269,13 @@ void Seq::setNextScore()
     }
 }
 
-void Seq::setNextScore(int i)
+void Seq::setNextMovement(int i)
 {
-    if (i < dominantScore->movements()->size() && i >= 0) {
-        cs = dominantScore->movements()->at(i);
+    if (i < topMovement->movements()->size() && i >= 0) {
+        cs = topMovement->movements()->at(i);
         nextMovementIndex = i + 1;
     } else {
-        cs = dominantScore;
+        cs = topMovement;
         nextMovementIndex = i + 1;
     }
 

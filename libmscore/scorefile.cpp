@@ -83,7 +83,7 @@ static void writeMeasure(XmlWriter& xml, MeasureBase* m, int staffIdx, bool writ
 //   writeMovement
 //---------------------------------------------------------
 
-void Score::writeMovement(XmlWriter& xml, bool selectionOnly, bool isTopScore)
+void Score::writeMovement(XmlWriter& xml, bool selectionOnly, bool isTopMovement)
 {
     // if we have multi measure rests and some parts are hidden,
     // then some layout information is missing:
@@ -156,7 +156,7 @@ void Score::writeMovement(XmlWriter& xml, bool selectionOnly, bool isTopScore)
     }
     xml.tag("currentLayer", _currentLayer);
 
-    if (isTopScore && !MScore::testMode) {
+    if (isTopMovement && !MScore::testMode) {
         _synthesizerState.write(xml);
     }
 
@@ -166,7 +166,7 @@ void Score::writeMovement(XmlWriter& xml, bool selectionOnly, bool isTopScore)
     xml.tag("Division", MScore::division);
     xml.setCurTrack(-1);
 
-    if (isTopScore) {                   // only top score
+    if (isTopMovement) {                   // only top score
         style().save(xml, true);           // save only differences to buildin style
     }
     xml.tag("showInvisible",   _showInvisible);

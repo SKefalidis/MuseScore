@@ -17,7 +17,6 @@
 
 #include <assert.h>
 
-
 #include "album.h"
 #include "types.h"
 #include "musescoreCore.h"
