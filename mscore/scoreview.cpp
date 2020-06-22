@@ -1121,9 +1121,11 @@ void ScoreView::paintEvent(QPaintEvent* ev)
     vp.setRenderHint(QPainter::TextAntialiasing, true);
 
     if (_score != m_drawingScore) { // only run for multi-movement scores
-        for (auto x : *m_drawingScore->masterScore()->movements()) {
-            x->doLayout();
-        }
+//        for (auto x : *m_drawingScore->masterScore()->movements()) { // ΤODO:SK doLayout maybe only on the selected score? the others shouldn't have changed
+//            std::cout << "called from paint event " << x->title().toStdString() << std::endl;
+//            x->doLayout();
+//        }
+        _score->doLayout();
         m_drawingScore->doLayout();
         b = true;
     }
