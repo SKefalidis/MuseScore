@@ -59,7 +59,7 @@ Page* MuseScoreView::point2page(const QPointF& p)
     if (m_drawingScore->layoutMode() == LayoutMode::LINE) {
         return m_drawingScore->pages().isEmpty() ? 0 : m_drawingScore->pages().front();
     }
-    foreach (Page* page, m_drawingScore->pages()) { // TODO:SK change to c++ foreach
+    for (Page* page : m_drawingScore->pages()) {
         if (page->bbox().translated(page->pos()).contains(p)) {
             return page;
         }
