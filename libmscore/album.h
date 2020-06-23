@@ -32,19 +32,23 @@ class XmlWriter;
 //---------------------------------------------------------
 
 struct AlbumItem {
+public:
     AlbumItem(Album* album);
     AlbumItem(Album* album, MasterScore* score, bool enabled = true);
     ~AlbumItem();
 
     void setEnabled(bool b);
+    bool enabled() const;
     void setScore(MasterScore* score);
     void readAlbumItem(XmlReader& reader);
     void writeAlbumItem(XmlWriter& writer, bool absolutePathEnabled);
 
     Album* album            { nullptr };
     MasterScore* score      { nullptr };
-    bool enabled            { true };
     QFileInfo fileInfo      { "-" };
+
+private:
+    bool m_enabled            { true };
 };
 
 //---------------------------------------------------------

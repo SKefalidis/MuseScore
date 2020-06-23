@@ -48,6 +48,7 @@ AlbumManager::AlbumManager(QWidget* parent)
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setAllowedAreas(Qt::DockWidgetAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea));   // copy paste from play panel
     mscore->addDockWidget(Qt::RightDockWidgetArea, this);
+    setFloating(false);
 
     // buttons
     up->setIcon(*icons[int(Icons::arrowUp_ICON)]);
@@ -81,13 +82,14 @@ AlbumManager::AlbumManager(QWidget* parent)
 
     // the rest
     updateDurations();
-    MuseScore::restoreGeometry(this);
+    mscore->restoreGeometry(this);
 }
 
 AlbumManager::~AlbumManager()
 {
     if (isVisible()) {
-        MuseScore::saveGeometry(this);
+        mscore->saveGeometry(this);
+        mscore->saveState();
     }
 }
 
@@ -127,10 +129,23 @@ bool AlbumManager::eventFilter(QObject* obj, QEvent* ev)
 //   hideEvent
 //---------------------------------------------------------
 
+void AlbumManager::showEvent(QShowEvent* e)
+{
+    QDockWidget::showEvent(e);
+    activateWindow();
+    setFocus();
+    getAction("toggle-album")->setChecked(true);
+}
+
+//---------------------------------------------------------
+//   hideEvent
+//---------------------------------------------------------
+
 void AlbumManager::hideEvent(QHideEvent* event)
 {
     MuseScore::saveGeometry(this);
     QDockWidget::hideEvent(event);
+    getAction("toggle-album")->setChecked(false);
 }
 
 //---------------------------------------------------------
@@ -217,8 +232,8 @@ void AlbumManager::playAlbum()
     }
 
     if (!m_continuing) {
-        if (m_playbackIndex < m_items.size()) {
-            if (m_items.at(m_playbackIndex)->albumItem->enabled) {
+        if (m_playbackIndex < int(m_items.size())) {
+            if (m_items.at(m_playbackIndex)->albumItem->enabled()) {
                 //
                 // setup score to play
                 //
@@ -307,14 +322,14 @@ void AlbumManager::updateScoreOrder(QModelIndex sourceParent, int sourceStart, i
     Q_UNUSED(destinationParent);
     Q_UNUSED(destinationRow);
 
-    for (int i = 0; i < m_items.size(); i++) {
-        for (int j = 0; j < m_items.size(); j++) {
+    for (int i = 0; i < int(m_items.size()); i++) {
+        for (int j = 0; j < int(m_items.size()); j++) {
             if (m_items.at(j)->albumItem->score->title() != scoreList->item(j, 0)->text()) {
                 int h = scoreList->row(scoreList->findItems(m_items.at(j)->albumItem->score->title(),
                                                             Qt::MatchExactly).first());
                 std::swap(m_items.at(j), m_items.at(h));
                 break;
-            } else if (j == m_items.size() - 1) {
+            } else if (j == int(m_items.size()) - 1) {
                 goto end;
             }
         }
@@ -441,12 +456,6 @@ void AlbumManager::addAlbumItem(AlbumItem *albumItem)
     scoreList->blockSignals(false);
     updateDurations();
 
-    // add section break to the end of the movement (TODO: don't add if a break exists already)
-    LayoutBreak* lb = new LayoutBreak(albumManagerItem->albumItem->score);
-    lb->setLayoutBreakType(LayoutBreak::Type::SECTION);
-    albumManagerItem->albumItem->score->lastMeasure()->add(lb);
-    albumManagerItem->albumItem->score->update();
-
     // update the combined score to reflect the changes
     if (m_tempScore) {
         m_tempScore->addMovement(albumItem->score);
@@ -476,7 +485,7 @@ void AlbumManager::updateDurations()
             temporarilyOpen = true;
         }
 
-        if (item->albumItem->enabled) {
+        if (item->albumItem->enabled()) {
             seconds += item->albumItem->score->duration();
         }
 
@@ -546,7 +555,7 @@ void AlbumManager::downClicked(bool checked)
 ///     In Score mode:
 ///     This either opens the clicked Score or changes to the
 ///     corresponding tab if it is already open. \n
-///     TODO In Album mode:
+///     TODO_SK: In Album mode:
 ///     This centers the view to the part of the tempScore
 ///     where the clicked Score begins.
 //---------------------------------------------------------
@@ -595,8 +604,8 @@ void AlbumManager::swap(int indexA, int indexB)
     std::swap(m_items.at(indexA)->listDurationItem, m_items.at(indexB)->listDurationItem);
 
     // update the enabled indicators
-    m_items.at(indexA)->setEnabled(m_items.at(indexA)->albumItem->enabled);
-    m_items.at(indexB)->setEnabled(m_items.at(indexB)->albumItem->enabled);
+    m_items.at(indexA)->setEnabled(m_items.at(indexA)->albumItem->enabled());
+    m_items.at(indexB)->setEnabled(m_items.at(indexB)->albumItem->enabled());
 
     // update the duration labels
     updateDurations();
@@ -643,7 +652,7 @@ void AlbumManager::setAlbum(Album* a)
 {
     std::cout << "setting album" << std::endl;
     scoreList->setRowCount(0);
-    m_items.clear(); // TODO: also free all
+    m_items.clear(); // TODO_SK: also free all
     if (!a)
         return;
 
@@ -715,16 +724,22 @@ void AlbumManager::itemChanged(QTableWidgetItem* item)
 //   showAlbumManager
 //---------------------------------------------------------
 
-void MuseScore::showAlbumManager()
+void MuseScore::showAlbumManager(bool visible)
 {
+    QAction* toggleAlbumManagerAction = getAction("toggle-album");
+
     if (albumManager == 0) {
         albumManager = new AlbumManager(this);
     }
 
-//      if (currentScoreView() && currentScoreView()->score() && currentScoreView()->score()->masterScore()) // add the current score to the album
-//            albumManager->addScore(currentScoreView()->score()->masterScore());
-    albumManager->show();
-    albumManager->albumTitleEdit->setFocus();
+    reDisplayDockWidget(albumManager, visible);
+
+    if (visible) {
+        albumManager->show();
+        albumManager->albumTitleEdit->setFocus();
+    }
+
+    toggleAlbumManagerAction->setChecked(visible);
 }
 
 //---------------------------------------------------------
@@ -744,7 +759,7 @@ AlbumManagerItem::AlbumManagerItem(AlbumItem* item, QTableWidgetItem* listItem, 
     albumItem->score->setPartOfActiveAlbum(true);
     this->listItem = listItem;
     this->listDurationItem = listDurationItem;
-    setEnabled(albumItem->enabled);
+    setEnabled(albumItem->enabled());
 }
 
 AlbumManagerItem::~AlbumManagerItem()
@@ -758,7 +773,7 @@ AlbumManagerItem::~AlbumManagerItem()
 
 void AlbumManagerItem::setEnabled(bool b)
 {
-    albumItem->enabled = b;
+    albumItem->setEnabled(b);
     if (b) {
         if (listItem) {
             listItem->setTextColor(Qt::black);
