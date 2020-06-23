@@ -1313,25 +1313,26 @@ static inline const Score* toScore(const ScoreElement* e)
 class MasterScore : public Score
 {
     Q_OBJECT
-    TimeSigMap * _sigmap;
-    TempoMap* _tempomap;
-    RepeatList* _repeatList;
-    bool _expandRepeats     { MScore::playRepeats };
-    bool _playlistDirty     { true };
+    TimeSigMap * _sigmap        { nullptr };
+    TempoMap* _tempomap         { nullptr };
+    RepeatList* _repeatList     { nullptr };
+    bool _expandRepeats         { MScore::playRepeats };
+    bool _playlistDirty         { true };
     QList<Excerpt*> _excerpts;
     std::vector<PartChannelSettingsLink> _playbackSettingsLinks;
-    Score* _playbackScore = nullptr;
-    Revisions* _revisions;
-    Movements* _movements   { 0 };
-    bool m_emptyMovement     { false };  // used in album-mode for setting the selected score in scoreview
-                                        // to something other than the empty one
+    Score* _playbackScore       { nullptr };
+    Revisions* _revisions       { nullptr };
+    Movements* _movements       { nullptr };
+    bool m_emptyMovement        { false };  // used in album-mode for setting the selected score in scoreview
+                                            // to something other than the empty one
+    bool m_enabled              { true  };  // used to decide whether to draw/layout the movement in multi-movement scores
+                                            // ignored, for single-movement scores
+    bool _readOnly              { false };
 
-    bool _readOnly          { false };
+    CmdState _cmdState;                     // modified during cmd processing
 
-    CmdState _cmdState;       // modified during cmd processing
-
-    Omr* _omr               { 0 };
-    bool _showOmr           { false };
+    Omr* _omr                   { nullptr };
+    bool _showOmr               { false };
 
     std::shared_ptr<Avs::AvsOmr> _avsOmr { nullptr };
 
@@ -1391,8 +1392,11 @@ public:
     void addMovement(MasterScore* score);
     void removeMovement(MasterScore* score);
 
-    bool emptyMovement() const      { return m_emptyMovement; };
-    void setEmptyMovement(bool b)   { m_emptyMovement = b; };
+    bool emptyMovement() const      { return m_emptyMovement; }
+    void setEmptyMovement(bool b)   { m_emptyMovement = b; }
+
+    bool enabled() const            { return m_enabled; }
+    void setEnabled(bool b)         { m_enabled = b; }
 
     virtual void setUpdateAll() override;
 

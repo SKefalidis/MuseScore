@@ -91,6 +91,7 @@ private slots:
                           int destinationRow);
 
 private:
+    virtual void showEvent(QShowEvent*) override;
     virtual void hideEvent(QHideEvent*) override;
     void updateDurations();
 

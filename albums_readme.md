@@ -1,6 +1,4 @@
 Notes:
- - !FIX LINKER AND CI ERRORS!
- - fix mtest path
  - Change from album mode to score mode
  - Save in album mode?
  - page view? continuous view?

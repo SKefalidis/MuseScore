@@ -354,7 +354,7 @@ void MuseScore::doLoadFiles(const QStringList& filter, bool switchTab, bool sing
 
 void MuseScore::openAlbum(const QString& fn)
 {
-    showAlbumManager();
+    showAlbumManager(true);
     Album* newAlbum = new Album();
     newAlbum->loadFromFile(fn);
     albumManager->setAlbum(newAlbum);

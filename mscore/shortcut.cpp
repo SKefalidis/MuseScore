@@ -2916,9 +2916,9 @@ Shortcut Shortcut::_sc[] = {
     {
         MsWidget::MAIN_WINDOW,
         STATE_DISABLED | STATE_NORMAL,
-        "album",
-        QT_TRANSLATE_NOOP("action","Album…"),
-        QT_TRANSLATE_NOOP("action","Album"),
+        "toggle-album",
+        QT_TRANSLATE_NOOP("action","Album Manager"),
+        QT_TRANSLATE_NOOP("action","Toggle 'Album Manager'"),
         0,
         Icons::Invalid_ICON,
         Qt::ApplicationShortcut
