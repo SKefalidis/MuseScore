@@ -21,6 +21,7 @@
 #include "score.h"
 #include "xml.h"
 #include "musescoreCore.h"
+#include "measure.h"
 
 namespace Ms {
 
@@ -41,7 +42,7 @@ AlbumItem::AlbumItem(Album* album, MasterScore *score, bool enabled) : AlbumItem
 {
     std::cout << "New album item..." << std::endl;
     this->score = score;
-    this->enabled = enabled;
+    m_enabled = enabled;
     fileInfo.setFile(score->importedFilePath());
     score->setPartOfActiveAlbum(true);
     std::cout << "album item created..." << std::endl;
@@ -58,7 +59,13 @@ AlbumItem::~AlbumItem()
 
 void AlbumItem::setEnabled(bool b)
 {
-    enabled = b;
+    m_enabled = b;
+    score->setEnabled(b);
+}
+
+bool AlbumItem::enabled() const
+{
+    return m_enabled;
 }
 
 //---------------------------------------------------------
@@ -91,7 +98,7 @@ void AlbumItem::readAlbumItem(XmlReader &reader)
                 reader.readElementText();
             }
         } else if (tag == "enabled") {
-            enabled = reader.readBool();
+            m_enabled = reader.readBool();
         } else {
             reader.skipCurrentElement();
         }
@@ -113,7 +120,7 @@ void AlbumItem::writeAlbumItem(XmlWriter &writer, bool absolutePathEnabled)
     QDir dir(album->_fileInfo.dir());
     QString relativePath = dir.relativeFilePath(fileInfo.absoluteFilePath());
     writer.tag("relativePath", relativePath);
-    writer.tag("enabled", enabled);
+    writer.tag("enabled", m_enabled);
     writer.etag();
 }
 
@@ -146,6 +153,14 @@ void Album::addScore(MasterScore *score, bool enabled)
 
     AlbumItem* albumScore = new AlbumItem(this, score, enabled);
     _albumItems.push_back(albumScore);
+
+    // add section break to the end of the movement (if one does not already exist)
+    if (qFuzzyIsNull(score->lastMeasure()->pause())) {
+        LayoutBreak* lb = new LayoutBreak(score);
+        lb->setLayoutBreakType(LayoutBreak::Type::SECTION);
+        score->lastMeasure()->add(lb);
+        score->update();
+    }
 }
 
 //---------------------------------------------------------
@@ -154,6 +169,12 @@ void Album::addScore(MasterScore *score, bool enabled)
 
 void Album::removeScore(MasterScore *score)
 {
+    for (int i = 0; i < int(_albumItems.size()); i++) {
+        if (_albumItems.at(i)->score == score) {
+            removeScore(i);
+            break;
+        }
+    }
 }
 
 void Album::removeScore(int index)

@@ -456,7 +456,7 @@ class MuseScore : public QMainWindow, public MuseScoreCore, public mu::framework
     void editRaster();
     void showPianoKeyboard(bool);
     void showMediaDialog();
-    void showAlbumManager();
+    void showAlbumManager(bool);
     void showLayerManager();
     void updateUndoRedo();
     void changeScore(int);

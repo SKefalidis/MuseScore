@@ -1418,26 +1418,19 @@ MuseScore::MuseScore()
             "file-save-a-copy",
             "file-save-selection",
             saveOnlineMenuItem,
+            "album-save",
             "file-export",
             "file-part-export",
             "file-import-pdf",
             "",
             "file-close",
             "",
-            "parts",
-            "album" }) {
+            "parts" }) {
         if (!*i) {
             menuFile->addSeparator();
             continue;
         }
-
-        if (strcmp(i, "album") == 0) {
-            menuFile->addAction(getAction("album"));
-            menuFile->addAction(getAction("album-save"));
-            continue;
-        } else {
-            menuFile->addAction(getAction(i));
-        }
+        menuFile->addAction(getAction(i));
     }
     if (enableExperimental) {
         menuFile->addAction(getAction("layer"));
@@ -1551,6 +1544,10 @@ MuseScore::MuseScore()
     menuView->addAction(a);
 
     a = getAction("toggle-scorecmp-tool");
+    a->setCheckable(true);
+    menuView->addAction(a);
+
+    a = getAction("toggle-album");
     a->setCheckable(true);
     menuView->addAction(a);
 
@@ -4946,6 +4943,7 @@ void MuseScore::writeSettings()
     settings.setValue("showInspector", _inspector && _inspector->isVisible());
     settings.setValue("showPianoKeyboard", _pianoTools && _pianoTools->isVisible());
     settings.setValue("showSelectionWindow", selectionWindow && selectionWindow->isVisible());
+    settings.setValue("showAlbumManager", albumManager && albumManager->isVisible());
     settings.setValue("state", saveState());
     settings.setValue("splitScreen", _splitScreen);
     settings.setValue("debuggerSplitter", mainWindow->saveState());
@@ -5063,6 +5061,7 @@ void MuseScore::readSettings()
     mscore->showPianoKeyboard(settings.value("showPianoKeyboard", "0").toBool());
     mscore->showSelectionWindow(settings.value("showSelectionWindow", "0").toBool());
     mscore->showMixer(mixerVisible);
+    mscore->showAlbumManager(settings.value("showAlbumManager", "0").toBool());
 
     restoreState(settings.value("state").toByteArray());
     //if we were in full screen mode, go to maximized mode
@@ -6679,8 +6678,6 @@ void MuseScore::cmd(QAction* a, const QString& cmd)
         cmdInsertMeasures();
     } else if (cmd == "debugger") {
         startDebugger();
-    } else if (cmd == "album") {
-        showAlbumManager();
     } else if (cmd == "layer" && enableExperimental) {
         showLayerManager();
     } else if (cmd == "backspace") {
@@ -6728,6 +6725,8 @@ void MuseScore::cmd(QAction* a, const QString& cmd)
         importmidiPanel->setVisible(a->isChecked());
     } else if (cmd == "toggle-mixer") {
         showMixer(a->isChecked());
+    } else if (cmd == "toggle-album") {
+        showAlbumManager(a->isChecked());
     } else if (cmd == "synth-control") {
         showSynthControl(a->isChecked());
     } else if (cmd == "toggle-selection-window") {

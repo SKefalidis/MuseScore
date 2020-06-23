@@ -4683,10 +4683,17 @@ void LayoutContext::collectPage()
             // would not be printed
             if (systemIdx > 0) {
                 nextSystem = score->systems().value(systemIdx++);
-                if (!nextSystem) {         // if we have used all the systems of this movement go to the next movement
+                if (!nextSystem) {         // if we have used all the systems of this movement go to the next (enabled) movement
                     if (score->isMaster()) {
-                        MasterScore* ms = movementIndex
-                                          < movementsSize ? static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex++) : nullptr;
+                        MasterScore* ms = nullptr;
+                        while (movementIndex < movementsSize) {
+                            if (static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex)->enabled()) {
+                                ms = static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex);
+                                movementIndex++;
+                                break;
+                            }
+                            movementIndex++;
+                        }
                         if (ms) {
                             score     = ms;
                             systemIdx = 0;
@@ -4702,8 +4709,15 @@ void LayoutContext::collectPage()
                 if (nextSystem) {
                     score->systems().append(nextSystem);
                 } else if (score->isMaster()) {
-                    MasterScore* ms = movementIndex
-                                      < movementsSize ? static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex++) : nullptr;
+                    MasterScore* ms = nullptr;
+                    while (movementIndex < movementsSize) {
+                        if (static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex)->enabled()) {
+                            ms = static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex);
+                            movementIndex++;
+                            break;
+                        }
+                        movementIndex++;
+                    }
                     if (ms) {
                         score     = ms;
                         systemIdx = 0;
@@ -4717,8 +4731,15 @@ void LayoutContext::collectPage()
                 collected = true;
             }
             if (!nextSystem && score->isMaster()) {
-                MasterScore* ms = movementIndex
-                                  < movementsSize ? static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex++) : nullptr;
+                MasterScore* ms = nullptr;
+                while (movementIndex < movementsSize) {
+                    if (static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex)->enabled()) {
+                        ms = static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex);
+                        movementIndex++;
+                        break;
+                    }
+                    movementIndex++;
+                }
                 if (ms) {
                     score = ms;
                     QList<System*>& systems = ms->systems();
