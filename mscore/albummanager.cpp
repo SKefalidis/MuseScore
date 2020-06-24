@@ -330,11 +330,11 @@ void AlbumManager::updateScoreOrder(QModelIndex sourceParent, int sourceStart, i
                 std::swap(m_items.at(j), m_items.at(h));
                 break;
             } else if (j == int(m_items.size()) - 1) {
-                goto end;
+                goto exit_loops;
             }
         }
     }
-end:;
+    exit_loops:;
     updateButtons();
 }
 
@@ -562,19 +562,31 @@ void AlbumManager::downClicked(bool checked)
 
 void AlbumManager::itemDoubleClicked(QTableWidgetItem* item)
 {
-//      if (scoreModeButton->isChecked()) {
-    for (auto& x : m_items) {
+    AlbumManagerItem* aItem;
+    for (auto x : m_items) {
         if (x->listItem == item) {
-            if (x->albumItem->score) {
-                mscore->openScore(x->albumItem->fileInfo.absoluteFilePath());
-            } else {
-                x->albumItem->score = mscore->openScore(x->albumItem->fileInfo.absoluteFilePath());
-                x->albumItem->score->setPartOfActiveAlbum(true);
-            }
-            x->albumItem->score->doLayout();
+            aItem = x;
         }
     }
-//            }
+
+    if (!aItem) {
+        qDebug("Could not find the clicked AlbumManagerItem.");
+        return;
+    }
+
+    if (scoreModeButton->isChecked()) {
+        if (aItem->albumItem->score) {
+            mscore->openScore(aItem->albumItem->fileInfo.absoluteFilePath());
+        } else {
+            aItem->albumItem->score = mscore->openScore(aItem->albumItem->fileInfo.absoluteFilePath());
+            aItem->albumItem->score->setPartOfActiveAlbum(true);
+        }
+        aItem->albumItem->score->doLayout();
+    } else {
+        mscore->currentScoreView()->gotoMeasure(aItem->albumItem->score->firstMeasure()); // move to the chosen measure
+        mscore->currentScoreView()->deselectAll(); // deselect the element selected by `goToMeasure`
+        mscore->currentScoreView()->updateAll();
+    }
 }
 
 //---------------------------------------------------------
