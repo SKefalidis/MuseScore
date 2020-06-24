@@ -4598,6 +4598,7 @@ void LayoutContext::collectPage()
 {
     const qreal slb = score->styleP(Sid::staffLowerBorder);
     bool breakPages = score->layoutMode() != LayoutMode::SYSTEM;
+    bool isEmptyMovement = score->isMaster() ? static_cast<MasterScore*>(score)->emptyMovement() : false;
     //qreal y         = prevSystem ? prevSystem->y() + prevSystem->height() : page->tm();
     qreal ey        = page->height() - page->bm();
 
@@ -4776,7 +4777,7 @@ void LayoutContext::collectPage()
         // if this is the last iteration of this loop (because we found a pageBreak or the page is filled)
         // curSystem will be the first system of the next page
 
-        bool breakPage = !curSystem || (breakPages && prevSystem->pageBreak());     // checks if we ran out of systems or if we encountered a pageBreak
+        bool breakPage = !curSystem || (breakPages && prevSystem->pageBreak()) || isEmptyMovement;     // checks if we ran out of systems or if we encountered a pageBreak
 
         if (!breakPage) {
             qreal dist = prevSystem->minDistance(curSystem) + curSystem->height();

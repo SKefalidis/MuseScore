@@ -75,6 +75,7 @@ private slots:
 
     // The unused 'checked' parameters exist because Qt 5 style signals/slots don't
     // accept default values.
+    void albumNameChanged(const QString& text);
     void addClicked(bool checked = false);
     void addNewClicked(bool checked = false);
     void upClicked(bool checked = false);
