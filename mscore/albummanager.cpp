@@ -26,6 +26,8 @@
 #include "libmscore/undo.h"
 #include "libmscore/album.h"
 #include "libmscore/system.h"
+#include "libmscore/page.h"
+#include "libmscore/box.h"
 
 using namespace std;
 
@@ -56,17 +58,18 @@ AlbumManager::AlbumManager(QWidget* parent)
     playButton->setIcon(*icons[int(Icons::play_ICON)]);
     rewindButton->setIcon(*icons[int(Icons::start_ICON)]);
 
-    connect(add,                &QPushButton::clicked,  this, &AlbumManager::addClicked);
-    connect(addNew,             &QPushButton::clicked,  this, &AlbumManager::addNewClicked);
-    connect(up,                 &QPushButton::clicked,  this, &AlbumManager::upClicked);
-    connect(down,               &QPushButton::clicked,  this, &AlbumManager::downClicked);
-    connect(remove,             &QPushButton::clicked,  this, &AlbumManager::removeClicked);
-    connect(deleteButton,       &QPushButton::clicked,  this, &AlbumManager::deleteClicked);
-    connect(albumModeButton,    &QRadioButton::toggled, this, &AlbumManager::changeMode);
-    connect(scoreModeButton,    &QRadioButton::toggled, this, &AlbumManager::changeMode);
-    connect(settingsButton,     &QPushButton::clicked,  this, &AlbumManager::openSettingsDialog);
-    connect(playButton,         &QToolButton::clicked,  this, static_cast<void (AlbumManager::*)(bool)>(&AlbumManager::playAlbum));
-    connect(rewindButton,       &QToolButton::clicked,  this, static_cast<void (AlbumManager::*)(bool)>(&AlbumManager::rewindAlbum));
+    connect(albumTitleEdit,     &QLineEdit::textChanged,    this, &AlbumManager::albumNameChanged);
+    connect(add,                &QPushButton::clicked,      this, &AlbumManager::addClicked);
+    connect(addNew,             &QPushButton::clicked,      this, &AlbumManager::addNewClicked);
+    connect(up,                 &QPushButton::clicked,      this, &AlbumManager::upClicked);
+    connect(down,               &QPushButton::clicked,      this, &AlbumManager::downClicked);
+    connect(remove,             &QPushButton::clicked,      this, &AlbumManager::removeClicked);
+    connect(deleteButton,       &QPushButton::clicked,      this, &AlbumManager::deleteClicked);
+    connect(albumModeButton,    &QRadioButton::toggled,     this, &AlbumManager::changeMode);
+    connect(scoreModeButton,    &QRadioButton::toggled,     this, &AlbumManager::changeMode);
+    connect(settingsButton,     &QPushButton::clicked,      this, &AlbumManager::openSettingsDialog);
+    connect(playButton,         &QToolButton::clicked,      this, static_cast<void (AlbumManager::*)(bool)>(&AlbumManager::playAlbum));
+    connect(rewindButton,       &QToolButton::clicked,      this, static_cast<void (AlbumManager::*)(bool)>(&AlbumManager::rewindAlbum));
     connect(scoreList,          &QTableWidget::itemChanged, this,             &AlbumManager::itemChanged);
     connect(scoreList,          &QTableWidget::itemDoubleClicked, this,       &AlbumManager::itemDoubleClicked);
     connect(scoreList,          &QTableWidget::itemSelectionChanged, this,    &AlbumManager::updateButtons);
@@ -199,6 +202,38 @@ void AlbumManager::changeMode(bool checked)
         }
     } else {
         Q_ASSERT(false);
+    }
+}
+
+//---------------------------------------------------------
+//   albumNameChanged
+//---------------------------------------------------------
+
+void AlbumManager::albumNameChanged(const QString& text)
+{
+    if (!m_tempScore) {
+        return;
+    }
+
+    VBox* box = toVBox(m_tempScore->measures()->first());
+    box->setOffset(0, 750);
+    box->setBoxHeight(Spatium(20));
+
+    for (auto x : m_tempScore->measures()->first()->el()) {
+        if (x && x->isText()) {
+            Text* t = toText(x);
+
+            t->setFontStyle(FontStyle::Bold); // I should be calling t->setBold(true) (this overwrites other styles) but it crashes
+            t->setSize(48);
+            t->setAlign(Align::CENTER);
+
+            t->cursor()->setRow(0);
+            t->setPlainText(text);
+
+            if (m_tempScore->pages().size() > 0) {
+                t->setPos(QPointF(t->pos().x(), m_tempScore->pages().at(0)->height() / 2));
+            }
+        }
     }
 }
 
@@ -540,7 +575,7 @@ void AlbumManager::downClicked(bool checked)
 
 void AlbumManager::itemDoubleClicked(QTableWidgetItem* item)
 {
-    AlbumManagerItem* aItem;
+    AlbumManagerItem* aItem { nullptr };
     for (auto x : m_items) {
         if (x->listItem == item) {
             aItem = x;
