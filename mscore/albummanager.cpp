@@ -86,6 +86,7 @@ AlbumManager::AlbumManager(QWidget* parent)
     // the rest
     updateDurations();
     mscore->restoreGeometry(this);
+    m_album = new Album(); // placeholder
 }
 
 AlbumManager::~AlbumManager()
