@@ -2928,8 +2928,8 @@ Shortcut Shortcut::_sc[] = {
         STATE_NORMAL | STATE_NOTE_ENTRY | STATE_EDIT | STATE_TEXT_EDIT | STATE_LYRICS_EDIT
         | STATE_HARMONY_FIGBASS_EDIT | STATE_PLAY,
         "album-save",
-        QT_TRANSLATE_NOOP("action","Album Save"),
-        QT_TRANSLATE_NOOP("action","File > Album Save"),
+        QT_TRANSLATE_NOOP("action","Save Album"),
+        QT_TRANSLATE_NOOP("action","File > Save Album"),
         QT_TRANSLATE_NOOP("action","Save album to file"),
         Icons::fileSave_ICON
     },
