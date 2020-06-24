@@ -217,23 +217,38 @@ void AlbumManager::albumNameChanged(const QString& text)
     }
 
     VBox* box = toVBox(m_tempScore->measures()->first());
-    box->setOffset(0, 750);
-    box->setBoxHeight(Spatium(20));
+    box->setOffset(0, 600);
+    box->setBoxHeight(Spatium(125));
 
     for (auto x : m_tempScore->measures()->first()->el()) {
         if (x && x->isText()) {
             Text* t = toText(x);
 
-            t->setFontStyle(FontStyle::Bold); // I should be calling t->setBold(true) (this overwrites other styles) but it crashes
-            t->setSize(48);
-            t->setAlign(Align::CENTER);
+            if (t->tid() == Tid::TITLE) {
+                t->setFontStyle(FontStyle::Bold); // I should be calling t->setBold(true) (this overwrites other styles) but it crashes
+                t->setSize(36);
 
-            t->cursor()->setRow(0);
-            t->setPlainText(text);
+                t->cursor()->setRow(0);
+                t->setPlainText(text);
+            } else if (t->tid() == Tid::SUBTITLE) {
+                t->setSize(24);
+                t->setAlign(Align::HCENTER | Align::BASELINE);
 
-            if (m_tempScore->pages().size() > 0) {
-                t->setPos(QPointF(t->pos().x(), m_tempScore->pages().at(0)->height() / 2));
+                t->cursor()->setRow(0);
+                t->setPlainText("");
+            } else if (t->tid() == Tid::COMPOSER) {
+                t->setSize(16);
+                t->setPlainText("Sergios - Anestis Kefalidis\nJames Thistlewood\nJoachim Schmitz");
+//                t->setAlign(Align::CENTER);
+            } else if (t->tid() == Tid::POET) {
+                t->setSize(16);
+//                t->setAlign(Align::CENTER);
             }
+
+
+//            if (m_tempScore->pages().size() > 0) {
+//                t->setPos(QPointF(t->pos().x(), m_tempScore->pages().at(0)->height() / 2));
+//            }
         }
     }
 }
