@@ -366,28 +366,6 @@ std::vector<AlbumItem*> AlbumManager::albumScores() const
     return m_album->_albumItems;
 }
 
-////---------------------------------------------------------
-////   getScoreTitle
-/////     TODO: What does this do and why?
-////---------------------------------------------------------
-
-//static QString getScoreTitle(Score* score)
-//{
-//    QString name = score->metaTag("movementTitle");
-//    if (name.isEmpty()) {
-//        Text* t = score->getText(Tid::TITLE);
-//        if (t) {
-//            name = QTextDocumentFragment::fromHtml(t->xmlText()).toPlainText().replace("&amp;","&")
-//                    .replace("&gt;",">").replace("&lt;","<").replace("&quot;", "\"");
-//        }
-//        name = name.simplified();
-//    }
-//    if (name.isEmpty()) {
-//        name = score->title();
-//    }
-//    return name;
-//}
-
 //---------------------------------------------------------
 //   addClicked
 ///     Add an existing score to the Album.\n
