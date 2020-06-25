@@ -217,8 +217,11 @@ void AlbumManager::albumNameChanged(const QString& text)
     }
 
     VBox* box = toVBox(m_tempScore->measures()->first());
-    box->setOffset(0, 600);
-    box->setBoxHeight(Spatium(125));
+    qreal pageHeight = m_tempScore->pages().at(0)->height();
+    qreal scoreSpatium = m_tempScore->spatium();
+
+    box->setOffset(0, pageHeight * 0.1);
+    box->setBoxHeight(Spatium(pageHeight * 0.8 / scoreSpatium));
 
     for (auto x : m_tempScore->measures()->first()->el()) {
         if (x && x->isText()) {
@@ -238,17 +241,11 @@ void AlbumManager::albumNameChanged(const QString& text)
                 t->setPlainText("");
             } else if (t->tid() == Tid::COMPOSER) {
                 t->setSize(16);
-                t->setPlainText("Sergios - Anestis Kefalidis\nJames Thistlewood\nJoachim Schmitz");
-//                t->setAlign(Align::CENTER);
+                t->setPlainText(m_album->composers().join("\n"));
             } else if (t->tid() == Tid::POET) {
                 t->setSize(16);
-//                t->setAlign(Align::CENTER);
+                t->setPlainText(m_album->lyricists().join("\n"));
             }
-
-
-//            if (m_tempScore->pages().size() > 0) {
-//                t->setPos(QPointF(t->pos().x(), m_tempScore->pages().at(0)->height() / 2));
-//            }
         }
     }
 }

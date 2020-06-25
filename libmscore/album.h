@@ -65,6 +65,8 @@ public:
     void swap(int indexA, int indexB);
     static bool scoreInActiveAlbum(MasterScore* score);
     MasterScore* getDominant();
+    QStringList composers() const;
+    QStringList lyricists() const;
 
     bool loadFromFile(const QString& path);
     void readAlbum(XmlReader& reader);
