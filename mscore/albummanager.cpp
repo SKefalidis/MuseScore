@@ -702,6 +702,8 @@ void AlbumManager::setAlbum(Album* a)
         item->setScore(mscore->currentScoreView()->score()->masterScore());
         addAlbumItem(item);
     }
+
+    m_album->addSectionBreaks(); // TODO:SK normally I should add the sections breaks while loading, but the scores haven't been loaded so I can't
     scoreList->blockSignals(false);
 
     Album::activeAlbum = m_album;

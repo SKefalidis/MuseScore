@@ -140,6 +140,19 @@ Album::Album()
 }
 
 //---------------------------------------------------------
+//   addAlbumItem
+//---------------------------------------------------------
+
+void Album::addAlbumItem(AlbumItem* aItem)
+{
+    _albumItems.push_back(aItem);
+    // add section break to the end of the movement (if one does not already exist)
+    if (aItem->score && qFuzzyIsNull(aItem->score->lastMeasure()->pause())) {
+        addSectionBreak(aItem);
+    }
+}
+
+//---------------------------------------------------------
 //   addScore
 //---------------------------------------------------------
 
@@ -151,15 +164,30 @@ void Album::addScore(MasterScore *score, bool enabled)
     }
     std::cout << "Adding score to album..." << std::endl;
 
-    AlbumItem* albumScore = new AlbumItem(this, score, enabled);
-    _albumItems.push_back(albumScore);
+    AlbumItem* albumItem = new AlbumItem(this, score, enabled);
+    addAlbumItem(albumItem);
+}
 
-    // add section break to the end of the movement (if one does not already exist)
-    if (qFuzzyIsNull(score->lastMeasure()->pause())) {
-        LayoutBreak* lb = new LayoutBreak(score);
-        lb->setLayoutBreakType(LayoutBreak::Type::SECTION);
-        score->lastMeasure()->add(lb);
-        score->update();
+//---------------------------------------------------------
+//   addSectionBreak
+//---------------------------------------------------------
+
+void Album::addSectionBreak(AlbumItem* aItem)
+{
+    LayoutBreak* lb = new LayoutBreak(aItem->score);
+    lb->setLayoutBreakType(LayoutBreak::Type::SECTION);
+    aItem->score->lastMeasure()->add(lb);
+    aItem->score->update();
+}
+
+//---------------------------------------------------------
+//   addSectionBreaks
+//---------------------------------------------------------
+
+void Album::addSectionBreaks()
+{
+    for (auto aItem : _albumItems) {
+        addSectionBreak(aItem);
     }
 }
 
@@ -288,7 +316,7 @@ void Album::readAlbum(XmlReader &reader)
             std::cout << "new album item" << std::endl;
             AlbumItem* aItem = new AlbumItem(this);
             aItem->readAlbumItem(reader);
-            _albumItems.push_back(aItem);
+            addAlbumItem(aItem);
         }
     }
 }

@@ -48,7 +48,7 @@ public:
     QFileInfo fileInfo      { "-" };
 
 private:
-    bool m_enabled            { true };
+    bool m_enabled          { true  };
 };
 
 //---------------------------------------------------------
@@ -59,7 +59,10 @@ class Album {
 
 public:
     Album();
+    void addAlbumItem(AlbumItem* aItem);
     void addScore(MasterScore* score, bool enabled = true);
+    void addSectionBreak(AlbumItem* aItem);
+    void addSectionBreaks();
     void removeScore(MasterScore* score);
     void removeScore(int index);
     void swap(int indexA, int indexB);
