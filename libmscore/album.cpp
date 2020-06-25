@@ -218,6 +218,42 @@ MasterScore *Album::getDominant()
 }
 
 //---------------------------------------------------------
+//   composers
+//---------------------------------------------------------
+
+QStringList Album::composers() const
+{
+    QStringList composers;
+
+    for (auto item : _albumItems) {
+        QString composer = item->score->composer();
+        if (!composers.contains(composer)) {
+            composers.push_back(composer);
+        }
+    }
+
+    return composers;
+}
+
+//---------------------------------------------------------
+//   lyricists
+//---------------------------------------------------------
+
+QStringList Album::lyricists() const
+{
+    QStringList lyricists;
+
+    for (auto item : _albumItems) {
+        QString lyricist = item->score->lyricist();
+        if (!lyricists.contains(lyricist)) {
+            lyricists.push_back(lyricist);
+        }
+    }
+
+    return lyricists;
+}
+
+//---------------------------------------------------------
 //   loadFromFile
 //---------------------------------------------------------
 

@@ -4445,6 +4445,40 @@ QString Score::nextRehearsalMarkText(RehearsalMark* previous, RehearsalMark* cur
 }
 
 //---------------------------------------------------------
+//   composer
+//---------------------------------------------------------
+
+QString Score::composer() const
+{
+    for (auto x : _measures.first()->el()) {
+        if (x && x->isText()) {
+            Text* t = toText(x);
+            if (t->tid() == Tid::COMPOSER) {
+                return t->plainText();
+            }
+        }
+    }
+    return QString();
+}
+
+//---------------------------------------------------------
+//   lyricist
+//---------------------------------------------------------
+
+QString Score::lyricist() const
+{
+    for (auto x : _measures.first()->el()) {
+        if (x && x->isText()) {
+            Text* t = toText(x);
+            if (t->tid() == Tid::POET) {
+                return t->plainText();
+            }
+        }
+    }
+    return QString();
+}
+
+//---------------------------------------------------------
 //   changeVoice
 //    moves selected notes into specified voice if possible
 //---------------------------------------------------------

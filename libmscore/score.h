@@ -1247,6 +1247,11 @@ public:
     QString createRehearsalMarkText(RehearsalMark* current) const;
     QString nextRehearsalMarkText(RehearsalMark* previous, RehearsalMark* current) const;
 
+//    QString title
+    QString composer() const;
+    QString lyricist() const;
+
+
     //@ ??
 //      Q_INVOKABLE void cropPage(qreal margins);
     bool sanityCheck(const QString& name = QString());
