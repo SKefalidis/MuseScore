@@ -48,7 +48,7 @@ public:
     QFileInfo fileInfo      { "-" };
 
 private:
-    bool m_enabled          { true  };
+    bool m_enabled          { true };
 };
 
 //---------------------------------------------------------
