@@ -2535,7 +2535,7 @@ void MuseScore::updateInspector()
     // skip update if no inspector, or if inspector is hidden and there is a GUI
     // (important not to skip when running test scripts)
     if (_inspector && (_inspector->isVisible() || MScore::testMode || scriptTestMode)) {
-        _inspector->update(cs);
+        _inspector->update(currentScoreView()->score()); // TODO:SK changed this for album-mode, did I break anything?
     }
 }
 
