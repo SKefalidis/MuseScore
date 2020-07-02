@@ -1,8 +1,9 @@
 Notes:
- - First album page should have the title like the outside of a book
+ - Crash when opening page settings in album-mode
+ - Use a variable to store the first real movement and use that for playback/selecting etc
  - Automatic contents/page_index generation
+ - Use smart pointers and references
  - Reorder functions in albummanager.cpp (create a utility tool to do this automatically?)
- - Empty space between 0th movement and 1st
  - Change from album mode to score mode
  - Save in album mode?
  - page view? continuous view?
@@ -12,3 +13,5 @@ Notes:
  - Changing from score mode to album-mode should switch the tab to the album score if it exists
  - Albums in the start center?
  - Start center 'Open a Score...' to 'Open File...'?
+ - Option to add page break at the end of each score
+ - Select elements from different scores in album-mode.

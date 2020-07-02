@@ -28,6 +28,7 @@
 #include "libmscore/system.h"
 #include "libmscore/page.h"
 #include "libmscore/box.h"
+#include "libmscore/box.h"
 
 using namespace std;
 
@@ -185,6 +186,7 @@ void AlbumManager::changeMode(bool checked)
                 m_tempScore->systems().removeLast();
             }
             m_tempScore->setEmptyMovement(true);
+            m_tempScore->setfirstRealMovement(1);
             mscore->setCurrentScoreView(mscore->appendScore(m_tempScore));
             mscore->getTab1()->setTabText(mscore->getTab1()->count() - 1, "Temporary Album Score");
             m_tempScore->setName("Temporary Album Score");
@@ -248,6 +250,76 @@ void AlbumManager::albumNameChanged(const QString& text)
             }
         }
     }
+    updateContents();
+}
+
+//---------------------------------------------------------
+//   updateContents
+//---------------------------------------------------------
+
+void AlbumManager::updateContents()
+{
+    if (!m_tempScore) {
+        return;
+    }
+
+    if (!album()->m_contentsGeneration) {
+        return;
+    }
+
+    qreal pageWidth = m_tempScore->pages().at(0)->width();
+    qreal scoreSpatium = m_tempScore->spatium();
+    int charWidth = pageWidth / scoreSpatium;
+
+    if (!m_tempScore->movements()->at(1)->emptyMovement()) {    // there is no contents page
+        MasterScore* ms = m_items.at(0)->albumItem->score->clone();
+        ms->setEmptyMovement(true);
+        m_tempScore->insertMovement(ms, 1);
+
+        while (ms->systems().size() > 1) {
+            for (auto x : ms->systems().last()->measures()) {
+                ms->removeElement(x);
+            }
+            ms->systems().removeLast();
+        }
+    }
+
+    MasterScore* ms = m_tempScore->movements()->at(1);
+    for (auto x : ms->measures()->first()->el()) {
+        if (x && x->isText()) {
+            Text* t = toText(x);
+
+            if (t->tid() == Tid::TITLE) {
+                t->setFontStyle(FontStyle::Bold); // I should be calling t->setBold(true) (this overwrites other styles) but it crashes
+                t->setSize(36);
+
+                t->cursor()->setRow(0);
+                t->setPlainText("Contents");
+            } else if (t->tid() == Tid::SUBTITLE) {
+                t->setSize(16);
+                t->setAlign(Align::LEFT | Align::BASELINE);
+
+                QString str("");
+
+                for (auto x : m_album->scoreTitles()) {
+                    QString temp(x);
+                    temp.append(QString(".").repeated(charWidth - x.length()));
+                    temp += "3\n";
+                    str += temp;
+                }
+
+                t->cursor()->setRow(0);
+                t->setPlainText(str);
+            } else if (t->tid() == Tid::COMPOSER) {
+                t->setSize(16);
+                t->setPlainText("");
+            } else if (t->tid() == Tid::POET) {
+                t->setSize(16);
+                t->setPlainText("");
+            }
+        }
+    }
+    ms->doLayout();
 }
 
 //---------------------------------------------------------

@@ -298,6 +298,15 @@ void MasterScore::addMovement(MasterScore* score)
 }
 
 //---------------------------------------------------------
+//   insertMovement
+//---------------------------------------------------------
+
+void MasterScore::insertMovement(MasterScore* score, int atIndex)
+{
+    _movements->insert(_movements->begin() + atIndex, score);
+}
+
+//---------------------------------------------------------
 //   removeMovement
 //---------------------------------------------------------
 
