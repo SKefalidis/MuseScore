@@ -282,6 +282,24 @@ QStringList Album::lyricists() const
 }
 
 //---------------------------------------------------------
+//   scoreTitles
+//---------------------------------------------------------
+
+QStringList Album::scoreTitles() const
+{
+    QStringList scoreTitles;
+
+    for (auto item : _albumItems) {
+        if (!item->score->emptyMovement()) {
+            QString title = item->score->title();
+            scoreTitles.push_back(title);
+        }
+    }
+
+    return scoreTitles;
+}
+
+//---------------------------------------------------------
 //   loadFromFile
 //---------------------------------------------------------
 

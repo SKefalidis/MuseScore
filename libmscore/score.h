@@ -1329,6 +1329,7 @@ class MasterScore : public Score
     Movements* _movements       { nullptr };
     bool m_emptyMovement        { false };  // used in album-mode for setting the selected score in scoreview
                                             // to something other than the empty one
+    int m_firstRealMovement     { 0 };
     bool m_enabled              { true  };  // used to decide whether to draw/layout the movement in multi-movement scores
                                             // ignored, for single-movement scores
     bool _readOnly              { false };
@@ -1394,13 +1395,17 @@ public:
     virtual const Movements* movements() const override { return _movements; }
     void setMovements(Movements* m);
     void addMovement(MasterScore* score);
+    void insertMovement(MasterScore* score, int atIndex);
     void removeMovement(MasterScore* score);
 
-    bool emptyMovement() const      { return m_emptyMovement; }
-    void setEmptyMovement(bool b)   { m_emptyMovement = b; }
+    bool emptyMovement() const          { return m_emptyMovement; }
+    void setEmptyMovement(bool b)       { m_emptyMovement = b; }
 
-    bool enabled() const            { return m_enabled; }
-    void setEnabled(bool b)         { m_enabled = b; }
+    int firstRealMovement() const       { return m_firstRealMovement; }
+    void setfirstRealMovement(int i)    { m_firstRealMovement = i; }
+
+    bool enabled() const                { return m_enabled; }
+    void setEnabled(bool b)             { m_enabled = b; }
 
     virtual void setUpdateAll() override;
 

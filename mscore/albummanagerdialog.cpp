@@ -59,6 +59,7 @@ void AlbumManagerDialog::apply()
 {
     AlbumManager* albumManager = static_cast<AlbumManager*>(parent());
     albumManager->album()->playbackDelay = playbackDelayBox->value();
+    albumManager->album()->m_contentsGeneration = checkContentsGeneration->isChecked();
 }
 
 //---------------------------------------------------------
@@ -69,6 +70,7 @@ void AlbumManagerDialog::update()
 {
     AlbumManager* albumManager = static_cast<AlbumManager*>(parent());
     playbackDelayBox->setValue(albumManager->album()->playbackDelay);
+    checkContentsGeneration->setChecked(albumManager->album()->m_contentsGeneration);
 }
 
 //---------------------------------------------------------

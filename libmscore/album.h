@@ -70,6 +70,7 @@ public:
     MasterScore* getDominant();
     QStringList composers() const;
     QStringList lyricists() const;
+    QStringList scoreTitles() const;
 
     bool loadFromFile(const QString& path);
     void readAlbum(XmlReader& reader);
@@ -78,6 +79,7 @@ public:
 
     static Album* activeAlbum;
 
+    bool m_contentsGeneration           { false };
     int playbackDelay                   { 1000 };
     std::vector<AlbumItem*> _albumItems {};
     QString _albumTitle                 { "" };
