@@ -1171,7 +1171,7 @@ void ScoreView::changeState(ViewState s)
     }
 
     if (_score->masterScore()->emptyMovement()) {
-        _score = _score->masterScore()->movements()->at(1)->score();
+        _score = _score->masterScore()->movements()->at(_score->masterScore()->firstRealMovement())->score();
     }
 
     qDebug("changeState %s  -> %s", stateName(state), stateName(s));

@@ -95,6 +95,7 @@ private:
     virtual void showEvent(QShowEvent*) override;
     virtual void hideEvent(QHideEvent*) override;
     void updateDurations();
+    void updateContents();
 
     AlbumManagerDialog* m_settingsDialog    { nullptr };
     Album* m_album                          { nullptr };
