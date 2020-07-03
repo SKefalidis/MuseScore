@@ -273,6 +273,7 @@ void AlbumManager::updateContents()
 
     if (!m_tempScore->movements()->at(1)->emptyMovement()) {    // there is no contents page
         MasterScore* ms = m_items.at(0)->albumItem->score->clone();
+        ms->setName("Contents");
         ms->setEmptyMovement(true);
         m_tempScore->insertMovement(ms, 1);
 
@@ -301,11 +302,14 @@ void AlbumManager::updateContents()
 
                 QString str("");
 
+                int i = 0;
                 for (auto x : m_album->scoreTitles()) {
                     QString temp(x);
                     temp.append(QString(".").repeated(charWidth - x.length()));
-                    temp += "3\n";
+                    temp += QString::number(m_album->_albumItems.at(i)->score->pageIndexInAlbum());
+                    temp += "\n";
                     str += temp;
+                    i++;
                 }
 
                 t->cursor()->setRow(0);
