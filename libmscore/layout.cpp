@@ -4606,7 +4606,6 @@ void LayoutContext::collectPage()
     System* nextSystem = 0;
     systemIdx = continuing ? systemIdx : -1;   // if the page changed before the movement ended, we need to continue that movement on the next page so we need the previous systemIdx
     continuing = false;
-
     qreal y = page->systems().isEmpty() ? page->tm() : page->system(0)->y() + page->system(0)->height();
     // re-calculate positions for systems before current
     // (they may have been filled on previous layout)
@@ -4690,15 +4689,17 @@ void LayoutContext::collectPage()
                         while (movementIndex < movementsSize) {
                             if (static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex)->enabled()) {
                                 ms = static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex);
+                                ms->setPageIndexInAlbum(dominantScore->pages().size());
                                 movementIndex++;
                                 break;
                             }
                             movementIndex++;
                         }
                         if (ms) {
-                            score     = ms;
+                            score = ms;
                             systemIdx = 0;
                             nextSystem = score->systems().value(systemIdx++);
+                            collected = true;
                         }
                     }
                 } else {
@@ -4714,15 +4715,17 @@ void LayoutContext::collectPage()
                     while (movementIndex < movementsSize) {
                         if (static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex)->enabled()) {
                             ms = static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex);
+                            ms->setPageIndexInAlbum(dominantScore->pages().size());
                             movementIndex++;
                             break;
                         }
                         movementIndex++;
                     }
                     if (ms) {
-                        score     = ms;
+                        score = ms;
                         systemIdx = 0;
                         nextSystem = score->systems().value(systemIdx++);
+                        collected = true;
                     }
                 }
             }
@@ -4736,6 +4739,7 @@ void LayoutContext::collectPage()
                 while (movementIndex < movementsSize) {
                     if (static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex)->enabled()) {
                         ms = static_cast<MasterScore*>(dominantScore)->movements()->at(movementIndex);
+                        ms->setPageIndexInAlbum(dominantScore->pages().size());
                         movementIndex++;
                         break;
                     }
@@ -4777,7 +4781,7 @@ void LayoutContext::collectPage()
         // if this is the last iteration of this loop (because we found a pageBreak or the page is filled)
         // curSystem will be the first system of the next page
 
-        bool breakPage = !curSystem || (breakPages && prevSystem->pageBreak()) || isEmptyMovement;     // checks if we ran out of systems or if we encountered a pageBreak
+        bool breakPage = !curSystem || (breakPages && prevSystem->pageBreak()) || isEmptyMovement;     // checks if we ran out of systems or if we encountered a pageBreak or if the movement does not have measures
 
         if (!breakPage) {
             qreal dist = prevSystem->minDistance(curSystem) + curSystem->height();
@@ -5097,7 +5101,6 @@ void LayoutContext::layout()
         //    it will be nullptr if this page was never laid out or if we collected a system for next page
     } while (curSystem && !(rangeDone && lmb == pageOldMeasure));
 //             && page->systems().back()->measures().back()->tick() > endTick)); // FIXME: perhaps the first measure was meant? Or last system?
-
     if (!curSystem) {
         // The end of the score. The remaining systems are not needed...
         qDeleteAll(systemList);

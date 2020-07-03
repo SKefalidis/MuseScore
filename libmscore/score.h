@@ -1335,10 +1335,11 @@ class MasterScore : public Score
     Score* _playbackScore       { nullptr };
     Revisions* _revisions       { nullptr };
     Movements* _movements       { nullptr };
+    int m_pageIndexInAlbum      { 1 };
     bool m_emptyMovement        { false };  // used in album-mode for setting the selected score in scoreview
                                             // to something other than the empty one
     int m_firstRealMovement     { 0 };
-    bool m_enabled              { true  };  // used to decide whether to draw/layout the movement in multi-movement scores
+    bool m_enabled              { true };   // used to decide whether to draw/layout the movement in multi-movement scores
                                             // ignored, for single-movement scores
     bool _readOnly              { false };
 
@@ -1408,6 +1409,9 @@ public:
 
     bool emptyMovement() const          { return m_emptyMovement; }
     void setEmptyMovement(bool b)       { m_emptyMovement = b; }
+
+    int pageIndexInAlbum() const        { return m_pageIndexInAlbum; }
+    void setPageIndexInAlbum(int i)     { m_pageIndexInAlbum = i; }
 
     int firstRealMovement() const       { return m_firstRealMovement; }
     void setfirstRealMovement(int i)    { m_firstRealMovement = i; }
