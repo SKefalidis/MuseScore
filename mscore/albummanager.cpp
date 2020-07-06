@@ -88,6 +88,8 @@ AlbumManager::AlbumManager(QWidget* parent)
     updateDurations();
     mscore->restoreGeometry(this);
     m_album = new Album(); // placeholder
+
+    connect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
 }
 
 AlbumManager::~AlbumManager()
@@ -173,8 +175,6 @@ void AlbumManager::changeMode(bool checked)
 
     if (scoreModeButton->isChecked()) {
         albumModeButton->setChecked(false);
-        mscore->closeScore(m_tempScore); // also frees
-        m_tempScore = nullptr;
     } else if (albumModeButton->isChecked()) {
         scoreModeButton->setChecked(false);
         if (!m_tempScore) {
@@ -189,23 +189,37 @@ void AlbumManager::changeMode(bool checked)
             m_tempScore->setfirstRealMovement(1);
             mscore->setCurrentScoreView(mscore->appendScore(m_tempScore));
             mscore->getTab1()->setTabText(mscore->getTab1()->count() - 1, "Temporary Album Score");
+            m_tempScoreTabIndex = mscore->getTab1()->count() - 1;
             m_tempScore->setName("Temporary Album Score");
             for (auto item : m_items) {
-//                if (item == _items.at(0)) { If I clone and I use the cloned masterscore's measures I don't need to add it again.
-//                    continue;
-//                }
                 cout << "adding score: " << item->albumItem->score->title().toStdString() << endl;
                 m_tempScore->addMovement(item->albumItem->score);
             }
             m_tempScore->setLayoutAll();
             m_tempScore->update();
-
-//            _album->addScore(tempScore);
-//            addAlbumItem(_album->_albumItems.back());
+        } else {
+            mscore->setCurrentScoreView(m_tempScoreTabIndex);
         }
     } else {
         Q_ASSERT(false);
     }
+}
+
+//---------------------------------------------------------
+//   tabChanged
+//---------------------------------------------------------
+
+void AlbumManager::tabChanged()
+{
+    mscore->getTab1()->blockSignals(true);
+    if (mscore->getTab1()->currentIndex() == m_tempScoreTabIndex && scoreModeButton->isChecked()) {
+        albumModeButton->setChecked(true);
+        changeMode();
+    } else if (mscore->getTab1()->currentIndex() != m_tempScoreTabIndex && albumModeButton->isChecked()) {
+        scoreModeButton->setChecked(true);
+        changeMode();
+    }
+    mscore->getTab1()->blockSignals(false);
 }
 
 //---------------------------------------------------------
