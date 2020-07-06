@@ -368,6 +368,7 @@ void ScoreView::mouseReleaseEvent(QMouseEvent* mouseEvent)
         changeState(ViewState::FOTO);
         break;
     }
+    update();
 }
 
 //---------------------------------------------------------
@@ -489,6 +490,7 @@ void ScoreView::mousePressEventNormal(QMouseEvent* ev)
         m_drawingScore->doLayout();
     }
     mscore->endCmd();
+    update();
 }
 
 //---------------------------------------------------------
@@ -644,6 +646,7 @@ void ScoreView::mousePressEvent(QMouseEvent* ev)
         qDebug("mousePressEvent in state %d", int(state));
         break;
     }
+    update();
 }
 
 //---------------------------------------------------------
