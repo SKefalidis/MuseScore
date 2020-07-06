@@ -1036,7 +1036,6 @@ Score::FileError MasterScore::read1(XmlReader& e, bool ignoreVersionError)
 
 void Score::print(QPainter* painter, int pageNo)
 {
-    _printing  = true;
     MScore::pdfPrinting = true;
     Page* page = pages().at(pageNo);
     QRectF fr  = page->abbox();
@@ -1044,6 +1043,7 @@ void Score::print(QPainter* painter, int pageNo)
     QList<Element*> ell = page->items(fr);
     std::stable_sort(ell.begin(), ell.end(), elementLessThan);
     for (const Element* e : ell) {
+        e->score()->_printing = true; // there might be different scores in the same page (Album-mode)
         if (!e->visible()) {
             continue;
         }
@@ -1051,9 +1051,9 @@ void Score::print(QPainter* painter, int pageNo)
         painter->translate(e->pagePos());
         e->draw(painter);
         painter->restore();
+        e->score()->_printing = false;
     }
     MScore::pdfPrinting = false;
-    _printing = false;
 }
 
 //---------------------------------------------------------
