@@ -333,7 +333,7 @@ void AlbumManager::updateContents()
 
 void AlbumManager::playAlbum()
 {
-    static bool connectionEstablished { false };
+    static bool connectionEstablished { false }; // TODO_SK: replace with Qt::UniqueConnection
     static qreal pause { 3 };
 
     // pause playback
