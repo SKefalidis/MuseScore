@@ -1646,7 +1646,10 @@ void ScoreView::zoom(qreal _mag, const QPointF& pos)
     scroll(dx, dy, QRect(0, 0, width(), height()));
     emit viewRectChanged();
     emit offsetChanged(_matrix.dx(), _matrix.dy());
+
     update();
+
+    QTimer::singleShot(100, this, SLOT(update())); // hack: zooming caues displacement of pages in album-mode
 }
 
 //-----------------------------------------------------------------------------
