@@ -72,6 +72,7 @@ private slots:
     void swap(int indexA, int indexB);
     void updateButtons();
     void itemChanged(QTableWidgetItem* item);     // score name in list is edited
+    void tabChanged();
 
     // The unused 'checked' parameters exist because Qt 5 style signals/slots don't
     // accept default values.
@@ -101,6 +102,7 @@ private:
     Album* m_album                          { nullptr };
     std::vector<AlbumManagerItem*> m_items  {};
     MasterScore* m_tempScore                { nullptr };
+    int m_tempScoreTabIndex                 { -1 };
 
     int m_dragEnterIndex    { -1 };
     int m_dropIndex         { -1 };
