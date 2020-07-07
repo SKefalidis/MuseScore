@@ -1,16 +1,16 @@
 Notes:
- - Crash when opening page settings in album-mode
- - Use a variable to store the first real movement and use that for playback/selecting etc
- - Automatic contents/page_index generation
+ Refactor and Code Quality:
  - Use smart pointers and references
  - Reorder functions in albummanager.cpp (create a utility tool to do this automatically?)
- - Change from album mode to score mode
+ - Rename to albumIOtest and create albumTest (for libmscore/album)
+ Bugs:
+ - Crash when opening page settings in album-mode
+ - Contents page for big scores (add BVW to reproduce)
+ Features:
  - Save in album mode?
  - page view? continuous view?
  - Add album to album
  - Score mode printing
- - Changing tab from the temp score to another should automatically change the mode to score mode (the opposite should happen when changing tab to the temp score tab)
- - Changing from score mode to album-mode should switch the tab to the album score if it exists
  - Albums in the start center?
  - Start center 'Open a Score...' to 'Open File...'?
  - Option to add page break at the end of each score
