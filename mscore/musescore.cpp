@@ -2796,6 +2796,19 @@ void MuseScore::setCurrentScoreView(int idx)
     }
 }
 
+void MuseScore::setCurrentScoreViewSignalBlocking(int idx)
+{
+    tab1->blockSignals(true);
+    setCurrentView(0, idx);
+    tab1->blockSignals(false);
+
+    if (tab2) {
+        tab2->blockSignals(true);
+        setCurrentView(1, idx);
+        tab2->blockSignals(false);
+    }
+}
+
 void MuseScore::setCurrentView(int tabIdx, int idx)
 {
     if (idx == -1) {
