@@ -561,6 +561,7 @@ public slots:
     void handleMessage(const QString& message);
     void setCurrentScoreView(ScoreView*);
     void setCurrentScoreView(int);
+    void setCurrentScoreViewSignalBlocking(int);
     void setCurrentScores(Score* s1, Score* s2 = nullptr);
     void setNormalState() { changeState(STATE_NORMAL); }
     void setPlayState() { changeState(STATE_PLAY); }

@@ -173,10 +173,16 @@ void AlbumManager::changeMode(bool checked)
 {
     Q_UNUSED(checked);
 
+    mscore->getTab1()->blockSignals(true);
+    if (mscore->getTab2()) {
+        mscore->getTab2()->blockSignals(true);
+    }
+
     if (scoreModeButton->isChecked()) {
+        albumModeButton->blockSignals(true);
         albumModeButton->setChecked(false);
+        albumModeButton->blockSignals(false);
     } else if (albumModeButton->isChecked()) {
-        scoreModeButton->setChecked(false);
         if (!m_tempScore) {
             m_tempScore = m_items.at(0)->albumItem->score->clone(); // clone breaks editing sync for the 1st movement
             while (m_tempScore->systems().size() > 1) { // remove the measures of the cloned masterscore, that way editing is synced
@@ -185,23 +191,39 @@ void AlbumManager::changeMode(bool checked)
                 }
                 m_tempScore->systems().removeLast();
             }
+
             m_tempScore->setEmptyMovement(true);
             m_tempScore->setfirstRealMovement(1);
-            mscore->setCurrentScoreView(mscore->appendScore(m_tempScore));
-            mscore->getTab1()->setTabText(mscore->getTab1()->count() - 1, "Temporary Album Score");
-            m_tempScoreTabIndex = mscore->getTab1()->count() - 1;
             m_tempScore->setName("Temporary Album Score");
+
+            mscore->setCurrentScoreViewSignalBlocking(mscore->appendScore(m_tempScore));
+            mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
+
+            m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
+
             for (auto item : m_items) {
                 cout << "adding score: " << item->albumItem->score->title().toStdString() << endl;
                 m_tempScore->addMovement(item->albumItem->score);
             }
             m_tempScore->setLayoutAll();
             m_tempScore->update();
+
+//            albumModeButton->setChecked(true);  // workaround, for some reason tabChanged is called after setCurrentScoreView and this changes the mode
+//                                                // to score mode again
+//                                                // fixed by using setCurrentScoreviewBlocking
         } else {
             mscore->setCurrentScoreView(m_tempScoreTabIndex);
         }
+        scoreModeButton->blockSignals(true);
+        scoreModeButton->setChecked(false);
+        scoreModeButton->blockSignals(false);
     } else {
         Q_ASSERT(false);
+    }
+
+    mscore->getTab1()->blockSignals(false);
+    if (mscore->getTab2()) {
+        mscore->getTab2()->blockSignals(false);
     }
 }
 
@@ -214,10 +236,8 @@ void AlbumManager::tabChanged()
     mscore->getTab1()->blockSignals(true);
     if (mscore->getTab1()->currentIndex() == m_tempScoreTabIndex && scoreModeButton->isChecked()) {
         albumModeButton->setChecked(true);
-        changeMode();
     } else if (mscore->getTab1()->currentIndex() != m_tempScoreTabIndex && albumModeButton->isChecked()) {
         scoreModeButton->setChecked(true);
-        changeMode();
     }
     mscore->getTab1()->blockSignals(false);
 }
