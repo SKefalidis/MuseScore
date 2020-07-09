@@ -5,7 +5,6 @@ Notes:
  - Rename to albumIOtest and create albumTest (for libmscore/album)
  Bugs:
  - Crash when opening page settings in album-mode
- - Contents page for big scores (add BVW to reproduce)
  Features:
  - Save in album mode?
  - page view? continuous view?
