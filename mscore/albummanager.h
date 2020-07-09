@@ -38,7 +38,7 @@ public:
 
     void setEnabled(bool b);
 
-    AlbumItem& albumItem; // TODO_SK: convert to reference, this should never be null and should not change
+    AlbumItem& albumItem;
     QTableWidgetItem* listItem;
     QTableWidgetItem* listDurationItem;
 };
@@ -84,7 +84,7 @@ private slots:
     void changeMode(bool checked = false);
     void openSettingsDialog(bool checked = false);
     void playAlbum(bool checked);
-    void playAlbum(); // TODO: move to libmscore
+    void playAlbum();
     void startPlayback();
     void rewindAlbum(bool checked = false);
     void updateScoreOrder(QModelIndex sourceParent, int sourceStart, int sourceEnd, QModelIndex destinationParent,
