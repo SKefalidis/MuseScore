@@ -69,4 +69,4 @@ void TestAlbums::saveAlbumTest(const char* file)
 }
 
 QTEST_MAIN(TestAlbums)
-#include "tst_albums.moc"
+#include "tst_albumsIO.moc"

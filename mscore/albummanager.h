@@ -18,7 +18,6 @@
 #include "libmscore/album.h"
 
 namespace Ms {
-
 class XmlWriter;
 class Movements;
 class MasterScore;
