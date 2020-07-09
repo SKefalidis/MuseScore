@@ -34,9 +34,10 @@ using std::unique_ptr;
 //---------------------------------------------------------
 
 struct AlbumItem {
+
 public:
-    AlbumItem(Album* album);
-    AlbumItem(Album* album, MasterScore* score, bool enabled = true);
+    AlbumItem(Album& album);
+    AlbumItem(Album& album, MasterScore* score, bool enabled = true);
     ~AlbumItem();
 
     void setEnabled(bool b);
@@ -45,8 +46,8 @@ public:
     void readAlbumItem(XmlReader& reader);
     void writeAlbumItem(XmlWriter& writer, bool absolutePathEnabled);
 
-    Album* album            { nullptr };
-    MasterScore* score      { nullptr };
+    Album& album;
+    MasterScore* score      { nullptr }; // make reference? (probably can't cause I am not reading while loading)
     QFileInfo fileInfo      { "-" };
 
 private:
@@ -60,7 +61,7 @@ private:
 class Album {
 
 public:
-    Album();
+    Album(){};
     void addAlbumItem(unique_ptr<AlbumItem> aItem);
     void addScore(MasterScore* score, bool enabled = true);
     void addSectionBreak(AlbumItem* aItem);
@@ -79,13 +80,24 @@ public:
     bool saveToFile(const QString &path, bool absolutePathEnabled = true);
     void writeAlbum(XmlWriter& writer, bool absolutePathEnabled);
 
+    const std::vector<unique_ptr<AlbumItem>>& albumItems() const;
+    const QString& albumTitle() const;
+    void setAlbumTitle(const QString& newTitle);
+    const QFileInfo& fileInfo() const;
+    bool generateContents() const;
+    void setGenerateContents(bool enabled);
+    int defaultPlaybackDelay() const;
+    void setDefaultPlaybackDelay(int ms);
+
     static Album* activeAlbum;
 
-    bool m_contentsGeneration                       { false };
-    int playbackDelay                               { 1000 };
-    std::vector<unique_ptr<AlbumItem>> _albumItems  {};
-    QString _albumTitle                             { "" };
-    QFileInfo _fileInfo                             {};
+private:
+    std::vector<unique_ptr<AlbumItem>> m_albumItems {};
+    QString m_albumTitle                            { "" };
+    QFileInfo m_fileInfo                            {};
+
+    bool m_generateContents                       { false };
+    int m_defaultPlaybackDelay                      { 1000 };
 };
 
 }     // namespace Ms

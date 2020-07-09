@@ -297,7 +297,7 @@ void AlbumManager::updateContents()
         return;
     }
 
-    if (!album()->m_contentsGeneration) {
+    if (!album()->generateContents()) {
         return;
     }
 
@@ -340,7 +340,7 @@ void AlbumManager::updateContents()
                 for (auto x : m_album->scoreTitles()) {
                     QString temp(x);
                     temp.append(QString(".").repeated(charWidth - x.length()));
-                    temp += QString::number(m_album->_albumItems.at(i)->score->pageIndexInAlbum());
+                    temp += QString::number(m_album->albumItems().at(i)->score->pageIndexInAlbum());
                     temp += "\n";
                     str += temp;
                     i++;
@@ -516,9 +516,9 @@ void AlbumManager::openSettingsDialog(bool checked)
 ///     this is a leftover before the refactor
 //---------------------------------------------------------
 
-std::vector<std::unique_ptr<AlbumItem>>& AlbumManager::albumScores() const
+const std::vector<std::unique_ptr<AlbumItem> >& AlbumManager::albumScores() const
 {
-    return m_album->_albumItems;
+    return m_album->albumItems();
 }
 
 //---------------------------------------------------------
@@ -539,7 +539,7 @@ void AlbumManager::addClicked(bool checked)
     for (const QString& fn : files) {
         MasterScore* score = mscore->readScore(fn);
         m_album->addScore(score);
-        addAlbumItem(*m_album->_albumItems.back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
+        addAlbumItem(*m_album->albumItems().back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
     }
 }
 
@@ -557,7 +557,7 @@ void AlbumManager::addNewClicked(bool checked)
         return;
     }
     m_album->addScore(score);
-    addAlbumItem(*m_album->_albumItems.back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
+    addAlbumItem(*m_album->albumItems().back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
 }
 
 //---------------------------------------------------------
@@ -802,7 +802,7 @@ void AlbumManager::setAlbum(std::unique_ptr<Album> a)
     m_album = std::move(a);
 
     scoreList->blockSignals(true);
-    for (auto& item : m_album->_albumItems) {
+    for (auto& item : m_album->albumItems()) {
         QString path = item->fileInfo.canonicalFilePath();
         MasterScore* score = mscore->readScore(path);
         item->setScore(score);

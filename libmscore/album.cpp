@@ -33,12 +33,13 @@ namespace Ms {
 //---------------------------------------------------------
 //---------------------------------------------------------
 
-AlbumItem::AlbumItem(Album* album)
+AlbumItem::AlbumItem(Album& album)
+    : album(album)
 {
-    this->album = album;
 }
 
-AlbumItem::AlbumItem(Album* album, MasterScore *score, bool enabled) : AlbumItem(album)
+AlbumItem::AlbumItem(Album& album, MasterScore *score, bool enabled)
+    : AlbumItem(album)
 {
     std::cout << "New album item..." << std::endl;
     this->score = score;
@@ -94,7 +95,7 @@ void AlbumItem::readAlbumItem(XmlReader &reader)
             fileInfo.setFile(reader.readElementText());
         } else if (tag == "relativePath") {
             if (!fileInfo.exists()) {
-                QDir dir(album->_fileInfo.dir());
+                QDir dir(album.fileInfo().dir());
                 QString relativePath = reader.readElementText();
                 fileInfo.setFile(dir, relativePath);
             } else {
@@ -120,7 +121,7 @@ void AlbumItem::writeAlbumItem(XmlWriter &writer, bool absolutePathEnabled)
     if (absolutePathEnabled) {
         writer.tag("path", fileInfo.absoluteFilePath());
     }
-    QDir dir(album->_fileInfo.dir());
+    QDir dir(album.fileInfo().dir());
     QString relativePath = dir.relativeFilePath(fileInfo.absoluteFilePath());
     writer.tag("relativePath", relativePath);
     writer.tag("enabled", m_enabled);
@@ -137,11 +138,6 @@ void AlbumItem::writeAlbumItem(XmlWriter &writer, bool absolutePathEnabled)
 
 Album* Album::activeAlbum = nullptr;
 
-Album::Album()
-{
-
-}
-
 //---------------------------------------------------------
 //   addAlbumItem
 //---------------------------------------------------------
@@ -152,7 +148,7 @@ void Album::addAlbumItem(unique_ptr<AlbumItem> aItem)
     if (aItem->score && qFuzzyIsNull(aItem->score->lastMeasure()->pause())) {
         addSectionBreak(aItem.get());
     }
-    _albumItems.push_back(std::move(aItem));
+    m_albumItems.push_back(std::move(aItem));
 }
 
 //---------------------------------------------------------
@@ -167,7 +163,7 @@ void Album::addScore(MasterScore *score, bool enabled)
     }
     std::cout << "Adding score to album..." << std::endl;
 
-    unique_ptr<AlbumItem> albumItem(new AlbumItem(this, score, enabled));
+    unique_ptr<AlbumItem> albumItem(new AlbumItem(*this, score, enabled));
     addAlbumItem(std::move(albumItem));
 }
 
@@ -189,7 +185,7 @@ void Album::addSectionBreak(AlbumItem* aItem)
 
 void Album::addSectionBreaks()
 {
-    for (auto& aItem : _albumItems) {
+    for (auto& aItem : m_albumItems) {
         addSectionBreak(aItem.get());
     }
 }
@@ -200,8 +196,8 @@ void Album::addSectionBreaks()
 
 void Album::removeScore(MasterScore *score)
 {
-    for (int i = 0; i < int(_albumItems.size()); i++) {
-        if (_albumItems.at(i)->score == score) {
+    for (int i = 0; i < int(m_albumItems.size()); i++) {
+        if (m_albumItems.at(i)->score == score) {
             removeScore(i);
             break;
         }
@@ -210,7 +206,7 @@ void Album::removeScore(MasterScore *score)
 
 void Album::removeScore(int index)
 {
-    _albumItems.erase(_albumItems.begin() + index);
+    m_albumItems.erase(m_albumItems.begin() + index);
 }
 
 //---------------------------------------------------------
@@ -219,7 +215,7 @@ void Album::removeScore(int index)
 
 void Album::swap(int indexA, int indexB)
 {
-    std::swap(_albumItems.at(indexA), _albumItems.at(indexB));
+    std::swap(m_albumItems.at(indexA), m_albumItems.at(indexB));
 }
 
 //---------------------------------------------------------
@@ -231,7 +227,7 @@ bool Album::scoreInActiveAlbum(MasterScore *score)
     if (!activeAlbum)
         return false;
 
-    for (auto& x : activeAlbum->_albumItems) {
+    for (auto& x : activeAlbum->m_albumItems) {
         if (x->score == score) {
             return true;
         }
@@ -245,7 +241,7 @@ bool Album::scoreInActiveAlbum(MasterScore *score)
 
 MasterScore *Album::getDominant()
 {
-    return _albumItems.front()->score;
+    return m_albumItems.front()->score;
 }
 
 //---------------------------------------------------------
@@ -256,7 +252,7 @@ QStringList Album::composers() const
 {
     QStringList composers;
 
-    for (auto& item : _albumItems) {
+    for (auto& item : m_albumItems) {
         QString composer = item->score->composer();
         if (!composers.contains(composer)) {
             composers.push_back(composer);
@@ -274,7 +270,7 @@ QStringList Album::lyricists() const
 {
     QStringList lyricists;
 
-    for (auto& item : _albumItems) {
+    for (auto& item : m_albumItems) {
         QString lyricist = item->score->lyricist();
         if (!lyricists.contains(lyricist)) {
             lyricists.push_back(lyricist);
@@ -292,7 +288,7 @@ QStringList Album::scoreTitles() const
 {
     QStringList scoreTitles;
 
-    for (auto& item : _albumItems) {
+    for (auto& item : m_albumItems) {
         if (!item->score->emptyMovement()) {
             QString title = item->score->title();
             scoreTitles.push_back(title);
@@ -306,7 +302,7 @@ QStringList Album::scoreTitles() const
 //   loadFromFile
 //---------------------------------------------------------
 
-bool Ms::Album::loadFromFile(const QString &path)
+bool Album::loadFromFile(const QString &path)
 {
     std::cout << "Loading album from file..." << std::endl;
     QFile f(path);
@@ -315,7 +311,7 @@ bool Ms::Album::loadFromFile(const QString &path)
         return false;
     }
 
-    _fileInfo.setFile(path);
+    m_fileInfo.setFile(path);
     XmlReader reader(&f);
     reader.setDevice(&f);
     readAlbum(reader);
@@ -332,11 +328,11 @@ void Album::readAlbum(XmlReader &reader)
     while (reader.readNextStartElement()) {
         const QStringRef& tag(reader.name());
         if (tag == "name") {
-            _albumTitle = reader.readElementText();
+            m_albumTitle = reader.readElementText();
         } else if (tag == "Score") {
             std::cout << "new album item" << std::endl;
 
-            unique_ptr<AlbumItem> albumItem(new AlbumItem(this));
+            unique_ptr<AlbumItem> albumItem(new AlbumItem(*this));
             albumItem->readAlbumItem(reader);
             addAlbumItem(std::move(albumItem));
         }
@@ -356,7 +352,7 @@ bool Album::saveToFile(const QString &path, bool absolutePathEnabled)
         return false;
     }
 
-    _fileInfo.setFile(path);
+    m_fileInfo.setFile(path);
     XmlWriter writer(nullptr, &f);
     writer.header();
     writer.stag(QStringLiteral("museScore version=\"" MSC_VERSION"\""));
@@ -373,11 +369,83 @@ bool Album::saveToFile(const QString &path, bool absolutePathEnabled)
 void Album::writeAlbum(XmlWriter &writer, bool absolutePathEnabled)
 {
     writer.stag("Album");
-    writer.tag("name", _albumTitle);
-    for (auto& aItem : _albumItems) {
+    writer.tag("name", m_albumTitle);
+    for (auto& aItem : m_albumItems) {
         aItem->writeAlbumItem(writer, absolutePathEnabled);
     }
     writer.etag();
+}
+
+//---------------------------------------------------------
+//   albumItems
+//---------------------------------------------------------
+
+const std::vector<unique_ptr<AlbumItem> >& Album::albumItems() const
+{
+    return m_albumItems;
+}
+
+//---------------------------------------------------------
+//   albumTitle
+//---------------------------------------------------------
+
+const QString& Album::albumTitle() const
+{
+    return m_albumTitle;
+}
+
+//---------------------------------------------------------
+//   setAlbumTitle
+//---------------------------------------------------------
+
+void Album::setAlbumTitle(const QString& newTitle)
+{
+    m_albumTitle = newTitle;
+}
+
+//---------------------------------------------------------
+//   fileInfo
+//---------------------------------------------------------
+
+const QFileInfo& Album::fileInfo() const
+{
+    return m_fileInfo;
+}
+
+//---------------------------------------------------------
+//   generateContents
+//---------------------------------------------------------
+
+bool Album::generateContents() const
+{
+    return m_generateContents;
+}
+
+//---------------------------------------------------------
+//   setGenerateContents
+//---------------------------------------------------------
+
+void Album::setGenerateContents(bool enabled)
+{
+    m_generateContents = enabled;
+}
+
+//---------------------------------------------------------
+//   defaultPlaybackDelay
+//---------------------------------------------------------
+
+int Album::defaultPlaybackDelay() const
+{
+    return m_defaultPlaybackDelay;
+}
+
+//---------------------------------------------------------
+//   setDefaultPlaybackDelay
+//---------------------------------------------------------
+
+void Album::setDefaultPlaybackDelay(int ms)
+{
+    m_defaultPlaybackDelay = ms;
 }
 
 }     // namespace Ms
