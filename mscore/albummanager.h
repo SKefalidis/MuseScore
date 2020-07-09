@@ -58,7 +58,7 @@ public:
     const std::unique_ptr<Album>& album() const;
     void setAlbum(std::unique_ptr<Album> album);
 
-    std::vector<std::unique_ptr<AlbumItem>>& albumScores() const;
+    const std::vector<std::unique_ptr<AlbumItem>>& albumScores() const;
 
 protected:
     virtual void retranslate();

@@ -2611,7 +2611,7 @@ void MuseScore::addRecentScore(const QString& scorePath)
 
 void MuseScore::addRecentAlbum(Album* album)
 {
-    QString path = album->_fileInfo.absoluteFilePath();
+    QString path = album->fileInfo().absoluteFilePath();
     addRecentScore(path);
     if (startcenter) {
         startcenter->updateRecentScores();

@@ -58,8 +58,8 @@ void AlbumManagerDialog::start()
 void AlbumManagerDialog::apply()
 {
     AlbumManager* albumManager = static_cast<AlbumManager*>(parent());
-    albumManager->album()->playbackDelay = playbackDelayBox->value();
-    albumManager->album()->m_contentsGeneration = checkContentsGeneration->isChecked();
+    albumManager->album()->setDefaultPlaybackDelay(playbackDelayBox->value());
+    albumManager->album()->setGenerateContents(checkContentsGeneration->isChecked());
 }
 
 //---------------------------------------------------------
@@ -69,8 +69,8 @@ void AlbumManagerDialog::apply()
 void AlbumManagerDialog::update()
 {
     AlbumManager* albumManager = static_cast<AlbumManager*>(parent());
-    playbackDelayBox->setValue(albumManager->album()->playbackDelay);
-    checkContentsGeneration->setChecked(albumManager->album()->m_contentsGeneration);
+    playbackDelayBox->setValue(albumManager->album()->defaultPlaybackDelay());
+    checkContentsGeneration->setChecked(albumManager->album()->generateContents());
 }
 
 //---------------------------------------------------------
@@ -85,7 +85,6 @@ void AlbumManagerDialog::buttonBoxClicked(QAbstractButton* button)
         break;
     case QDialogButtonBox::Ok:
         apply();
-    // intentional ??
     // fall through
     case QDialogButtonBox::Cancel:
     default:
