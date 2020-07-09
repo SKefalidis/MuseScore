@@ -362,7 +362,7 @@ void AlbumManager::updateContents()
 
 //---------------------------------------------------------
 //   playAlbum
-///     TODO: rethink this
+///     TODO_SK: rethink this
 //---------------------------------------------------------
 
 void AlbumManager::playAlbum()
@@ -397,8 +397,11 @@ void AlbumManager::playAlbum()
                 //
                 if (scoreModeButton->isChecked()) {
                     if (m_items.at(m_playbackIndex)->albumItem->score) {
+                        // TODO_SK: It should not open a new score (it already has one) it should append the score to MuseScoreCore's scoreList
                         mscore->openScore(m_items.at(m_playbackIndex)->albumItem->fileInfo.absoluteFilePath());         // what if the files have not been saved?
                     } else {
+                        Q_ASSERT(false);
+                        std::cout << "There is some kind of problem... AlbumManager::playAlbum" << std::endl;
                         m_items.at(m_playbackIndex)->albumItem->score = mscore->openScore(m_items.at(m_playbackIndex)->albumItem->fileInfo.absoluteFilePath());
                     }
                     mscore->currentScoreView()->gotoMeasure(m_items.at(m_playbackIndex)->albumItem->score->firstMeasure());       // rewind before playing
@@ -528,7 +531,7 @@ std::vector<AlbumItem*> AlbumManager::albumScores() const
 //   addClicked
 ///     Add an existing score to the Album.\n
 ///     Opens a dialog to select a Score from the filesystem.
-///     TODO: if the score is already opened openScore returns nullptr,
+///     TODO_SK: if the score is already opened openScore returns nullptr,
 ///     so this does not work
 //---------------------------------------------------------
 
@@ -540,7 +543,7 @@ void AlbumManager::addClicked(bool checked)
         tr("MuseScore Files") + " (*.mscz *.mscx);;", tr("Load Score")
         );
     for (const QString& fn : files) {
-        MasterScore* score = mscore->openScore(fn);
+        MasterScore* score = mscore->readScore(fn);
         m_album->addScore(score);
         addAlbumItem(m_album->_albumItems.back());
     }
@@ -617,6 +620,8 @@ void AlbumManager::updateDurations()
     for (auto item : m_items) {
         bool temporarilyOpen = false;
         if (item->albumItem->score == nullptr) {
+            Q_ASSERT(false);
+            std::cout << "There is some kind of problem... AlbumManager::updateDurations" << std::endl;
             item->albumItem->setScore(mscore->openScore(item->albumItem->fileInfo.absoluteFilePath(), false));
             temporarilyOpen = true;
         }
@@ -712,6 +717,7 @@ void AlbumManager::itemDoubleClicked(QTableWidgetItem* item)
 
     if (scoreModeButton->isChecked()) {
         if (aItem->albumItem->score) {
+            // TODO_SK: This should not just open the score, it should append it to MuseScoreCore's scoreList.
             mscore->openScore(aItem->albumItem->fileInfo.absoluteFilePath());
         } else {
             aItem->albumItem->score = mscore->openScore(aItem->albumItem->fileInfo.absoluteFilePath());
@@ -808,8 +814,9 @@ void AlbumManager::setAlbum(Album* a)
 
     scoreList->blockSignals(true);
     for (auto& item : m_album->_albumItems) {
-        mscore->openScore(item->fileInfo.absoluteFilePath());
-        item->setScore(mscore->currentScoreView()->score()->masterScore());
+        QString path = item->fileInfo.canonicalFilePath();
+        MasterScore* score = mscore->readScore(path);
+        item->setScore(score);
         addAlbumItem(item);
     }
 
@@ -904,7 +911,9 @@ AlbumManagerItem::AlbumManagerItem(AlbumItem* item, QTableWidgetItem* listItem, 
 {
     albumItem = item;
     if (!albumItem->score) {
-        albumItem->setScore(mscore->openScore(albumItem->fileInfo.absoluteFilePath()));
+        QString path = item->fileInfo.canonicalFilePath();
+        MasterScore* score = mscore->readScore(path);
+        albumItem->setScore(score);
     }
     albumItem->score->setPartOfActiveAlbum(true);
     this->listItem = listItem;
