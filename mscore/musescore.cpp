@@ -3532,15 +3532,12 @@ void MuseScore::removeTab()
 
 void MuseScore::removeTab(int i)
 {
+    bool deleteScore = true;
     MasterScore* score = scoreList.value(i);
     if (score->partOfActiveAlbum()) {
-        for (auto& x : albumManager->albumScores()) {
-            if (x->score == score) {
-                x->score = nullptr;
-            }
-        }
-//            albumManager->albumScores().at(i)->score = nullptr;
+        deleteScore = false;
     }
+
     if (score == 0) {
         return;
     }
@@ -3580,7 +3577,10 @@ void MuseScore::removeTab(int i)
         QFile f(tmpName);
         f.remove();
     }
-    delete score;
+
+    if (deleteScore) {
+        delete score;
+    }
     // Shouldn't be necessary... but fix #21841
     update();
 }

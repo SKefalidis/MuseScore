@@ -80,7 +80,7 @@ public:
     bool saveToFile(const QString &path, bool absolutePathEnabled = true);
     void writeAlbum(XmlWriter& writer, bool absolutePathEnabled);
 
-    const std::vector<unique_ptr<AlbumItem>>& albumItems() const;
+    std::vector<AlbumItem*> albumItems() const;
     const QString& albumTitle() const;
     void setAlbumTitle(const QString& newTitle);
     const QFileInfo& fileInfo() const;
@@ -96,7 +96,7 @@ private:
     QString m_albumTitle                            { "" };
     QFileInfo m_fileInfo                            {};
 
-    bool m_generateContents                       { false };
+    bool m_generateContents                         { false };
     int m_defaultPlaybackDelay                      { 1000 };
 };
 
