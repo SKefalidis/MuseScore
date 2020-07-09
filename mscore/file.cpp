@@ -397,7 +397,7 @@ bool MuseScore::saveAlbum()
     }
 
     albumManager->album()->saveToFile(fileBaseName);
-    mscore->lastSaveDirectory = albumManager->album()->_fileInfo.absolutePath();
+    mscore->lastSaveDirectory = albumManager->album()->fileInfo().absolutePath();
     addRecentAlbum(albumManager->album().get());
     writeSessionFile(false);
     return true;
