@@ -367,23 +367,18 @@ void AlbumManager::updateContents()
 
 void AlbumManager::playAlbum()
 {
-    static bool connectionEstablished { false }; // TODO_SK: replace with Qt::UniqueConnection
     static qreal pause { 3 };
 
     // pause playback
     if (!playButton->isChecked() && seq->isPlaying()) {
         disconnect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
         seq->stop();
-        connectionEstablished = false;
         m_continuing = true;
         return;
     }
 
     // connection used to move to the next score automatically during playback
-    if (!connectionEstablished) {
-        connect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
-        connectionEstablished = true;
-    }
+    connect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum), Qt::ConnectionType::UniqueConnection);
 
     if (m_playbackIndex == -1) {
         m_playbackIndex++;
@@ -427,7 +422,6 @@ void AlbumManager::playAlbum()
         } else { // album ended, reset for
             rewindAlbum();
             disconnect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
-            connectionEstablished = false;
             m_continuing = false;
             playButton->setChecked(false);
             return;
