@@ -4603,9 +4603,10 @@ void LayoutContext::collectPage()
     qreal ey        = page->height() - page->bm();
 
     int movementsSize = dominantScore->isMaster() ? static_cast<MasterScore*>(dominantScore)->movements()->size() : -1;
-    if (score->isMaster()) {
+    if (score->isMaster() && curSystem == score->systems().first()) {
         static_cast<MasterScore*>(score)->setPageIndexInAlbum(dominantScore->pages().size());
     }
+
     System* nextSystem = 0;
     systemIdx = continuing ? systemIdx : -1;   // if the page changed before the movement ended, we need to continue that movement on the next page so we need the previous systemIdx
     continuing = false;
