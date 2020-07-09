@@ -1,10 +1,13 @@
 Notes:
+ - Improve the automated tests
+ - Fix warnings
  Refactor and Code Quality:
  - Use smart pointers and references
- - Reorder functions in albummanager.cpp (create a utility tool to do this automatically?)
- - Rename to albumIOtest and create albumTest (for libmscore/album)
  Bugs:
  - Crash when opening page settings in album-mode
+ - Crash when closing the temporary score
+ - Zooming bug, correct fix!
+ - section breaks are not in score mode because the opened scores and the scores in the album are different
  Features:
  - Save in album mode?
  - page view? continuous view?
