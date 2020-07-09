@@ -54,7 +54,7 @@ AlbumItem::~AlbumItem()
     if (score) {
         score->setPartOfActiveAlbum(false); // also called in ~AlbumManagerItem, FIXME
     }
-    // TODO_SK: I should probably delete the score since it's not in the scoreList of MuseScoreCore
+    // TODO_SK: if (score not in score list, delete it)
 }
 
 //---------------------------------------------------------
@@ -380,9 +380,13 @@ void Album::writeAlbum(XmlWriter &writer, bool absolutePathEnabled)
 //   albumItems
 //---------------------------------------------------------
 
-const std::vector<unique_ptr<AlbumItem> >& Album::albumItems() const
+std::vector<AlbumItem*> Album::albumItems() const
 {
-    return m_albumItems;
+    std::vector<AlbumItem*> ai;
+    for (auto& x : m_albumItems) {
+        ai.push_back(x.get());
+    }
+    return ai;
 }
 
 //---------------------------------------------------------

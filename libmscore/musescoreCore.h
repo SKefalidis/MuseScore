@@ -42,6 +42,7 @@ public:
     virtual int appendScore(MasterScore* s) { scoreList.append(s); return 0; }
     virtual void endCmd(const bool /*isCmdFromInspector*/ = false, const bool /*undoRedo*/ = false) {}
     virtual MasterScore* openScore(const QString& /*fn*/, bool /*switchTab*/) { return 0; }
+    virtual MasterScore* openScoreWithoutAppending(const QString& /*fn*/) { return 0; }
     QList<MasterScore*>& scores() { return scoreList; }
     virtual void updateInspector() {}
 };

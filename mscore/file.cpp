@@ -412,6 +412,8 @@ MasterScore* MuseScore::openScore(const QString& fn, bool switchTab)
     //
     // make sure we load a file only once
     //
+
+    // search the score list (open tabs)
     QFileInfo fi(fn);
     QString path = fi.canonicalFilePath();
     for (Score* s : scoreList) {
@@ -423,6 +425,21 @@ MasterScore* MuseScore::openScore(const QString& fn, bool switchTab)
         }
     }
 
+    // search the active album (loaded scores but not neccesarily in a tab)
+    if (Album::activeAlbum) {
+        for (auto x : Album::activeAlbum->albumItems()) {
+            if (x->score->fileInfo()->canonicalFilePath() == path) {
+                const int tabIdx = appendScore(x->score);
+                if (switchTab) {
+                    setCurrentScoreView(tabIdx);
+                }
+                writeSessionFile(false);
+                return x->score;
+            }
+        }
+    }
+
+    // load the score and create a new tab for it
     MasterScore* score = readScore(fn);
     if (score) {
         score->updateCapo();
@@ -432,6 +449,39 @@ MasterScore* MuseScore::openScore(const QString& fn, bool switchTab)
         }
         writeSessionFile(false);
     }
+    return score;
+}
+
+//---------------------------------------------------------
+//   openScoreWithoutAppending
+//---------------------------------------------------------
+
+MasterScore* MuseScore::openScoreWithoutAppending(const QString& fn)
+{
+    //
+    // make sure we load a file only once
+    //
+
+    // search the score list (open tabs)
+    QFileInfo fi(fn);
+    QString path = fi.canonicalFilePath();
+    for (Score* s : scoreList) {
+        if (s->masterScore()->fileInfo()->canonicalFilePath() == path) {
+            return s->masterScore();
+        }
+    }
+
+    // search the active album (loaded scores but not neccesarily in a tab)
+    if (Album::activeAlbum) {
+        for (auto x : Album::activeAlbum->albumItems()) {
+            if (x->score->fileInfo()->canonicalFilePath() == path) {
+                return x->score;
+            }
+        }
+    }
+
+    // load the score
+    MasterScore* score = readScore(fn);
     return score;
 }
 

@@ -516,9 +516,9 @@ void AlbumManager::openSettingsDialog(bool checked)
 ///     this is a leftover before the refactor
 //---------------------------------------------------------
 
-const std::vector<std::unique_ptr<AlbumItem> >& AlbumManager::albumScores() const
+const std::vector<AlbumItem*>&& AlbumManager::albumScores() const
 {
-    return m_album->albumItems();
+    return std::move(m_album->albumItems());
 }
 
 //---------------------------------------------------------
@@ -538,7 +538,7 @@ void AlbumManager::addClicked(bool checked)
     for (const QString& fn : files) {
         MasterScore* score = mscore->readScore(fn);
         m_album->addScore(score);
-        addAlbumItem(*m_album->albumItems().back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
+        addAlbumItem(*m_album->albumItems().back()); // TODO_SK: Convert to reference and use the unique ptr reference
     }
 }
 
@@ -556,7 +556,7 @@ void AlbumManager::addNewClicked(bool checked)
         return;
     }
     m_album->addScore(score);
-    addAlbumItem(*m_album->albumItems().back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
+    addAlbumItem(*m_album->albumItems().back()); // TODO_SK: Convert to reference and use the unique ptr reference
 }
 
 //---------------------------------------------------------
@@ -802,12 +802,13 @@ void AlbumManager::setAlbum(std::unique_ptr<Album> a)
     scoreList->blockSignals(true);
     for (auto& item : m_album->albumItems()) {
         QString path = item->fileInfo.canonicalFilePath();
-        MasterScore* score = mscore->readScore(path);
+        MasterScore* score = mscore->openScoreWithoutAppending(path);
+        score->updateCapo();
         item->setScore(score);
-        addAlbumItem(*item.get()); // TODO_SK: Convert to reference and use the unique ptr reference
+        addAlbumItem(*item); // TODO_SK: Convert to reference and use the unique ptr reference
     }
 
-    m_album->addSectionBreaks(); // TODO:SK normally I should add the sections breaks while loading, but the scores haven't been loaded so I can't
+    m_album->addSectionBreaks(); // TODO_SK: normally I should add the sections breaks while loading, but the scores haven't been loaded so I can't
     scoreList->blockSignals(false);
 
     Album::activeAlbum = m_album.get();
