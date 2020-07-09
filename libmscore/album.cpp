@@ -50,7 +50,9 @@ AlbumItem::AlbumItem(Album* album, MasterScore *score, bool enabled) : AlbumItem
 
 AlbumItem::~AlbumItem()
 {
-    score->setPartOfActiveAlbum(false); // also called in ~AlbumManagerItem, FIXME
+    if (score) {
+        score->setPartOfActiveAlbum(false); // also called in ~AlbumManagerItem, FIXME
+    }
     // TOSO_SK: I should probably delete the score since it's not in the scoreList of MuseScoreCore
 }
 
