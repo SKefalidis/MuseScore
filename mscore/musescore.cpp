@@ -3534,7 +3534,7 @@ void MuseScore::removeTab(int i)
 {
     MasterScore* score = scoreList.value(i);
     if (score->partOfActiveAlbum()) {
-        for (auto x : albumManager->albumScores()) {
+        for (auto& x : albumManager->albumScores()) {
             if (x->score == score) {
                 x->score = nullptr;
             }

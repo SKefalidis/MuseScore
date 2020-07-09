@@ -27,6 +27,8 @@ class MasterScore;
 class XmlReader;
 class XmlWriter;
 
+using std::unique_ptr;
+
 //---------------------------------------------------------
 //   AlbumItem
 //---------------------------------------------------------
@@ -59,7 +61,7 @@ class Album {
 
 public:
     Album();
-    void addAlbumItem(AlbumItem* aItem);
+    void addAlbumItem(unique_ptr<AlbumItem> aItem);
     void addScore(MasterScore* score, bool enabled = true);
     void addSectionBreak(AlbumItem* aItem);
     void addSectionBreaks();
@@ -79,11 +81,11 @@ public:
 
     static Album* activeAlbum;
 
-    bool m_contentsGeneration           { false };
-    int playbackDelay                   { 1000 };
-    std::vector<AlbumItem*> _albumItems {};
-    QString _albumTitle                 { "" };
-    QFileInfo _fileInfo                 {};
+    bool m_contentsGeneration                       { false };
+    int playbackDelay                               { 1000 };
+    std::vector<unique_ptr<AlbumItem>> _albumItems  {};
+    QString _albumTitle                             { "" };
+    QFileInfo _fileInfo                             {};
 };
 
 }     // namespace Ms

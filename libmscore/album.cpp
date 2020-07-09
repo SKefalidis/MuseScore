@@ -51,6 +51,7 @@ AlbumItem::AlbumItem(Album* album, MasterScore *score, bool enabled) : AlbumItem
 AlbumItem::~AlbumItem()
 {
     score->setPartOfActiveAlbum(false); // also called in ~AlbumManagerItem, FIXME
+    // TOSO_SK: I should probably delete the score since it's not in the scoreList of MuseScoreCore
 }
 
 //---------------------------------------------------------
@@ -143,13 +144,13 @@ Album::Album()
 //   addAlbumItem
 //---------------------------------------------------------
 
-void Album::addAlbumItem(AlbumItem* aItem)
+void Album::addAlbumItem(unique_ptr<AlbumItem> aItem)
 {
-    _albumItems.push_back(aItem);
     // add section break to the end of the movement (if one does not already exist)
     if (aItem->score && qFuzzyIsNull(aItem->score->lastMeasure()->pause())) {
-        addSectionBreak(aItem);
+        addSectionBreak(aItem.get());
     }
+    _albumItems.push_back(std::move(aItem));
 }
 
 //---------------------------------------------------------
@@ -164,8 +165,8 @@ void Album::addScore(MasterScore *score, bool enabled)
     }
     std::cout << "Adding score to album..." << std::endl;
 
-    AlbumItem* albumItem = new AlbumItem(this, score, enabled);
-    addAlbumItem(albumItem);
+    unique_ptr<AlbumItem> albumItem(new AlbumItem(this, score, enabled));
+    addAlbumItem(std::move(albumItem));
 }
 
 //---------------------------------------------------------
@@ -186,8 +187,8 @@ void Album::addSectionBreak(AlbumItem* aItem)
 
 void Album::addSectionBreaks()
 {
-    for (auto aItem : _albumItems) {
-        addSectionBreak(aItem);
+    for (auto& aItem : _albumItems) {
+        addSectionBreak(aItem.get());
     }
 }
 
@@ -228,7 +229,7 @@ bool Album::scoreInActiveAlbum(MasterScore *score)
     if (!activeAlbum)
         return false;
 
-    for (auto x : activeAlbum->_albumItems) {
+    for (auto& x : activeAlbum->_albumItems) {
         if (x->score == score) {
             return true;
         }
@@ -253,7 +254,7 @@ QStringList Album::composers() const
 {
     QStringList composers;
 
-    for (auto item : _albumItems) {
+    for (auto& item : _albumItems) {
         QString composer = item->score->composer();
         if (!composers.contains(composer)) {
             composers.push_back(composer);
@@ -271,7 +272,7 @@ QStringList Album::lyricists() const
 {
     QStringList lyricists;
 
-    for (auto item : _albumItems) {
+    for (auto& item : _albumItems) {
         QString lyricist = item->score->lyricist();
         if (!lyricists.contains(lyricist)) {
             lyricists.push_back(lyricist);
@@ -289,7 +290,7 @@ QStringList Album::scoreTitles() const
 {
     QStringList scoreTitles;
 
-    for (auto item : _albumItems) {
+    for (auto& item : _albumItems) {
         if (!item->score->emptyMovement()) {
             QString title = item->score->title();
             scoreTitles.push_back(title);
@@ -332,9 +333,10 @@ void Album::readAlbum(XmlReader &reader)
             _albumTitle = reader.readElementText();
         } else if (tag == "Score") {
             std::cout << "new album item" << std::endl;
-            AlbumItem* aItem = new AlbumItem(this);
-            aItem->readAlbumItem(reader);
-            addAlbumItem(aItem);
+
+            unique_ptr<AlbumItem> albumItem(new AlbumItem(this));
+            albumItem->readAlbumItem(reader);
+            addAlbumItem(std::move(albumItem));
         }
     }
 }

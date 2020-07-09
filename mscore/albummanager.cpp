@@ -516,7 +516,7 @@ void AlbumManager::openSettingsDialog(bool checked)
 ///     this is a leftover before the refactor
 //---------------------------------------------------------
 
-std::vector<AlbumItem*> AlbumManager::albumScores() const
+std::vector<std::unique_ptr<AlbumItem>>& AlbumManager::albumScores() const
 {
     return m_album->_albumItems;
 }
@@ -539,7 +539,7 @@ void AlbumManager::addClicked(bool checked)
     for (const QString& fn : files) {
         MasterScore* score = mscore->readScore(fn);
         m_album->addScore(score);
-        addAlbumItem(m_album->_albumItems.back());
+        addAlbumItem(m_album->_albumItems.back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
     }
 }
 
@@ -557,7 +557,7 @@ void AlbumManager::addNewClicked(bool checked)
         return;
     }
     m_album->addScore(score);
-    addAlbumItem(m_album->_albumItems.back());
+    addAlbumItem(m_album->_albumItems.back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
 }
 
 //---------------------------------------------------------
@@ -811,7 +811,7 @@ void AlbumManager::setAlbum(Album* a)
         QString path = item->fileInfo.canonicalFilePath();
         MasterScore* score = mscore->readScore(path);
         item->setScore(score);
-        addAlbumItem(item);
+        addAlbumItem(item.get()); // TODO_SK: Convert to reference and use the unique ptr reference
     }
 
     m_album->addSectionBreaks(); // TODO:SK normally I should add the sections breaks while loading, but the scores haven't been loaded so I can't
