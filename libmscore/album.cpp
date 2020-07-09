@@ -54,7 +54,7 @@ AlbumItem::~AlbumItem()
     if (score) {
         score->setPartOfActiveAlbum(false); // also called in ~AlbumManagerItem, FIXME
     }
-    // TOSO_SK: I should probably delete the score since it's not in the scoreList of MuseScoreCore
+    // TODO_SK: I should probably delete the score since it's not in the scoreList of MuseScoreCore
 }
 
 //---------------------------------------------------------

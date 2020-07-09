@@ -525,7 +525,6 @@ const std::vector<std::unique_ptr<AlbumItem> >& AlbumManager::albumScores() cons
 //   addClicked
 ///     Add an existing score to the Album.\n
 ///     Opens a dialog to select a Score from the filesystem.
-///     TODO_SK: if the score is already opened openScore returns nullptr,
 ///     so this does not work
 //---------------------------------------------------------
 
@@ -685,7 +684,6 @@ void AlbumManager::downClicked(bool checked)
 ///     In Score mode:
 ///     This either opens the clicked Score or changes to the
 ///     corresponding tab if it is already open. \n
-///     TODO_SK: In Album mode:
 ///     This centers the view to the part of the tempScore
 ///     where the clicked Score begins.
 //---------------------------------------------------------

@@ -33,7 +33,7 @@ using std::unique_ptr;
 //   AlbumItem
 //---------------------------------------------------------
 
-struct AlbumItem {
+class AlbumItem {
 
 public:
     AlbumItem(Album& album);
