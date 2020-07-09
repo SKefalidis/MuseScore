@@ -39,8 +39,7 @@ public:
 
     void setEnabled(bool b);
 
-    // can I convert these to references?
-    AlbumItem* albumItem;
+    AlbumItem* albumItem; // TODO_SK: convert to reference, this should never be null and should not change
     QTableWidgetItem* listItem;
     QTableWidgetItem* listDurationItem;
 };
@@ -60,7 +59,7 @@ public:
     Album* album();
     void setAlbum(Album* album);
 
-    std::vector<AlbumItem*> albumScores() const;
+    std::vector<std::unique_ptr<AlbumItem> >& albumScores() const;
 
 protected:
     virtual void retranslate();
