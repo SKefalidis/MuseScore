@@ -87,7 +87,7 @@ AlbumManager::AlbumManager(QWidget* parent)
     // the rest
     updateDurations();
     mscore->restoreGeometry(this);
-    m_album = new Album(); // placeholder
+    m_album = std::unique_ptr<Album>(new Album()); // placeholder
 
     connect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
 }
@@ -184,7 +184,7 @@ void AlbumManager::changeMode(bool checked)
         albumModeButton->blockSignals(false);
     } else if (albumModeButton->isChecked()) {
         if (!m_tempScore) {
-            m_tempScore = m_items.at(0)->albumItem->score->clone(); // clone breaks editing sync for the 1st movement
+            m_tempScore = m_items.at(0)->albumItem.score->clone(); // clone breaks editing sync for the 1st movement
             while (m_tempScore->systems().size() > 1) { // remove the measures of the cloned masterscore, that way editing is synced
                 for (auto x : m_tempScore->systems().last()->measures()) {
                     m_tempScore->removeElement(x);
@@ -202,8 +202,8 @@ void AlbumManager::changeMode(bool checked)
             m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
 
             for (auto item : m_items) {
-                cout << "adding score: " << item->albumItem->score->title().toStdString() << endl;
-                m_tempScore->addMovement(item->albumItem->score);
+                cout << "adding score: " << item->albumItem.score->title().toStdString() << endl;
+                m_tempScore->addMovement(item->albumItem.score);
             }
             m_tempScore->setLayoutAll();
             m_tempScore->update();
@@ -306,7 +306,7 @@ void AlbumManager::updateContents()
     int charWidth = pageWidth / scoreSpatium;
 
     if (!m_tempScore->movements()->at(1)->emptyMovement()) {    // there is no contents page
-        MasterScore* ms = m_items.at(0)->albumItem->score->clone();
+        MasterScore* ms = m_items.at(0)->albumItem.score->clone();
         ms->setName("Contents");
         ms->setEmptyMovement(true);
         m_tempScore->insertMovement(ms, 1);
@@ -386,20 +386,20 @@ void AlbumManager::playAlbum()
 
     if (!m_continuing) {
         if (m_playbackIndex < int(m_items.size())) {
-            if (m_items.at(m_playbackIndex)->albumItem->enabled()) {
+            if (m_items.at(m_playbackIndex)->albumItem.enabled()) {
                 //
                 // setup score to play
                 //
                 if (scoreModeButton->isChecked()) {
-                    if (m_items.at(m_playbackIndex)->albumItem->score) {
+                    if (m_items.at(m_playbackIndex)->albumItem.score) {
                         // TODO_SK: It should not open a new score (it already has one) it should append the score to MuseScoreCore's scoreList
-                        mscore->openScore(m_items.at(m_playbackIndex)->albumItem->fileInfo.absoluteFilePath());         // what if the files have not been saved?
+                        mscore->openScore(m_items.at(m_playbackIndex)->albumItem.fileInfo.absoluteFilePath());         // what if the files have not been saved?
                     } else {
                         Q_ASSERT(false);
                         std::cout << "There is some kind of problem... AlbumManager::playAlbum" << std::endl;
-                        m_items.at(m_playbackIndex)->albumItem->score = mscore->openScore(m_items.at(m_playbackIndex)->albumItem->fileInfo.absoluteFilePath());
+                        m_items.at(m_playbackIndex)->albumItem.score = mscore->openScore(m_items.at(m_playbackIndex)->albumItem.fileInfo.absoluteFilePath());
                     }
-                    mscore->currentScoreView()->gotoMeasure(m_items.at(m_playbackIndex)->albumItem->score->firstMeasure());       // rewind before playing
+                    mscore->currentScoreView()->gotoMeasure(m_items.at(m_playbackIndex)->albumItem.score->firstMeasure());       // rewind before playing
                 } else {
                     seq->setNextMovement(m_playbackIndex + 1); // first movement is empty
                     mscore->currentScoreView()->gotoMeasure(seq->score()->firstMeasure());       // rewind before playing
@@ -431,7 +431,7 @@ void AlbumManager::playAlbum()
         m_continuing = false;
     }
 
-    mscore->currentScoreView()->setActiveScore(m_items.at(m_playbackIndex - 1)->albumItem->score);
+    mscore->currentScoreView()->setActiveScore(m_items.at(m_playbackIndex - 1)->albumItem.score);
 }
 
 void AlbumManager::playAlbum(bool checked)
@@ -479,8 +479,8 @@ void AlbumManager::updateScoreOrder(QModelIndex sourceParent, int sourceStart, i
 
     for (int i = 0; i < int(m_items.size()); i++) {
         for (int j = 0; j < int(m_items.size()); j++) {
-            if (m_items.at(j)->albumItem->score->title() != scoreList->item(j, 0)->text()) {
-                int h = scoreList->row(scoreList->findItems(m_items.at(j)->albumItem->score->title(),
+            if (m_items.at(j)->albumItem.score->title() != scoreList->item(j, 0)->text()) {
+                int h = scoreList->row(scoreList->findItems(m_items.at(j)->albumItem.score->title(),
                                                             Qt::MatchExactly).first());
                 std::swap(m_items.at(j), m_items.at(h));
                 break;
@@ -539,7 +539,7 @@ void AlbumManager::addClicked(bool checked)
     for (const QString& fn : files) {
         MasterScore* score = mscore->readScore(fn);
         m_album->addScore(score);
-        addAlbumItem(m_album->_albumItems.back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
+        addAlbumItem(*m_album->_albumItems.back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
     }
 }
 
@@ -557,7 +557,7 @@ void AlbumManager::addNewClicked(bool checked)
         return;
     }
     m_album->addScore(score);
-    addAlbumItem(m_album->_albumItems.back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
+    addAlbumItem(*m_album->_albumItems.back().get()); // TODO_SK: Convert to reference and use the unique ptr reference
 }
 
 //---------------------------------------------------------
@@ -567,15 +567,10 @@ void AlbumManager::addNewClicked(bool checked)
 ///     the AlbumItem and Widget are saved in a new AlbumManagerItem
 //---------------------------------------------------------
 
-void AlbumManager::addAlbumItem(AlbumItem *albumItem)
+void AlbumManager::addAlbumItem(AlbumItem& albumItem)
 {
-    if (!albumItem) {
-        std::cout << "empty album item" << std::endl;
-        return;
-    }
-
     scoreList->blockSignals(true);
-    QString name = albumItem->score->title();
+    QString name = albumItem.score->title();
     QTableWidgetItem* li = new QTableWidgetItem(name);
     scoreList->setRowCount(scoreList->rowCount() + 1);
     scoreList->setItem(scoreList->rowCount() - 1, 0, li);
@@ -591,7 +586,7 @@ void AlbumManager::addAlbumItem(AlbumItem *albumItem)
 
     // update the combined score to reflect the changes
     if (m_tempScore) {
-        m_tempScore->addMovement(albumItem->score);
+        m_tempScore->addMovement(albumItem.score);
         m_tempScore->update();
         m_tempScore->doLayout(); // position the movements correctly
         mscore->currentScoreView()->update(); // repaint
@@ -613,18 +608,18 @@ void AlbumManager::updateDurations()
 
     for (auto item : m_items) {
         bool temporarilyOpen = false;
-        if (item->albumItem->score == nullptr) {
+        if (item->albumItem.score == nullptr) {
             Q_ASSERT(false);
             std::cout << "There is some kind of problem... AlbumManager::updateDurations" << std::endl;
-            item->albumItem->setScore(mscore->openScore(item->albumItem->fileInfo.absoluteFilePath(), false));
+            item->albumItem.setScore(mscore->openScore(item->albumItem.fileInfo.absoluteFilePath(), false));
             temporarilyOpen = true;
         }
 
-        if (item->albumItem->enabled()) {
-            seconds += item->albumItem->score->duration();
+        if (item->albumItem.enabled()) {
+            seconds += item->albumItem.score->duration();
         }
 
-        int tempSeconds = item->albumItem->score->duration();
+        int tempSeconds = item->albumItem.score->duration();
         int tempMinutes = tempSeconds / 60;
         tempSeconds -= tempMinutes * 60;
         int tempHours = tempMinutes / 60;
@@ -636,7 +631,7 @@ void AlbumManager::updateDurations()
             + QString::number(tempSeconds).rightJustified(2, '0'));
 
         if (temporarilyOpen) {
-            mscore->closeScore(item->albumItem->score);
+            mscore->closeScore(item->albumItem.score);
         }
     }
     minutes = seconds / 60;
@@ -710,16 +705,16 @@ void AlbumManager::itemDoubleClicked(QTableWidgetItem* item)
     }
 
     if (scoreModeButton->isChecked()) {
-        if (aItem->albumItem->score) {
+        if (aItem->albumItem.score) {
             // TODO_SK: This should not just open the score, it should append it to MuseScoreCore's scoreList.
-            mscore->openScore(aItem->albumItem->fileInfo.absoluteFilePath());
+            mscore->openScore(aItem->albumItem.fileInfo.absoluteFilePath());
         } else {
-            aItem->albumItem->score = mscore->openScore(aItem->albumItem->fileInfo.absoluteFilePath());
-            aItem->albumItem->score->setPartOfActiveAlbum(true);
+            aItem->albumItem.score = mscore->openScore(aItem->albumItem.fileInfo.absoluteFilePath());
+            aItem->albumItem.score->setPartOfActiveAlbum(true);
         }
-        aItem->albumItem->score->doLayout();
+        aItem->albumItem.score->doLayout();
     } else {
-        mscore->currentScoreView()->gotoMeasure(aItem->albumItem->score->firstMeasure()); // move to the chosen measure
+        mscore->currentScoreView()->gotoMeasure(aItem->albumItem.score->firstMeasure()); // move to the chosen measure
         mscore->currentScoreView()->deselectAll(); // deselect the element selected by `goToMeasure`
         mscore->currentScoreView()->updateAll();
     }
@@ -743,17 +738,17 @@ void AlbumManager::swap(int indexA, int indexB)
 
     // swap the text of the widgets
     QTableWidgetItem* itemA = scoreList->item(indexA, 0);
-    itemA->setText(m_items.at(indexA)->albumItem->score->title());
+    itemA->setText(m_items.at(indexA)->albumItem.score->title());
     QTableWidgetItem* itemB = scoreList->item(indexB, 0);
-    itemB->setText(m_items.at(indexB)->albumItem->score->title());
+    itemB->setText(m_items.at(indexB)->albumItem.score->title());
 
     // swap again the widgets to place them correctly FIXME: isn't there a better way to do all this?
     std::swap(m_items.at(indexA)->listItem, m_items.at(indexB)->listItem);   // workaround, because the list widget items are changed twice so they are being reset
     std::swap(m_items.at(indexA)->listDurationItem, m_items.at(indexB)->listDurationItem);
 
     // update the enabled indicators
-    m_items.at(indexA)->setEnabled(m_items.at(indexA)->albumItem->enabled());
-    m_items.at(indexB)->setEnabled(m_items.at(indexB)->albumItem->enabled());
+    m_items.at(indexA)->setEnabled(m_items.at(indexA)->albumItem.enabled());
+    m_items.at(indexB)->setEnabled(m_items.at(indexB)->albumItem.enabled());
 
     // update the duration labels
     updateDurations();
@@ -796,7 +791,7 @@ void AlbumManager::deleteClicked(bool checked)
 //   setAlbum
 //---------------------------------------------------------
 
-void AlbumManager::setAlbum(Album* a)
+void AlbumManager::setAlbum(std::unique_ptr<Album> a)
 {
     std::cout << "setting album" << std::endl;
     scoreList->setRowCount(0);
@@ -804,27 +799,27 @@ void AlbumManager::setAlbum(Album* a)
     if (!a)
         return;
 
-    m_album = a;
+    m_album = std::move(a);
 
     scoreList->blockSignals(true);
     for (auto& item : m_album->_albumItems) {
         QString path = item->fileInfo.canonicalFilePath();
         MasterScore* score = mscore->readScore(path);
         item->setScore(score);
-        addAlbumItem(item.get()); // TODO_SK: Convert to reference and use the unique ptr reference
+        addAlbumItem(*item.get()); // TODO_SK: Convert to reference and use the unique ptr reference
     }
 
     m_album->addSectionBreaks(); // TODO:SK normally I should add the sections breaks while loading, but the scores haven't been loaded so I can't
     scoreList->blockSignals(false);
 
-    Album::activeAlbum = m_album;
+    Album::activeAlbum = m_album.get();
 }
 
 //---------------------------------------------------------
-//   album (maybe getAlbum here?)
+//   album
 //---------------------------------------------------------
 
-Album* AlbumManager::album()
+const std::unique_ptr<Album>& AlbumManager::album() const
 {
     return m_album;
 }
@@ -901,23 +896,23 @@ void MuseScore::showAlbumManager(bool visible)
 //---------------------------------------------------------
 //---------------------------------------------------------
 
-AlbumManagerItem::AlbumManagerItem(AlbumItem* item, QTableWidgetItem* listItem, QTableWidgetItem* listDurationItem)
+AlbumManagerItem::AlbumManagerItem(AlbumItem& item, QTableWidgetItem* listItem, QTableWidgetItem* listDurationItem)
+    : albumItem(item)
 {
-    albumItem = item;
-    if (!albumItem->score) {
-        QString path = item->fileInfo.canonicalFilePath();
+    if (!albumItem.score) {
+        QString path = item.fileInfo.canonicalFilePath();
         MasterScore* score = mscore->readScore(path);
-        albumItem->setScore(score);
+        albumItem.setScore(score);
     }
-    albumItem->score->setPartOfActiveAlbum(true);
+    albumItem.score->setPartOfActiveAlbum(true);
     this->listItem = listItem;
     this->listDurationItem = listDurationItem;
-    setEnabled(albumItem->enabled());
+    setEnabled(albumItem.enabled());
 }
 
 AlbumManagerItem::~AlbumManagerItem()
 {
-    albumItem->score->setPartOfActiveAlbum(false);
+    albumItem.score->setPartOfActiveAlbum(false);
 }
 
 //---------------------------------------------------------
@@ -926,7 +921,7 @@ AlbumManagerItem::~AlbumManagerItem()
 
 void AlbumManagerItem::setEnabled(bool b)
 {
-    albumItem->setEnabled(b);
+    albumItem.setEnabled(b);
     if (b) {
         if (listItem) {
             listItem->setTextColor(Qt::black);

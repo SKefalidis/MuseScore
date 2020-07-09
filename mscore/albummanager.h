@@ -15,6 +15,7 @@
 
 #include "ui_albummanager.h"
 #include "abstractdialog.h"
+#include "libmscore/album.h"
 
 namespace Ms {
 
@@ -23,8 +24,6 @@ class Movements;
 class MasterScore;
 class Score;
 class AlbumManagerDialog;
-class Album;
-struct AlbumItem;
 
 //---------------------------------------------------------
 //   AlbumManagerItem
@@ -34,12 +33,12 @@ struct AlbumManagerItem : public QObject {
     Q_OBJECT
 
 public:
-    AlbumManagerItem(AlbumItem* albumItem, QTableWidgetItem* listItem, QTableWidgetItem* listDurationItem);
+    AlbumManagerItem(AlbumItem& albumItem, QTableWidgetItem* listItem, QTableWidgetItem* listDurationItem);
     ~AlbumManagerItem();
 
     void setEnabled(bool b);
 
-    AlbumItem* albumItem; // TODO_SK: convert to reference, this should never be null and should not change
+    AlbumItem& albumItem; // TODO_SK: convert to reference, this should never be null and should not change
     QTableWidgetItem* listItem;
     QTableWidgetItem* listDurationItem;
 };
@@ -56,17 +55,17 @@ public:
     AlbumManager(QWidget* parent = 0);
     ~AlbumManager();
 
-    Album* album();
-    void setAlbum(Album* album);
+    const std::unique_ptr<Album>& album() const;
+    void setAlbum(std::unique_ptr<Album> album);
 
-    std::vector<std::unique_ptr<AlbumItem> >& albumScores() const;
+    std::vector<std::unique_ptr<AlbumItem>>& albumScores() const;
 
 protected:
     virtual void retranslate();
     bool eventFilter(QObject* obj, QEvent* ev) override;
 
 private slots:
-    void addAlbumItem(AlbumItem* albumItem);
+    void addAlbumItem(AlbumItem& albumItem);
     void itemDoubleClicked(QTableWidgetItem* item);
     void swap(int indexA, int indexB);
     void updateButtons();
@@ -98,7 +97,7 @@ private:
     void updateContents();
 
     AlbumManagerDialog* m_settingsDialog    { nullptr };
-    Album* m_album                          { nullptr };
+    std::unique_ptr<Album> m_album          { nullptr };
     std::vector<AlbumManagerItem*> m_items  {};
     MasterScore* m_tempScore                { nullptr };
     int m_tempScoreTabIndex                 { -1 };
