@@ -90,6 +90,7 @@ AlbumManager::AlbumManager(QWidget* parent)
     m_album = std::unique_ptr<Album>(new Album()); // placeholder
 
     connect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
+    connect(mscore->getTab1(), &ScoreTab::tabRemoved, this, &AlbumManager::tabRemoved);
 }
 
 AlbumManager::~AlbumManager()
@@ -195,10 +196,10 @@ void AlbumManager::changeMode(bool checked)
             m_tempScore->setEmptyMovement(true);
             m_tempScore->setfirstRealMovement(1);
             m_tempScore->setName("Temporary Album Score");
+            m_tempScore->setPartOfActiveAlbum(true);
 
             mscore->setCurrentScoreViewSignalBlocking(mscore->appendScore(m_tempScore));
             mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
-
             m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
 
             for (auto item : m_items) {
@@ -212,7 +213,13 @@ void AlbumManager::changeMode(bool checked)
 //                                                // to score mode again
 //                                                // fixed by using setCurrentScoreviewBlocking
         } else {
-            mscore->setCurrentScoreView(m_tempScoreTabIndex);
+            if (m_tempScoreTabIndex != -1) {
+                mscore->setCurrentScoreView(m_tempScoreTabIndex);
+            } else {
+                mscore->setCurrentScoreViewSignalBlocking(mscore->appendScore(m_tempScore));
+                mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
+                m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
+            }
         }
         scoreModeButton->blockSignals(true);
         scoreModeButton->setChecked(false);
@@ -240,6 +247,18 @@ void AlbumManager::tabChanged()
         scoreModeButton->setChecked(true);
     }
     mscore->getTab1()->blockSignals(false);
+}
+
+//---------------------------------------------------------
+//   tabRemoved
+//---------------------------------------------------------
+
+void AlbumManager::tabRemoved(int index)
+{
+    if (index == m_tempScoreTabIndex) {
+        scoreModeButton->setChecked(true);
+        m_tempScoreTabIndex = -1;
+    }
 }
 
 //---------------------------------------------------------

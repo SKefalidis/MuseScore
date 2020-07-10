@@ -70,6 +70,7 @@ private slots:
     void updateButtons();
     void itemChanged(QTableWidgetItem* item);     // score name in list is edited
     void tabChanged();
+    void tabRemoved(int index);
 
     // The unused 'checked' parameters exist because Qt 5 style signals/slots don't
     // accept default values.
@@ -99,7 +100,7 @@ private:
     std::unique_ptr<Album> m_album          { nullptr };
     std::vector<AlbumManagerItem*> m_items  {};
     MasterScore* m_tempScore                { nullptr };
-    int m_tempScoreTabIndex                 { -1 };
+    int m_tempScoreTabIndex                 { -1 }; // TODO_SK: goes out of sync very easily (remove on of the previous tabs)
 
     int m_dragEnterIndex    { -1 };
     int m_dropIndex         { -1 };
