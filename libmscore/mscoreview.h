@@ -52,6 +52,7 @@ public:
     virtual void adjustCanvasPosition(const Element*, bool /*playBack*/, int /*staffIdx*/ = -1) {}
     virtual void setScore(Score* s) { _score = s; }
     Score* score() const { return _score; }
+    Score* drawingScore() const { return m_drawingScore; }
     virtual void removeScore() {}
 
     virtual void changeEditElement(Element*) {}

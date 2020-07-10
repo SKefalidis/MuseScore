@@ -168,7 +168,7 @@ QSplitter* ScoreTab::viewSplitter(int n) const
             return 0;
         }
         ScoreView* v = static_cast<ScoreView*>(sp->widget(0));
-        if (v->score() == score) {
+        if (v->drawingScore() == score) {
             return sp;
         }
     }
