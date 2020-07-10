@@ -60,6 +60,10 @@ void AlbumManagerDialog::apply()
     AlbumManager* albumManager = static_cast<AlbumManager*>(parent());
     albumManager->album()->setDefaultPlaybackDelay(playbackDelayBox->value());
     albumManager->album()->setGenerateContents(checkContentsGeneration->isChecked());
+    albumManager->album()->setAddPageBreaksEnabled(checkAddPageBreak->isChecked());
+    if (checkAddPageBreak->isChecked()) {
+        albumManager->album()->addPageBreaks();
+    }
 }
 
 //---------------------------------------------------------
@@ -71,6 +75,7 @@ void AlbumManagerDialog::update()
     AlbumManager* albumManager = static_cast<AlbumManager*>(parent());
     playbackDelayBox->setValue(albumManager->album()->defaultPlaybackDelay());
     checkContentsGeneration->setChecked(albumManager->album()->generateContents());
+    checkAddPageBreak->setChecked(albumManager->album()->addPageBreaksEnabled());
 }
 
 //---------------------------------------------------------

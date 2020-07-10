@@ -66,6 +66,8 @@ public:
     void addScore(MasterScore* score, bool enabled = true);
     void addSectionBreak(AlbumItem* aItem);
     void addSectionBreaks();
+    void addPageBreak(AlbumItem* aItem);
+    void addPageBreaks();
     void removeScore(MasterScore* score);
     void removeScore(int index);
     void swap(int indexA, int indexB);
@@ -86,6 +88,8 @@ public:
     const QFileInfo& fileInfo() const;
     bool generateContents() const;
     void setGenerateContents(bool enabled);
+    bool addPageBreaksEnabled() const;
+    void setAddPageBreaksEnabled(bool enabled);
     int defaultPlaybackDelay() const;
     void setDefaultPlaybackDelay(int ms);
 
@@ -97,6 +101,7 @@ private:
     QFileInfo m_fileInfo                            {};
 
     bool m_generateContents                         { false };
+    bool m_addPageBreaksEnabled                     { false };
     int m_defaultPlaybackDelay                      { 1000 };
 };
 
