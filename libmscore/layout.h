@@ -60,7 +60,7 @@ struct LayoutContext {
     Fraction endTick;
 
     LayoutContext(Score* s)
-        : score(s), dominantScore(s) {}
+        : dominantScore(s), score(s) {}
     LayoutContext(const LayoutContext&) = delete;
     LayoutContext& operator=(const LayoutContext&) = delete;
     ~LayoutContext();
