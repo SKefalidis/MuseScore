@@ -82,7 +82,7 @@ public:
 
     std::vector<AlbumItem*> albumItems() const;
     const QString& albumTitle() const;
-    void setAlbumTitle(const QString& newTitle);
+    void setAlbumTitle(const QString& newTitle); // delete?
     const QFileInfo& fileInfo() const;
     bool generateContents() const;
     void setGenerateContents(bool enabled);
