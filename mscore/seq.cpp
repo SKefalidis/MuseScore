@@ -247,7 +247,7 @@ void Seq::setScoreView(ScoreView* v)
 
 void Seq::setNextMovement()
 {
-    if (nextMovementIndex < topMovement->movements()->size() && nextMovementIndex >= 0) {
+    if (nextMovementIndex < int(topMovement->movements()->size()) && nextMovementIndex >= 0) {
         cs = topMovement->movements()->at(nextMovementIndex);
         nextMovementIndex++;
     } else {
@@ -271,7 +271,7 @@ void Seq::setNextMovement()
 
 void Seq::setNextMovement(int i)
 {
-    if (i < topMovement->movements()->size() && i >= 0) {
+    if (i < int(topMovement->movements()->size()) && i >= 0) {
         cs = topMovement->movements()->at(i);
         nextMovementIndex = i + 1;
     } else {
