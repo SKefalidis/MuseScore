@@ -145,8 +145,11 @@ Album* Album::activeAlbum = nullptr;
 void Album::addAlbumItem(unique_ptr<AlbumItem> aItem)
 {
     // add section break to the end of the movement (if one does not already exist)
-    if (aItem->score && qFuzzyIsNull(aItem->score->lastMeasure()->pause())) {
+    if (aItem->score) {
         addSectionBreak(aItem.get());
+    }
+    if (aItem->score && m_addPageBreaksEnabled) {
+        addPageBreak(aItem.get());
     }
     m_albumItems.push_back(std::move(aItem));
 }
@@ -173,10 +176,12 @@ void Album::addScore(MasterScore *score, bool enabled)
 
 void Album::addSectionBreak(AlbumItem* aItem)
 {
-    LayoutBreak* lb = new LayoutBreak(aItem->score);
-    lb->setLayoutBreakType(LayoutBreak::Type::SECTION);
-    aItem->score->lastMeasure()->add(lb);
-    aItem->score->update();
+    if (!aItem->score->lastMeasure()->sectionBreak()) { // add only if there isn't one
+        LayoutBreak* lb = new LayoutBreak(aItem->score);
+        lb->setLayoutBreakType(LayoutBreak::Type::SECTION);
+        aItem->score->lastMeasure()->add(lb);
+        aItem->score->update();
+    }
 }
 
 //---------------------------------------------------------
@@ -187,6 +192,31 @@ void Album::addSectionBreaks()
 {
     for (auto& aItem : m_albumItems) {
         addSectionBreak(aItem.get());
+    }
+}
+
+//---------------------------------------------------------
+//   addPageBreak
+//---------------------------------------------------------
+
+void Album::addPageBreak(AlbumItem* aItem)
+{
+    if (!aItem->score->lastMeasure()->pageBreak()) { // add only if there isn't one
+        LayoutBreak* lb = new LayoutBreak(aItem->score);
+        lb->setLayoutBreakType(LayoutBreak::Type::PAGE);
+        aItem->score->lastMeasure()->add(lb);
+        aItem->score->update();
+    }
+}
+
+//---------------------------------------------------------
+//   addPageBreaks
+//---------------------------------------------------------
+
+void Album::addPageBreaks()
+{
+    for (auto& aItem : m_albumItems) {
+        addPageBreak(aItem.get());
     }
 }
 
@@ -432,6 +462,24 @@ bool Album::generateContents() const
 void Album::setGenerateContents(bool enabled)
 {
     m_generateContents = enabled;
+}
+
+//---------------------------------------------------------
+//   addPageBreaksEnabled
+//---------------------------------------------------------
+
+bool Album::addPageBreaksEnabled() const
+{
+    return m_addPageBreaksEnabled;
+}
+
+//---------------------------------------------------------
+//   setAddPageBreaksEnabled
+//---------------------------------------------------------
+
+void Album::setAddPageBreaksEnabled(bool enabled)
+{
+    m_addPageBreaksEnabled = enabled;
 }
 
 //---------------------------------------------------------
