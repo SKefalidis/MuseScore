@@ -1107,12 +1107,13 @@ void ScoreView::drawAnchorLines(QPainter& painter)
 //---------------------------------------------------------
 void ScoreView::paintEvent(QPaintEvent* ev)
 {
-    static bool b = false;
-
-    if(b) {
-        b = false;
-        return;
-    }
+    // these were commencted out to fix an issue with zooming
+    // if there are crashes related to paintEvent being called twice, enable these
+//    static bool b = false;
+//    if(b) {
+//        b = false;
+//        return;
+//    }
 
     if (!m_drawingScore) {
         return;
@@ -1122,13 +1123,9 @@ void ScoreView::paintEvent(QPaintEvent* ev)
     vp.setRenderHint(QPainter::TextAntialiasing, true);
 
     if (_score != m_drawingScore) { // only run for multi-movement scores
-//        for (auto x : *m_drawingScore->masterScore()->movements()) { // ΤODO:SK doLayout maybe only on the selected score? the others shouldn't have changed
-//            std::cout << "called from paint event " << x->title().toStdString() << std::endl;
-//            x->doLayout();
-//        }
         _score->doLayout();
         m_drawingScore->doLayout();
-        b = true;
+//        b = true;
     }
 
     paint(ev->rect(), vp);
@@ -1675,8 +1672,6 @@ void ScoreView::zoom(qreal _mag, const QPointF& pos)
     emit offsetChanged(_matrix.dx(), _matrix.dy());
 
     update();
-
-    QTimer::singleShot(100, this, SLOT(update())); // hack: zooming caues displacement of pages in album-mode
 }
 
 //-----------------------------------------------------------------------------
