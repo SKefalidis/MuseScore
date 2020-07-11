@@ -997,7 +997,10 @@ QList<System*> Score::searchSystem(const QPointF& pos, const System* preferredSy
     int n = sl->size();
     for (int i = 0; i < n; ++i) {
         System* s = sl->at(i);
-        System* ns = 0;                   // next system row
+        if (s->score() != this) { // for multi-movement scores
+            continue;
+        }
+        System* ns = nullptr;               // next system row
         int ii = i + 1;
         for (; ii < n; ++ii) {
             ns = sl->at(ii);
@@ -1005,7 +1008,7 @@ QList<System*> Score::searchSystem(const QPointF& pos, const System* preferredSy
                 break;
             }
         }
-        if ((ii == n) || (ns == 0)) {
+        if ((ii == n) || (ns == nullptr)) {
             y2 = page->height();
         } else {
             qreal sy2 = s->y() + s->bbox().height();
