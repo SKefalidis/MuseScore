@@ -595,7 +595,7 @@ void ScoreView::mousePressEvent(QMouseEvent* ev)
         }
         _score->endCmd();
         if (_score->inputState().cr()) {
-            adjustCanvasPosition(_score->inputState().cr(), false);
+//            adjustCanvasPosition(_score->inputState().cr(), false);
         }
         shadowNote->setVisible(false);
     }
