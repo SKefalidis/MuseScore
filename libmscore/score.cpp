@@ -928,7 +928,17 @@ void Score::appendPart(Part* p)
 
 Page* Score::searchPage(const QPointF& p) const
 {
-    for (Page* page : pages()) {
+    // TODO_SK:
+    // the pages are added only in the dominantScore
+    // individuals scores don't have the correct pages
+    // this is a workaround, find something better
+    QList<Page*> temp_pages {};
+    for (auto x : systems()) {
+        if(!temp_pages.contains(x->page())) {
+            temp_pages.append(x->page());
+        }
+    }
+    for (Page* page : temp_pages) {
         QRectF r = page->bbox().translated(page->pos());
         if (r.contains(p)) {
             return page;
