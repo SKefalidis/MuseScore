@@ -4484,6 +4484,13 @@ void LayoutContext::collectPage()
         page->appendSystem(curSystem);
         y += curSystem->height();
 
+        if (dominantScore && dominantScore != score) {
+            curSystem->setAlbumParent(page);
+            for (auto x : curSystem->measures()) {
+                x->albumParentPage = curSystem->page();
+            }
+        }
+
         //
         // find the next system to add to the page (if it does not fit or if there is a page break exit the loop)
         //
