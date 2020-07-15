@@ -120,6 +120,14 @@ void MeasureBase::scanElements(void* data, void (* func)(void*, Element*), bool 
     }
 }
 
+void MeasureBase::setSystem(System* s)
+{
+    setParent((Element*)s);
+    if (albumParentPage != nullptr && s != nullptr) {
+       s->setAlbumParent((Element*)albumParentPage);
+    }
+}
+
 //---------------------------------------------------------
 //   add
 ///   Add new Element \a el to MeasureBase

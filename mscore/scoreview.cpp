@@ -874,7 +874,7 @@ void ScoreView::moveCursor()
     _cursor->setRect(QRectF(x, y, w, h));
     update(_matrix.mapRect(_cursor->rect()).toRect().adjusted(-1,-1,1,1));
     if (is.cr()) {
-//        adjustCanvasPosition(is.cr(), false);
+        adjustCanvasPosition(is.cr(), false);
     }
 }
 
@@ -3154,7 +3154,7 @@ void ScoreView::startNoteEntry()
     _score->select(el, SelectType::SINGLE, 0);
     is.setRest(false);
     is.setNoteEntryMode(true);
-//    adjustCanvasPosition(el, false);
+    adjustCanvasPosition(el, false);
 
     getAction("pad-rest")->setChecked(false);
     setMouseTracking(true);
@@ -3815,7 +3815,7 @@ void ScoreView::adjustCanvasPosition(const Element* el, bool playBack, int staff
     }
 
     // align to page borders if extends beyond
-    Page* page = sys->page();
+    Page* page = sys->albumPage();
     if (x < page->x() || r.width() >= page->width()) {
         x = page->x();
     } else if (r.width() < page->width() && r.width() + x > page->width() + page->x()) {
@@ -5640,7 +5640,7 @@ void ScoreView::moveViewportToLastEdit()
         = (editElement && editElement->bbox().isValid() && !mb->isMeasure()) ? editElement : mb;
 
     const int staff = sc->isMaster() && mb->isMeasure() ? st.startStaff() : -1;   // TODO: choose the closest staff to the current viewport?
-//    adjustCanvasPosition(viewportElement, /* playback */ false, staff);
+    adjustCanvasPosition(viewportElement, /* playback */ false, staff);
 }
 
 //---------------------------------------------------------
