@@ -360,11 +360,15 @@ void Album::readAlbum(XmlReader &reader)
         if (tag == "name") {
             m_albumTitle = reader.readElementText();
         } else if (tag == "Score") {
-            std::cout << "new album item" << std::endl;
-
             unique_ptr<AlbumItem> albumItem(new AlbumItem(*this));
             albumItem->readAlbumItem(reader);
             addAlbumItem(std::move(albumItem));
+        } else if (tag == "generateContents") {
+            m_generateContents = reader.readBool();
+        } else if (tag == "addPageBreaks") {
+            m_addPageBreaksEnabled = reader.readBool();
+        } else if (tag == "playbackDelay") {
+            m_defaultPlaybackDelay = reader.readInt();
         }
     }
 }
@@ -400,6 +404,9 @@ void Album::writeAlbum(XmlWriter &writer, bool absolutePathEnabled)
 {
     writer.stag("Album");
     writer.tag("name", m_albumTitle);
+    writer.tag("generateContents", m_generateContents);
+    writer.tag("addPageBreaks", m_addPageBreaksEnabled);
+    writer.tag("playbackDelay", m_defaultPlaybackDelay);
     for (auto& aItem : m_albumItems) {
         aItem->writeAlbumItem(writer, absolutePathEnabled);
     }

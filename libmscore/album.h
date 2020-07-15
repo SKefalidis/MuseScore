@@ -102,7 +102,7 @@ private:
 
     bool m_generateContents                         { false };
     bool m_addPageBreaksEnabled                     { false };
-    int m_defaultPlaybackDelay                      { 1000 };
+    int m_defaultPlaybackDelay                      { 3000 };
 };
 
 }     // namespace Ms
