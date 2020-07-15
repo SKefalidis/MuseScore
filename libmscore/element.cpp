@@ -178,6 +178,7 @@ Element::Element(const Element& e)
     : ScoreElement(e)
 {
     _parent     = e._parent;
+    _albumParent = e._albumParent;
     _bbox       = e._bbox;
     _mag        = e._mag;
     _pos        = e._pos;
@@ -481,6 +482,11 @@ QPointF Element::canvasPos() const
         return p;
     }
 
+    if (parent()->isPage() && albumParent()) {
+        p += albumParent()->canvasPos();
+        return p;
+    }
+
     if (_flags & ElementFlag::ON_STAFF) {
         System* system = nullptr;
         Measure* measure = nullptr;
@@ -539,8 +545,13 @@ qreal Element::pageX() const
 qreal Element::canvasX() const
 {
     qreal xp = x();
-    for (Element* e = parent(); e; e = e->parent()) {
+    for (Element* e = parent(); e;) {
         xp += e->x();
+        if (e->parent() && e->parent()->isPage() && e->albumParent()) {
+            e = e->albumParent();
+        } else {
+            e = e->parent();
+        }
     }
     return xp;
 }
