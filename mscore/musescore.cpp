@@ -6443,28 +6443,33 @@ void MuseScore::cmd(QAction* a)
 
 void MuseScore::endCmd(const bool isCmdFromInspector, const bool undoRedo)
 {
+    std::cout << "before the end\n" << std::flush;
+
 #ifdef SCRIPT_INTERFACE
     getPluginEngine()->beginEndCmd(this, undoRedo);
 #endif
+    std::cout << "end\n" << std::flush;
+
     if (timeline()) {
         timeline()->updateGrid();
     }
     if (MScore::_error != MS_NO_ERROR) {
         showError();
     }
-    if (cs) {
-        setPos(cs->inputState().tick());
+    Score* currentScore = currentScoreView() ? currentScoreView()->score() : cs;
+    if (currentScore) {
+        setPos(currentScore->inputState().tick());
         updateInputState(cv->score());
         updateUndoRedo();
-        dirtyChanged(cs);
+        dirtyChanged(currentScore);
         scoreCmpTool->updateDiff();
-        Element* e = cs->selection().element();
+        Element* e = currentScore->selection().element();
 
         // For multiple notes selected check if they all have same pitch and tuning
         bool samePitch = true;
         int pitch    = -1;
         float tuning = 0;
-        for (Element* ee : cs->selection().elements()) {
+        for (Element* ee : currentScore->selection().elements()) {
             if (!ee->isNote()) {
                 samePitch = false;
                 break;
@@ -6479,23 +6484,24 @@ void MuseScore::endCmd(const bool isCmdFromInspector, const bool undoRedo)
             }
         }
         if (samePitch && pitch >= 0) {
-            e = cs->selection().elements()[0];
+            e = currentScore->selection().elements()[0];
         }
 
-        NoteEntryMethod entryMethod = cs->noteEntryMethod();
-        if (e && (cs->playNote() || cs->playChord())
+        NoteEntryMethod entryMethod = currentScore->noteEntryMethod();
+        if (e && (currentScore->playNote() || currentScore->playChord())
             && entryMethod != NoteEntryMethod::REALTIME_AUTO
             && entryMethod != NoteEntryMethod::REALTIME_MANUAL) {
-            if (cs->playChord() && preferences.getBool(PREF_SCORE_CHORD_PLAYONADDNOTE)
+            if (currentScore->playChord() && preferences.getBool(PREF_SCORE_CHORD_PLAYONADDNOTE)
                 && e->type() == ElementType::NOTE) {
                 play(static_cast<Note*>(e)->chord());
             } else {
                 play(e);
             }
-            cs->setPlayNote(false);
-            cs->setPlayChord(false);
+            currentScore->setPlayNote(false);
+            currentScore->setPlayChord(false);
         }
-        MasterScore* ms = cs->masterScore();
+        std::cout << "a\n" << std::flush;
+        MasterScore* ms = currentScore->isMaster() ? static_cast<MasterScore*>(currentScore) : currentScore->masterScore();
         if (ms->excerptsChanged()) {
             if (tab1) {
                 tab1->blockSignals(ctab != tab1);
@@ -6516,35 +6522,38 @@ void MuseScore::endCmd(const bool isCmdFromInspector, const bool undoRedo)
             instrumentChanged();                      // update mixer
             ms->setInstrumentsChanged(false);
         }
-        if (cs->selectionChanged()) {
-            cs->setSelectionChanged(false);
-            SelState ss = cs->selection().state();
+        std::cout << "b\n" << std::flush;
+        if (currentScore->selectionChanged()) {
+            currentScore->setSelectionChanged(false);
+            SelState ss = currentScore->selection().state();
             selectionChanged(ss);
         }
-
+        std::cout << "b1\n" << std::flush;
         if (cv) {
             cv->moveViewportToLastEdit();
         }
-
-        getAction("concert-pitch")->setChecked(cs->styleB(Sid::concertPitch));
-
-        if (e == 0 && cs->noteEntryMode()) {
-            e = cs->inputState().cr();
+        std::cout << "b2\n" << std::flush;
+        getAction("concert-pitch")->setChecked(currentScore->styleB(Sid::concertPitch));
+        std::cout << "b3\n" << std::flush;
+        if (e == 0 && currentScore->noteEntryMode()) {
+            e = currentScore->inputState().cr();
         }
+        std::cout << "c\n" << std::flush;
         updateViewModeCombo();
         ScoreAccessibility::instance()->updateAccessibilityInfo();
     } else {
         selectionChanged(SelState::NONE);
     }
-
+    std::cout << !isCmdFromInspector << " " << "d\n" << std::flush;
     if (!isCmdFromInspector) {
         updateInspector();
     }
-
+    std::cout << "e\n" << std::flush;
     updatePaletteBeamMode();
 #ifdef SCRIPT_INTERFACE
     getPluginEngine()->endEndCmd(this);
 #endif
+    std::cout << "f\n" << std::flush;
 }
 
 //---------------------------------------------------------
