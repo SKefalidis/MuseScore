@@ -325,8 +325,9 @@ std::unique_ptr<TelemetryManager> TelemetryManager::mgr;
 
 void MuseScore::cmdInsertMeasures()
 {
-    if (cs) {
-        if (cs->selection().isNone() && !cs->selection().findMeasure()) {
+    Score* currentScore = currentScoreView() ? currentScoreView()->score() : cs;
+    if (currentScore) {
+        if (currentScore->selection().isNone() && !currentScore->selection().findMeasure()) {
             QMessageBox::warning(0, "MuseScore",
                                  tr("No measure selected:\n" "Please select a measure and try again"));
         } else {
@@ -6502,7 +6503,6 @@ void MuseScore::endCmd(const bool isCmdFromInspector, const bool undoRedo)
     } else {
         selectionChanged(SelState::NONE);
     }
-    std::cout << !isCmdFromInspector << " " << "d\n" << std::flush;
     if (!isCmdFromInspector) {
         updateInspector();
     }
