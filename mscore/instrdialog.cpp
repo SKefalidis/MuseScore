@@ -219,7 +219,7 @@ void MuseScore::editInstrList()
         return;
     }
     instrList->init();
-    MasterScore* masterScore = cs->masterScore();
+    MasterScore* masterScore = currentScoreView() ? static_cast<MasterScore*>(currentScoreView()->score()) : cs->masterScore();
     instrList->genPartList(masterScore);
     masterScore->startCmd();
     masterScore->deselectAll();
@@ -265,7 +265,7 @@ void MuseScore::editInstrList()
     if (i == tmpKeymap.end() || i->first != 0) {
         tmpKeymap[0].setKey(normalizedC);
     }
-
+    std::cout << 1 << std::endl;
     //
     // process modified partitur list
     //
@@ -290,7 +290,7 @@ void MuseScore::editInstrList()
             pli->op = ListItemOp::I_DELETE;
         }
     }
-
+    std::cout << 2 << std::endl;
     item = 0;
     for (int idx = 0; (item = pl->topLevelItem(idx)); ++idx) {
         int rstaff = 0;
@@ -410,7 +410,7 @@ void MuseScore::editInstrList()
             }
         }
     }
-
+    std::cout << 3 << std::endl;
     //
     //    sort staves
     //
@@ -515,7 +515,7 @@ void MuseScore::editInstrList()
             }
         }
     }
-
+    std::cout << 4 << std::endl;
     //
     // there should be at least one measure
     //
@@ -551,10 +551,16 @@ void MuseScore::editInstrList()
             }
         }
     }
-
+    std::cout << 5 << std::endl;
     masterScore->setLayoutAll();
-    masterScore->endCmd();
+    std::cout << 5.5 << std::endl;
+    masterScore->deselectAll();
+    masterScore->setSelectionChanged(false);
+    masterScore->endCmd(true); // otherwise the inspector is updated and it crashes
+    std::cout << 6 << std::endl;
     masterScore->rebuildAndUpdateExpressive(MuseScore::synthesizer("Fluid"));
+    std::cout << 7 << std::endl;
     seq->initInstruments();
+    std::cout << 8 << std::endl;
 }
 }
