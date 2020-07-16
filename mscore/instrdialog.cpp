@@ -222,7 +222,7 @@ void MuseScore::editInstrList()
     MasterScore* masterScore = currentScoreView() ? static_cast<MasterScore*>(currentScoreView()->score()) : cs->masterScore();
     instrList->genPartList(masterScore);
     masterScore->startCmd();
-    masterScore->deselectAll();
+//    masterScore->deselectAll();
     int rv = instrList->exec();
 
     if (rv == 0) {
@@ -554,7 +554,7 @@ void MuseScore::editInstrList()
     std::cout << 5 << std::endl;
     masterScore->setLayoutAll();
     std::cout << 5.5 << std::endl;
-    masterScore->deselectAll();
+//    masterScore->deselectAll();
     masterScore->setSelectionChanged(false);
     masterScore->endCmd(true); // otherwise the inspector is updated and it crashes
     std::cout << 6 << std::endl;

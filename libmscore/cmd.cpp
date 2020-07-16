@@ -263,7 +263,6 @@ void Score::undoRedo(bool undo, EditData* ed)
 
 void Score::endCmd(const bool isCmdFromInspector, bool rollback)
 {
-    std::cout << "ri" << std::endl;
     if (!undoStack()->active()) {
         qDebug("Score::endCmd(): no cmd active");
         update();
@@ -272,32 +271,25 @@ void Score::endCmd(const bool isCmdFromInspector, bool rollback)
     if (readOnly() || MScore::_error != MS_NO_ERROR) {
         rollback = true;
     }
-    std::cout << "gh" << std::endl;
 
     if (rollback) {
         undoStack()->current()->unwind();
     }
-    std::cout << "t" << std::endl;
     update(false);
     if (Album::scoreInActiveAlbum(this->masterScore())) { // relayout the album score so that this score does not go to the top
         Album::activeAlbum->getDominant()->doLayout();
     }
-    std::cout << "h" << std::endl;
     if (MScore::debugMode) {
         qDebug("===endCmd() %d", undoStack()->current()->childCount());
     }
     const bool noUndo = undoStack()->current()->empty();         // nothing to undo?
     undoStack()->endMacro(noUndo);
-    std::cout << "e" << std::endl;
     if (dirty()) {
         masterScore()->setPlaylistDirty();      // TODO: flag individual operations
         masterScore()->setAutosaveDirty(true);
     }
-    std::cout << "r" << std::endl;
     MuseScoreCore::mscoreCore->endCmd(isCmdFromInspector, rollback);
-    std::cout << "r" << std::endl;
     cmdState().reset();
-    std::cout << "e" << std::endl;
 }
 
 #ifndef NDEBUG
