@@ -462,5 +462,5 @@ Ms::Score* AbstractInspectorModel::parentScore() const
         return nullptr;
     }
 
-    return Ms::MuseScoreCore::mscoreCore->currentScore();
+    return Ms::MuseScoreCore::mscoreCore->currentScore2() ? Ms::MuseScoreCore::mscoreCore->currentScore2() : Ms::MuseScoreCore::mscoreCore->currentScore() ;
 }

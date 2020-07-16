@@ -1918,6 +1918,7 @@ void Score::scanElements(void* data, void (* func)(void*, Element*), bool all)
             }
         }
     }
+
     for (Page* page : pages()) {
         for (System* s :page->systems()) {
             s->scanElements(data, func, all);

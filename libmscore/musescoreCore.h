@@ -24,7 +24,8 @@ class Score;
 class MuseScoreCore
 {
 protected:
-    Score* cs  { 0 };                // current score
+    Score* cs  { nullptr };                // current score
+    Score* cs2 { nullptr };
     QList<MasterScore*> scoreList;
 
 public:
@@ -33,6 +34,8 @@ public:
     virtual ~MuseScoreCore() = default;
     Score* currentScore() const { return cs; }
     void setCurrentScore(Score* score) { cs = score; }
+    Score* currentScore2() const { return cs2; }
+    void setCurrentScore2(Score* score) { cs2 = score; }
 
     virtual bool saveAs(Score*, bool /*saveCopy*/, const QString& /*path*/, const QString& /*ext*/) { return false; }
     virtual void closeScore(Score*) {}

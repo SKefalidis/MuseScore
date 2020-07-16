@@ -6410,12 +6410,9 @@ void MuseScore::cmd(QAction* a)
 
 void MuseScore::endCmd(const bool isCmdFromInspector, const bool undoRedo)
 {
-    std::cout << "before the end\n" << std::flush;
-
 #ifdef SCRIPT_INTERFACE
     getPluginEngine()->beginEndCmd(this, undoRedo);
 #endif
-    std::cout << "end\n" << std::flush;
 
     if (timeline()) {
         timeline()->updateGrid();
@@ -6467,7 +6464,6 @@ void MuseScore::endCmd(const bool isCmdFromInspector, const bool undoRedo)
             currentScore->setPlayNote(false);
             currentScore->setPlayChord(false);
         }
-        std::cout << "a\n" << std::flush;
         MasterScore* ms = currentScore->isMaster() ? static_cast<MasterScore*>(currentScore) : currentScore->masterScore();
         if (ms->excerptsChanged()) {
             if (tab1) {
@@ -6489,23 +6485,18 @@ void MuseScore::endCmd(const bool isCmdFromInspector, const bool undoRedo)
             instrumentChanged();                      // update mixer
             ms->setInstrumentsChanged(false);
         }
-        std::cout << "b\n" << std::flush;
         if (currentScore->selectionChanged()) {
             currentScore->setSelectionChanged(false);
             SelState ss = currentScore->selection().state();
             selectionChanged(ss);
         }
-        std::cout << "b1\n" << std::flush;
         if (cv) {
             cv->moveViewportToLastEdit();
         }
-        std::cout << "b2\n" << std::flush;
         getAction("concert-pitch")->setChecked(currentScore->styleB(Sid::concertPitch));
-        std::cout << "b3\n" << std::flush;
         if (e == 0 && currentScore->noteEntryMode()) {
             e = currentScore->inputState().cr();
         }
-        std::cout << "c\n" << std::flush;
         updateViewModeCombo();
         ScoreAccessibility::instance()->updateAccessibilityInfo();
     } else {
@@ -6515,12 +6506,10 @@ void MuseScore::endCmd(const bool isCmdFromInspector, const bool undoRedo)
     if (!isCmdFromInspector) {
         updateInspector();
     }
-    std::cout << "e\n" << std::flush;
     updatePaletteBeamMode();
 #ifdef SCRIPT_INTERFACE
     getPluginEngine()->endEndCmd(this);
 #endif
-    std::cout << "f\n" << std::flush;
 }
 
 //---------------------------------------------------------
