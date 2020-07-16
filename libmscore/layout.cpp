@@ -4605,7 +4605,7 @@ void LayoutContext::collectPage()
         // if this is the last iteration of this loop (because we found a pageBreak or the page is filled)
         // curSystem will be the first system of the next page
 
-        bool breakPage = !curSystem || (breakPages && prevSystem->pageBreak()) || isEmptyMovement;     // checks if we ran out of systems or if we encountered a pageBreak or if the movement does not have measures
+        bool breakPage = !curSystem || (breakPages && prevSystem->pageBreak()) || (breakPages && isEmptyMovement);     // checks if we ran out of systems or if we encountered a pageBreak or if the movement does not have measures
 
         if (!breakPage) {
             qreal dist = prevSystem->minDistance(curSystem) + curSystem->height();
