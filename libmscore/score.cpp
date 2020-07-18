@@ -440,6 +440,7 @@ void Score::addMeasure(MeasureBase* m, MeasureBase* pos)
 {
     m->setNext(pos);
     _measures.add(m);
+    emit durationChanged();
 }
 
 //---------------------------------------------------------
@@ -1376,6 +1377,7 @@ Measure* Score::getCreateMeasure(const Fraction& tick)
             lastTick += Fraction::fromTicks(ts.ticks());
         }
     }
+    emit durationChanged();
     return tick2measure(tick);
 }
 
@@ -1407,6 +1409,7 @@ void Score::addElement(Element* element)
         ) {
         measures()->add(toMeasureBase(element));
         element->triggerLayout();
+        emit durationChanged();
         return;
     }
 
@@ -1521,6 +1524,7 @@ void Score::addElement(Element* element)
         break;
     }
     element->triggerLayout();
+    emit durationChanged();
 }
 
 //---------------------------------------------------------
@@ -1552,7 +1556,7 @@ void Score::removeElement(Element* element)
         MeasureBase* mb = toMeasureBase(element);
         measures()->remove(mb);
         System* system = mb->system();
-
+        emit durationChanged();
         if (!system) {     // vertical boxes are not shown in continuous view so no system
             Q_ASSERT(lineMode() && (element->isVBox() || element->isTBox()));
             return;
@@ -1692,6 +1696,7 @@ void Score::removeElement(Element* element)
     default:
         break;
     }
+    emit durationChanged();
 }
 
 //---------------------------------------------------------

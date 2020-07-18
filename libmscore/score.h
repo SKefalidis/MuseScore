@@ -603,6 +603,7 @@ protected:
 signals:
     void posChanged(POS, unsigned);
     void playlistChanged();
+    void durationChanged();
 
 public:
     Score();

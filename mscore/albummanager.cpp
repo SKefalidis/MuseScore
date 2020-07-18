@@ -602,7 +602,8 @@ void AlbumManager::addAlbumItem(AlbumItem& albumItem)
     AlbumManagerItem* albumManagerItem = new AlbumManagerItem(albumItem, li, tid);
     m_items.push_back(albumManagerItem);
     scoreList->blockSignals(false);
-    updateDurations();
+    connect(albumManagerItem, &AlbumManagerItem::durationChanged, this, &AlbumManager::updateTotalDuration);
+    albumManagerItem->updateDurationLabel();
 
     // update the combined score to reflect the changes
     if (m_tempScore) {
@@ -622,34 +623,45 @@ void AlbumManager::addAlbumItem(AlbumItem& albumItem)
 void AlbumManager::updateDurations()
 {
     scoreList->blockSignals(true);
-    int seconds = 0;
-    int minutes = 0;
-    int hours = 0;
+    for (auto item : m_items) {
+        item->updateDurationLabel();
+    }
+    updateTotalDuration();
+    scoreList->blockSignals(false);
+}
 
+//---------------------------------------------------------
+//   updateTotalDuration
+//---------------------------------------------------------
+
+void AlbumManager::updateTotalDuration()
+{
+    scoreList->blockSignals(true);
+    int seconds = 0; // total duration
     for (auto item : m_items) {
         if (item->albumItem.enabled()) {
-            seconds += item->albumItem.score->duration();
+            seconds += item->albumItem.duration();
         }
-
-        int tempSeconds = item->albumItem.score->duration();
-        int tempMinutes = tempSeconds / 60;
-        tempSeconds -= tempMinutes * 60;
-        int tempHours = tempMinutes / 60;
-        tempMinutes -= tempHours * 60;
-
-        item->listDurationItem->setText(
-            QString::number(tempHours).rightJustified(2, '0') + ":"
-            + QString::number(tempMinutes).rightJustified(2, '0') + ":"
-            + QString::number(tempSeconds).rightJustified(2, '0'));
     }
-    minutes = seconds / 60;
-    seconds -= minutes * 60;
-    hours = minutes / 60;
-    minutes -= hours * 60;
-
-    durationLabel->setText(QString::number(hours).rightJustified(2, '0') + ":" + QString::number(minutes).rightJustified(2,
-                               '0') + ":" + QString::number(seconds).rightJustified(2, '0'));
+    durationLabel->setText(durationToString(seconds));
     scoreList->blockSignals(false);
+}
+
+//---------------------------------------------------------
+//   durationToString
+//---------------------------------------------------------
+
+QString durationToString(int seconds)
+{
+    int tempSeconds = seconds;
+    int tempMinutes = tempSeconds / 60;
+    tempSeconds -= tempMinutes * 60;
+    int tempHours = tempMinutes / 60;
+    tempMinutes -= tempHours * 60;
+
+    return (QString::number(tempHours).rightJustified(2, '0') + ":"
+        + QString::number(tempMinutes).rightJustified(2, '0') + ":"
+        + QString::number(tempSeconds).rightJustified(2, '0'));
 }
 
 //---------------------------------------------------------
@@ -916,6 +928,7 @@ AlbumManagerItem::AlbumManagerItem(AlbumItem& item, QTableWidgetItem* listItem, 
     this->listItem = listItem;
     this->listDurationItem = listDurationItem;
     setEnabled(albumItem.enabled());
+    connect(&albumItem, &AlbumItem::durationChanged, this, &AlbumManagerItem::updateDurationLabel);
 }
 
 AlbumManagerItem::~AlbumManagerItem()
@@ -947,6 +960,17 @@ void AlbumManagerItem::setEnabled(bool b)
             listDurationItem->setTextColor(Qt::gray);
         }
     }
+}
+
+//---------------------------------------------------------
+//   updateDurationLabel
+//---------------------------------------------------------
+
+void AlbumManagerItem::updateDurationLabel()
+{
+    int tempSeconds = albumItem.score->duration();
+    listDurationItem->setText(durationToString(tempSeconds));
+    emit durationChanged();
 }
 
 }

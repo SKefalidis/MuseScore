@@ -76,16 +76,19 @@ bool AlbumItem::enabled() const
 //   setScore
 //---------------------------------------------------------
 
-void AlbumItem::setScore(MasterScore *score)
+void AlbumItem::setScore(MasterScore* score)
 {
+    disconnect(score, &MasterScore::durationChanged, this, &AlbumItem::updateDuration);
     this->score = score;
+    connect(score, &MasterScore::durationChanged, this, &AlbumItem::updateDuration);
+    updateDuration();
 }
 
 //---------------------------------------------------------
 //   readAlbumItem
 //---------------------------------------------------------
 
-void AlbumItem::readAlbumItem(XmlReader &reader)
+void AlbumItem::readAlbumItem(XmlReader& reader)
 {
     while (reader.readNextStartElement()) {
         const QStringRef& tag(reader.name());
@@ -114,7 +117,7 @@ void AlbumItem::readAlbumItem(XmlReader &reader)
 //---------------------------------------------------------
 
 
-void AlbumItem::writeAlbumItem(XmlWriter &writer, bool absolutePathEnabled)
+void AlbumItem::writeAlbumItem(XmlWriter& writer, bool absolutePathEnabled) const
 {
     writer.stag("Score");
     writer.tag("alias", "");
@@ -126,6 +129,25 @@ void AlbumItem::writeAlbumItem(XmlWriter &writer, bool absolutePathEnabled)
     writer.tag("relativePath", relativePath);
     writer.tag("enabled", m_enabled);
     writer.etag();
+}
+
+//---------------------------------------------------------
+//   duration
+//---------------------------------------------------------
+
+int AlbumItem::duration() const
+{
+    return m_duration;
+}
+
+//---------------------------------------------------------
+//   updateDuration
+//---------------------------------------------------------
+
+void AlbumItem::updateDuration()
+{
+    m_duration = score->duration();
+    emit durationChanged();
 }
 
 //---------------------------------------------------------
@@ -158,7 +180,7 @@ void Album::addAlbumItem(unique_ptr<AlbumItem> aItem)
 //   addScore
 //---------------------------------------------------------
 
-void Album::addScore(MasterScore *score, bool enabled)
+void Album::addScore(MasterScore* score, bool enabled)
 {
     if (!score) {
         std::cout << "There is no score to add to album..." << std::endl;
@@ -224,7 +246,7 @@ void Album::addPageBreaks()
 //   removeScore
 //---------------------------------------------------------
 
-void Album::removeScore(MasterScore *score)
+void Album::removeScore(MasterScore* score)
 {
     for (int i = 0; i < int(m_albumItems.size()); i++) {
         if (m_albumItems.at(i)->score == score) {
@@ -252,7 +274,7 @@ void Album::swap(int indexA, int indexB)
 //   scoreInAlbum
 //---------------------------------------------------------
 
-bool Album::scoreInActiveAlbum(MasterScore *score)
+bool Album::scoreInActiveAlbum(MasterScore* score)
 {
     if (!activeAlbum)
         return false;
@@ -269,7 +291,7 @@ bool Album::scoreInActiveAlbum(MasterScore *score)
 //   getDominant
 //---------------------------------------------------------
 
-MasterScore *Album::getDominant()
+MasterScore *Album::getDominant() const
 {
     return m_albumItems.front()->score;
 }
@@ -353,7 +375,7 @@ bool Album::loadFromFile(const QString &path)
 //   readAlbum
 //---------------------------------------------------------
 
-void Album::readAlbum(XmlReader &reader)
+void Album::readAlbum(XmlReader& reader)
 {
     while (reader.readNextStartElement()) {
         const QStringRef& tag(reader.name());
@@ -400,7 +422,7 @@ bool Album::saveToFile(const QString &path, bool absolutePathEnabled)
 //   writeAlbum
 //---------------------------------------------------------
 
-void Album::writeAlbum(XmlWriter &writer, bool absolutePathEnabled)
+void Album::writeAlbum(XmlWriter &writer, bool absolutePathEnabled) const
 {
     writer.stag("Album");
     writer.tag("name", m_albumTitle);
