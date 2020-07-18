@@ -461,6 +461,6 @@ Ms::Score* AbstractInspectorModel::parentScore() const
     IF_ASSERT_FAILED(Ms::MuseScoreCore::mscoreCore) {
         return nullptr;
     }
-
-    return Ms::MuseScoreCore::mscoreCore->currentScore2() ? Ms::MuseScoreCore::mscoreCore->currentScore2() : Ms::MuseScoreCore::mscoreCore->currentScore() ;
+    Ms::Score* returnScore = Ms::MuseScoreCore::mscoreCore->currentScore2() ? Ms::MuseScoreCore::mscoreCore->currentScore2() : Ms::MuseScoreCore::mscoreCore->currentScore();
+    return returnScore;
 }

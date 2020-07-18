@@ -9,7 +9,6 @@ Notes:
  Refactor and Code Quality:
  - Cleanup the main branch
  Bugs:
- - Crash when opening page settings in album-mode
  - Add instrument to the active score (very buggy)
  Features:
  - Albums in the start center?
