@@ -33,7 +33,8 @@ using std::unique_ptr;
 //   AlbumItem
 //---------------------------------------------------------
 
-class AlbumItem {
+class AlbumItem : public QObject {
+    Q_OBJECT
 
 public:
     AlbumItem(Album& album);
@@ -44,14 +45,23 @@ public:
     bool enabled() const;
     void setScore(MasterScore* score);
     void readAlbumItem(XmlReader& reader);
-    void writeAlbumItem(XmlWriter& writer, bool absolutePathEnabled);
+    void writeAlbumItem(XmlWriter& writer, bool absolutePathEnabled) const;
+
+    int duration() const;
 
     Album& album;
     MasterScore* score      { nullptr }; // make reference? (probably can't cause I am not reading while loading)
     QFileInfo fileInfo      { "-" };
 
+signals:
+    void durationChanged();
+
+private slots:
+    void updateDuration();
+
 private:
-    bool m_enabled          { true };
+    bool m_enabled { true };
+    int m_duration { 0 };
 };
 
 //---------------------------------------------------------
@@ -72,7 +82,7 @@ public:
     void removeScore(int index);
     void swap(int indexA, int indexB);
     static bool scoreInActiveAlbum(MasterScore* score);
-    MasterScore* getDominant();
+    MasterScore* getDominant() const;
     QStringList composers() const;
     QStringList lyricists() const;
     QStringList scoreTitles() const;
@@ -80,7 +90,7 @@ public:
     bool loadFromFile(const QString& path);
     void readAlbum(XmlReader& reader);
     bool saveToFile(const QString &path, bool absolutePathEnabled = true);
-    void writeAlbum(XmlWriter& writer, bool absolutePathEnabled);
+    void writeAlbum(XmlWriter& writer, bool absolutePathEnabled) const;
 
     std::vector<AlbumItem*> albumItems() const;
     const QString& albumTitle() const;

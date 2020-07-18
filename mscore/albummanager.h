@@ -40,6 +40,12 @@ public:
     AlbumItem& albumItem;
     QTableWidgetItem* listItem;
     QTableWidgetItem* listDurationItem;
+
+public slots:
+    void updateDurationLabel();
+
+signals:
+    void durationChanged();
 };
 
 //---------------------------------------------------------
@@ -90,6 +96,8 @@ private slots:
     void updateScoreOrder(QModelIndex sourceParent, int sourceStart, int sourceEnd, QModelIndex destinationParent,
                           int destinationRow);
 
+    void updateTotalDuration();
+
 private:
     virtual void showEvent(QShowEvent*) override;
     virtual void hideEvent(QHideEvent*) override;
@@ -107,6 +115,8 @@ private:
     int m_playbackIndex     { -1 };
     bool m_continuing       { false };
 };
+
+QString durationToString (int seconds);
 }
 
 #endif
