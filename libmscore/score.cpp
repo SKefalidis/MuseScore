@@ -4745,6 +4745,8 @@ MasterScore::MasterScore()
     _sigmap      = new TimeSigMap();
     _repeatList  = new RepeatList(this);
     _revisions   = new Revisions;
+    _movements = new Movements;
+    _movements->push_back(this);
     setMasterScore(this);
 
     _pos[int(POS::CURRENT)] = Fraction(0,1);
@@ -4777,8 +4779,6 @@ MasterScore::MasterScore()
 MasterScore::MasterScore(const MStyle& s)
     : MasterScore{}
 {
-    _movements = new Movements;
-    _movements->push_back(this);
     setStyle(s);
 }
 
