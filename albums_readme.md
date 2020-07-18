@@ -4,14 +4,13 @@ Notes:
  - Album shortcuts
  - Score mode printing
  - Active album, Active score behavior
- - Add instrument to the active score
- - Add measures to the active score
  - Album of albums
  - Continuous View (disable temporarily)
- - Page View (disable temporarily)
  Refactor and Code Quality:
+ - Cleanup the main branch
  Bugs:
  - Crash when opening page settings in album-mode
+ - Add instrument to the active score (very buggy)
  Features:
  - Albums in the start center?
  - Start center 'Open a Score...' to 'Open File...'?
