@@ -537,9 +537,9 @@ void AlbumManager::openSettingsDialog(bool checked)
 ///     this is a leftover before the refactor
 //---------------------------------------------------------
 
-const std::vector<AlbumItem*>&& AlbumManager::albumScores() const
+const std::vector<AlbumItem*> AlbumManager::albumScores() const
 {
-    return std::move(m_album->albumItems());
+    return m_album->albumItems();
 }
 
 //---------------------------------------------------------
