@@ -627,14 +627,6 @@ void AlbumManager::updateDurations()
     int hours = 0;
 
     for (auto item : m_items) {
-        bool temporarilyOpen = false;
-        if (item->albumItem.score == nullptr) {
-            Q_ASSERT(false);
-            std::cout << "There is some kind of problem... AlbumManager::updateDurations" << std::endl;
-            item->albumItem.setScore(mscore->openScore(item->albumItem.fileInfo.absoluteFilePath(), false));
-            temporarilyOpen = true;
-        }
-
         if (item->albumItem.enabled()) {
             seconds += item->albumItem.score->duration();
         }
@@ -649,10 +641,6 @@ void AlbumManager::updateDurations()
             QString::number(tempHours).rightJustified(2, '0') + ":"
             + QString::number(tempMinutes).rightJustified(2, '0') + ":"
             + QString::number(tempSeconds).rightJustified(2, '0'));
-
-        if (temporarilyOpen) {
-            mscore->closeScore(item->albumItem.score);
-        }
     }
     minutes = seconds / 60;
     seconds -= minutes * 60;
