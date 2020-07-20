@@ -293,7 +293,16 @@ bool Album::scoreInActiveAlbum(MasterScore* score)
 
 MasterScore *Album::getDominant() const
 {
-    return m_albumItems.front()->score;
+    return m_dominantScore;
+}
+
+//---------------------------------------------------------
+//   setDominant
+//---------------------------------------------------------
+
+void Album::setDominant(MasterScore* ms)
+{
+    m_dominantScore = ms;
 }
 
 //---------------------------------------------------------
