@@ -187,8 +187,8 @@ void AlbumManager::changeMode(bool checked)
         }
         albumModeButton->blockSignals(false);
     } else if (albumModeButton->isChecked()) {
-        if (!m_tempScore) {
-            m_tempScore = m_items.at(0)->albumItem.score->clone(); // clone breaks editing sync for the 1st movement
+        if (!m_album->getDominant()) {
+            MasterScore* m_tempScore = m_items.at(0)->albumItem.score->clone(); // clone breaks editing sync for the 1st movement
             while (m_tempScore->systems().size() > 1) { // remove the measures of the cloned masterscore, that way editing is synced
                 for (auto x : m_tempScore->systems().last()->measures()) {
                     m_tempScore->removeElement(x);
@@ -200,6 +200,7 @@ void AlbumManager::changeMode(bool checked)
             m_tempScore->setfirstRealMovement(1);
             m_tempScore->setName("Temporary Album Score");
             m_tempScore->setPartOfActiveAlbum(true);
+            m_album->setDominant(m_tempScore);
 
             mscore->setCurrentScoreViewSignalBlocking(mscore->appendScore(m_tempScore));
             mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
@@ -219,7 +220,7 @@ void AlbumManager::changeMode(bool checked)
             if (m_tempScoreTabIndex != -1) {
                 mscore->setCurrentScoreView(m_tempScoreTabIndex);
             } else {
-                mscore->setCurrentScoreViewSignalBlocking(mscore->appendScore(m_tempScore));
+                mscore->setCurrentScoreViewSignalBlocking(mscore->appendScore(m_album->getDominant()));
                 mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
                 m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
             }
@@ -272,18 +273,18 @@ void AlbumManager::tabRemoved(int index)
 
 void AlbumManager::albumNameChanged(const QString& text)
 {
-    if (!m_tempScore) {
+    if (!m_album->getDominant()) {
         return;
     }
 
-    VBox* box = toVBox(m_tempScore->measures()->first());
-    qreal pageHeight = m_tempScore->pages().at(0)->height();
-    qreal scoreSpatium = m_tempScore->spatium();
+    VBox* box = toVBox(m_album->getDominant()->measures()->first());
+    qreal pageHeight = m_album->getDominant()->pages().at(0)->height();
+    qreal scoreSpatium = m_album->getDominant()->spatium();
 
     box->setOffset(0, pageHeight * 0.1);
     box->setBoxHeight(Spatium(pageHeight * 0.8 / scoreSpatium));
 
-    for (auto x : m_tempScore->measures()->first()->el()) {
+    for (auto x : m_album->getDominant()->measures()->first()->el()) {
         if (x && x->isText()) {
             Text* t = toText(x);
 
@@ -317,7 +318,7 @@ void AlbumManager::albumNameChanged(const QString& text)
 
 void AlbumManager::updateContents()
 {
-    if (!m_tempScore) {
+    if (!m_album->getDominant()) {
         return;
     }
 
@@ -325,15 +326,15 @@ void AlbumManager::updateContents()
         return;
     }
 
-    qreal pageWidth = m_tempScore->pages().at(0)->width();
-    qreal scoreSpatium = m_tempScore->spatium();
+    qreal pageWidth = m_album->getDominant()->pages().at(0)->width();
+    qreal scoreSpatium = m_album->getDominant()->spatium();
     int charWidth = pageWidth / scoreSpatium;
 
-    if (!m_tempScore->movements()->at(1)->emptyMovement()) {    // there is no contents page
+    if (!m_album->getDominant()->movements()->at(1)->emptyMovement()) {    // there is no contents page
         MasterScore* ms = m_items.at(0)->albumItem.score->clone();
         ms->setName("Contents");
         ms->setEmptyMovement(true);
-        m_tempScore->insertMovement(ms, 1);
+        m_album->getDominant()->insertMovement(ms, 1);
 
         while (ms->systems().size() > 1) {
             for (auto x : ms->systems().last()->measures()) {
@@ -343,7 +344,7 @@ void AlbumManager::updateContents()
         }
     }
 
-    MasterScore* ms = m_tempScore->movements()->at(1);
+    MasterScore* ms = m_album->getDominant()->movements()->at(1);
     for (auto x : ms->measures()->first()->el()) {
         if (x && x->isText()) {
             Text* t = toText(x);
@@ -609,10 +610,10 @@ void AlbumManager::addAlbumItem(AlbumItem& albumItem)
     albumManagerItem->updateDurationLabel();
 
     // update the combined score to reflect the changes
-    if (m_tempScore) {
-        m_tempScore->addMovement(albumItem.score);
-        m_tempScore->update();
-        m_tempScore->doLayout(); // position the movements correctly
+    if (m_album->getDominant()) {
+        m_album->getDominant()->addMovement(albumItem.score);
+        m_album->getDominant()->update();
+        m_album->getDominant()->doLayout(); // position the movements correctly
         mscore->currentScoreView()->update(); // repaint
     }
 }
@@ -727,13 +728,7 @@ void AlbumManager::itemDoubleClicked(QTableWidgetItem* item)
     }
 
     if (scoreModeButton->isChecked()) {
-        if (aItem->albumItem.score) {
-            // TODO_SK: This should not just open the score, it should append it to MuseScoreCore's scoreList.
-            mscore->openScore(aItem->albumItem.fileInfo.absoluteFilePath());
-        } else {
-            aItem->albumItem.score = mscore->openScore(aItem->albumItem.fileInfo.absoluteFilePath());
-            aItem->albumItem.score->setPartOfActiveAlbum(true);
-        }
+        mscore->openScore(aItem->albumItem.fileInfo.absoluteFilePath());
         aItem->albumItem.score->doLayout();
     } else {
         mscore->currentScoreView()->gotoMeasure(aItem->albumItem.score->firstMeasure()); // move to the chosen measure
@@ -777,11 +772,11 @@ void AlbumManager::swap(int indexA, int indexB)
     scoreList->blockSignals(false);
 
     // update the combined score to reflect the changes
-    if (m_tempScore) {
-        std::swap(m_tempScore->movements()->at(indexA + 1), m_tempScore->movements()->at(indexB + 1));
+    if (m_album->getDominant()) {
+        std::swap(m_album->getDominant()->movements()->at(indexA + 1), m_album->getDominant()->movements()->at(indexB + 1));
         // these should probably only run if the current tab is the one with the tempScore
 //        tempScore->update(); probably not needed
-        m_tempScore->doLayout(); // position the movements correctly
+        m_album->getDominant()->doLayout(); // position the movements correctly
         mscore->currentScoreView()->update(); // repaint
     }
 }

@@ -37,6 +37,7 @@
 
 #include "inspectordockwidget.h"
 
+#include "libmscore/album.h"
 #include "libmscore/articulation.h"
 #include "libmscore/barline.h"
 #include "libmscore/box.h"
@@ -230,6 +231,7 @@ void ScoreView::setScore(Score* s)
     }
 
     _score = s;
+
     mscore->setCurrentScore2(s);
     if (_score) {
         if (_score->isMaster()) {
@@ -268,6 +270,11 @@ void ScoreView::setScore(Score* s)
 ScoreView::~ScoreView()
 {
     if (_score) {
+        if (Album::scoreInActiveAlbum(static_cast<MasterScore*>(_score))) {
+            for (auto& x : *Album::activeAlbum->getDominant()->movements()) {
+                x->removeViewer(this);
+            }
+        }
         _score->removeViewer(this);
     }
     delete lasso;
