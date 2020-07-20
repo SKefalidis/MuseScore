@@ -83,6 +83,7 @@ public:
     void swap(int indexA, int indexB);
     static bool scoreInActiveAlbum(MasterScore* score);
     MasterScore* getDominant() const;
+    void setDominant(MasterScore* ms);
     QStringList composers() const;
     QStringList lyricists() const;
     QStringList scoreTitles() const;
@@ -109,6 +110,7 @@ private:
     std::vector<unique_ptr<AlbumItem>> m_albumItems {};
     QString m_albumTitle                            { "" };
     QFileInfo m_fileInfo                            {};
+    MasterScore* m_dominantScore                    { nullptr };
 
     bool m_generateContents                         { false };
     bool m_addPageBreaksEnabled                     { false };
