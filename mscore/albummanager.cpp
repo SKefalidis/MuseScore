@@ -182,6 +182,9 @@ void AlbumManager::changeMode(bool checked)
     if (scoreModeButton->isChecked()) {
         albumModeButton->blockSignals(true);
         albumModeButton->setChecked(false);
+        if (m_tempScoreTabIndex == mscore->getTab1()->currentIndex()) {
+            mscore->openScore(m_album->albumItems().at(0)->fileInfo.absoluteFilePath());
+        }
         albumModeButton->blockSignals(false);
     } else if (albumModeButton->isChecked()) {
         if (!m_tempScore) {
