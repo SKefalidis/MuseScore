@@ -258,6 +258,7 @@ void Album::removeScore(MasterScore* score)
 
 void Album::removeScore(int index)
 {
+    m_albumItems.at(index)->score->setPartOfActiveAlbum(false);
     m_albumItems.erase(m_albumItems.begin() + index);
 }
 
