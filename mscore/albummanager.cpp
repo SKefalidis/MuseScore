@@ -173,19 +173,12 @@ void AlbumManager::retranslate()
 void AlbumManager::changeMode(bool checked)
 {
     Q_UNUSED(checked);
-
-    mscore->getTab1()->blockSignals(true);
-    if (mscore->getTab2()) {
-        mscore->getTab2()->blockSignals(true);
-    }
-
+    disconnect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
     if (scoreModeButton->isChecked()) {
-        albumModeButton->blockSignals(true);
         albumModeButton->setChecked(false);
         if (m_tempScoreTabIndex == mscore->getTab1()->currentIndex()) {
             mscore->openScore(m_album->albumItems().at(0)->fileInfo.absoluteFilePath());
         }
-        albumModeButton->blockSignals(false);
     } else if (albumModeButton->isChecked()) {
         if (!m_album->getDominant()) {
             MasterScore* m_tempScore = m_items.at(0)->albumItem.score->clone(); // clone breaks editing sync for the 1st movement
@@ -202,7 +195,7 @@ void AlbumManager::changeMode(bool checked)
             m_tempScore->setPartOfActiveAlbum(true);
             m_album->setDominant(m_tempScore);
 
-            mscore->setCurrentScoreViewSignalBlocking(mscore->appendScore(m_tempScore));
+            mscore->setCurrentScoreView(mscore->appendScore(m_tempScore));
             mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
             m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
 
@@ -212,30 +205,20 @@ void AlbumManager::changeMode(bool checked)
             }
             m_tempScore->setLayoutAll();
             m_tempScore->update();
-
-//            albumModeButton->setChecked(true);  // workaround, for some reason tabChanged is called after setCurrentScoreView and this changes the mode
-//                                                // to score mode again
-//                                                // fixed by using setCurrentScoreviewBlocking
         } else {
             if (m_tempScoreTabIndex != -1) {
                 mscore->setCurrentScoreView(m_tempScoreTabIndex);
             } else {
-                mscore->setCurrentScoreViewSignalBlocking(mscore->appendScore(m_album->getDominant()));
+                mscore->setCurrentScoreView(mscore->appendScore(m_album->getDominant()));
                 mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
                 m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
             }
         }
-        scoreModeButton->blockSignals(true);
         scoreModeButton->setChecked(false);
-        scoreModeButton->blockSignals(false);
     } else {
         Q_ASSERT(false);
     }
-
-    mscore->getTab1()->blockSignals(false);
-    if (mscore->getTab2()) {
-        mscore->getTab2()->blockSignals(false);
-    }
+    connect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
 }
 
 //---------------------------------------------------------
@@ -244,13 +227,16 @@ void AlbumManager::changeMode(bool checked)
 
 void AlbumManager::tabChanged()
 {
-    mscore->getTab1()->blockSignals(true);
+    albumModeButton->blockSignals(true);
+    scoreModeButton->blockSignals(true);
     if (mscore->getTab1()->currentIndex() == m_tempScoreTabIndex && scoreModeButton->isChecked()) {
         albumModeButton->setChecked(true);
     } else if (mscore->getTab1()->currentIndex() != m_tempScoreTabIndex && albumModeButton->isChecked()) {
         scoreModeButton->setChecked(true);
     }
-    mscore->getTab1()->blockSignals(false);
+    changeMode(true);
+    albumModeButton->blockSignals(false);
+    scoreModeButton->blockSignals(false);
 }
 
 //---------------------------------------------------------
@@ -259,12 +245,20 @@ void AlbumManager::tabChanged()
 
 void AlbumManager::tabRemoved(int index)
 {
+    albumModeButton->blockSignals(true);
+    scoreModeButton->blockSignals(true);
     if (index == m_tempScoreTabIndex) {
         scoreModeButton->setChecked(true);
         m_tempScoreTabIndex = -1;
+        changeMode(true);
     } else if (index < m_tempScoreTabIndex) {
         m_tempScoreTabIndex--;
+    } else if (index - 1 == m_tempScoreTabIndex) {
+        albumModeButton->setChecked(true);
+        changeMode(true);
     }
+    scoreModeButton->blockSignals(false);
+    albumModeButton->blockSignals(false);
 }
 
 //---------------------------------------------------------
