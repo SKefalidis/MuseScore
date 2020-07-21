@@ -315,7 +315,7 @@ QStringList Album::composers() const
 
     for (auto& item : m_albumItems) {
         QString composer = item->score->composer();
-        if (!composers.contains(composer)) {
+        if (!composers.contains(composer) && !composer.isEmpty()) {
             composers.push_back(composer);
         }
     }
@@ -333,7 +333,7 @@ QStringList Album::lyricists() const
 
     for (auto& item : m_albumItems) {
         QString lyricist = item->score->lyricist();
-        if (!lyricists.contains(lyricist)) {
+        if (!lyricists.contains(lyricist) && !lyricist.isEmpty()) {
             lyricists.push_back(lyricist);
         }
     }
