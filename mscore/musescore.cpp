@@ -3534,6 +3534,7 @@ void MuseScore::removeTab()
 
 void MuseScore::removeTab(int i)
 {
+    // TODO_SK: crashes if you close the tab without clicking on something, because cv hasn't changed without clicking
     bool deleteScore = true;
     MasterScore* score = scoreList.value(i);
     if (score->partOfActiveAlbum()) {
