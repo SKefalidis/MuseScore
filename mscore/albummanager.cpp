@@ -336,6 +336,15 @@ void AlbumManager::updateContents()
             }
             ms->systems().removeLast();
         }
+
+        MeasureBase* measure = ms->measures()->first();
+        measure->clearElements();
+        Text* s = new Text(ms, Tid::TITLE);
+        s->setPlainText("");
+        measure->add(s);
+        s = new Text(ms, Tid::SUBTITLE);
+        s->setPlainText("");
+        measure->add(s);
     }
 
     MasterScore* ms = m_album->getDominant()->movements()->at(1);
