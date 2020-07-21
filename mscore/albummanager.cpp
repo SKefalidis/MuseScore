@@ -263,6 +263,7 @@ void AlbumManager::tabRemoved(int index)
 
 //---------------------------------------------------------
 //   albumNameChanged
+//      TODO_SK: make sure that the 4 text fields exist, like in the contents
 //---------------------------------------------------------
 
 void AlbumManager::albumNameChanged(const QString& text)
@@ -337,6 +338,7 @@ void AlbumManager::updateContents()
             ms->systems().removeLast();
         }
 
+        // make sure that we have these 2 text fields
         MeasureBase* measure = ms->measures()->first();
         measure->clearElements();
         Text* s = new Text(ms, Tid::TITLE);
@@ -816,6 +818,10 @@ void AlbumManager::setAlbum(std::unique_ptr<Album> a)
     std::cout << "setting album" << std::endl;
     scoreList->setRowCount(0);
     m_items.clear(); // TODO_SK: also free all
+    for (auto x : m_album->albumItems()) {
+        m_album->removeScore(x->score);
+    }
+    Album::activeAlbum = nullptr;
     if (!a)
         return;
 
