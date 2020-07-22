@@ -4855,6 +4855,24 @@ QString Score::title() const
 }
 
 //---------------------------------------------------------
+//   realTitle
+//---------------------------------------------------------
+
+QString Score::realTitle() const
+{
+    MeasureBase* measure = _measures.first();
+    Element* first = measure->el().at(0);
+    if (!first->isText()) {
+        return QString();
+    }
+    Text* firstText = toText(first);
+    if (firstText->tid() == Tid::TITLE) {
+        return QString(firstText->plainText());
+    }
+    return QString();
+}
+
+//---------------------------------------------------------
 //   addRefresh
 //---------------------------------------------------------
 
