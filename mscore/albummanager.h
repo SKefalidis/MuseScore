@@ -77,6 +77,7 @@ private slots:
     void itemChanged(QTableWidgetItem* item);     // score name in list is edited
     void tabChanged();
     void tabRemoved(int index);
+    void tabMoved(int from, int to);
 
     // The unused 'checked' parameters exist because Qt 5 style signals/slots don't
     // accept default values.

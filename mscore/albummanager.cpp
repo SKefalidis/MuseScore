@@ -91,6 +91,7 @@ AlbumManager::AlbumManager(QWidget* parent)
 
     connect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
     connect(mscore->getTab1(), &ScoreTab::tabRemoved, this, &AlbumManager::tabRemoved);
+    connect(mscore->getTab1(), &ScoreTab::tabMovedSignal, this, &AlbumManager::tabRemoved);
 }
 
 AlbumManager::~AlbumManager()
@@ -259,6 +260,21 @@ void AlbumManager::tabRemoved(int index)
     }
     scoreModeButton->blockSignals(false);
     albumModeButton->blockSignals(false);
+}
+
+//---------------------------------------------------------
+//   tabMoved
+//---------------------------------------------------------
+
+void AlbumManager::tabMoved(int from, int to)
+{
+    if (from == m_tempScoreTabIndex) {
+        m_tempScoreTabIndex = to;
+    } else if (from < m_tempScoreTabIndex && to > m_tempScoreTabIndex) {
+        m_tempScoreTabIndex--;
+    } else if (from > m_tempScoreTabIndex && to < m_tempScoreTabIndex) {
+        m_tempScoreTabIndex++;
+    }
 }
 
 //---------------------------------------------------------
