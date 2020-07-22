@@ -447,6 +447,21 @@ void Album::writeAlbum(XmlWriter &writer, bool absolutePathEnabled) const
 }
 
 //---------------------------------------------------------
+//   setAlbumLayoutMode
+//---------------------------------------------------------
+
+void Album::setAlbumLayoutMode(LayoutMode lm)
+{
+    for (auto& x : m_albumItems) {
+        x->score->setLayoutMode(lm);
+        x->score->doLayout();
+    }
+    if (m_dominantScore) {
+        m_dominantScore->doLayout();
+    }
+}
+
+//---------------------------------------------------------
 //   albumItems
 //---------------------------------------------------------
 

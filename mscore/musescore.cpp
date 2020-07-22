@@ -7208,6 +7208,7 @@ void MuseScore::switchLayoutMode(LayoutMode mode)
 
     cv->loopUpdate(getAction("loop")->isChecked());
 
+    // or cv->drawingScore
     if (mode != cs->layoutMode()) {
         cs->setLayoutMode(mode);
         cs->doLayout();
