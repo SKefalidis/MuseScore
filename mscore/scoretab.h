@@ -81,6 +81,7 @@ signals:
     void tabInserted(int);
     void tabRemoved(int);
     void tabRenamed(int);
+    void tabMovedSignal(int, int);
 
 private slots:
     void setCurrent(int);
