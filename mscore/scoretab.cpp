@@ -240,6 +240,7 @@ void ScoreTab::tabMoved(int from, int to)
         }
         scoreListChanged = false;
     }
+    emit tabMovedSignal(from, to);
 }
 
 //---------------------------------------------------------
