@@ -1484,7 +1484,7 @@ void ScoreView::paint(const QRect& r, QPainter& p)
         p.fillRect(dropRectangle, QColor(80, 0, 0, 80));
     }
 
-    const Selection& sel = m_drawingScore->selection();
+    const Selection& sel = _score->selection();
     if (sel.isRange()) {
         Segment* ss = sel.startSegment();
         Segment* es = sel.endSegment();
