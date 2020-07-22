@@ -1278,6 +1278,7 @@ public:
     virtual inline std::list<MidiInputEvent>* activeMidiPitches();
 
     virtual QString title() const;
+    QString realTitle() const;
 
     void cmdTimeDelete();
     void localTimeDelete();
