@@ -26,6 +26,7 @@ class Album;
 class MasterScore;
 class XmlReader;
 class XmlWriter;
+enum class LayoutMode : char;
 
 using std::unique_ptr;
 
@@ -68,7 +69,8 @@ private:
 //   Album
 //---------------------------------------------------------
 
-class Album {
+class Album : public QObject {
+    Q_OBJECT
 
 public:
     Album(){};
@@ -105,6 +107,9 @@ public:
     void setDefaultPlaybackDelay(int ms);
 
     static Album* activeAlbum;
+
+public slots:
+    void setAlbumLayoutMode(LayoutMode lm);
 
 private:
     std::vector<unique_ptr<AlbumItem>> m_albumItems {};

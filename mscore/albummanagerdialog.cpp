@@ -20,6 +20,7 @@
 #include "albummanagerdialog.h"
 #include "albummanager.h"
 #include "libmscore/album.h"
+#include "libmscore/score.h"
 #include "ui_albummanagerdialog.h"
 
 namespace Ms {
@@ -34,6 +35,11 @@ AlbumManagerDialog::AlbumManagerDialog(QWidget* parent) :
     setObjectName("AlbumManagerDialog");
     setupUi(this);
     connect(buttonBox, &QDialogButtonBox::clicked, this, &AlbumManagerDialog::buttonBoxClicked);
+    albumViewModeCombo->setAccessibleName(tr("View Mode"));
+    albumViewModeCombo->addItem(tr("Page View"), int(LayoutMode::PAGE));
+    albumViewModeCombo->addItem(tr("Continuous View"), int(LayoutMode::LINE));
+    albumViewModeCombo->addItem(tr("Single Page"), int(LayoutMode::SYSTEM));
+    connect(albumViewModeCombo, SIGNAL(activated(int)), SLOT(setAlbumLayoutMode(int)));
 }
 
 AlbumManagerDialog::~AlbumManagerDialog()
@@ -96,5 +102,14 @@ void AlbumManagerDialog::buttonBoxClicked(QAbstractButton* button)
         hide();
         break;
     }
+}
+
+//---------------------------------------------------------
+//   setAlbumLayoutMode
+//---------------------------------------------------------
+
+void AlbumManagerDialog::setAlbumLayoutMode(int i)
+{
+    static_cast<AlbumManager*>(parent())->album()->setAlbumLayoutMode(static_cast<LayoutMode>(albumViewModeCombo->itemData(i).toInt()));
 }
 }

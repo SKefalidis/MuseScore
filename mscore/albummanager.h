@@ -105,7 +105,7 @@ private:
     void updateContents();
 
     AlbumManagerDialog* m_settingsDialog    { nullptr };
-    std::unique_ptr<Album> m_album          { nullptr };
+    std::unique_ptr<Album> m_album          { nullptr }; /// ??
     std::vector<AlbumManagerItem*> m_items  {};
     int m_tempScoreTabIndex                 { -1 };
 
