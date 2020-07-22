@@ -353,7 +353,8 @@ QStringList Album::scoreTitles() const
 
     for (auto& item : m_albumItems) {
         if (!item->score->emptyMovement()) {
-            QString title = item->score->title();
+            QString title = item->score->realTitle();
+            title = title.isEmpty() ? item->score->title() : title;
             scoreTitles.push_back(title);
         }
     }
