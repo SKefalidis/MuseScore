@@ -225,7 +225,7 @@ void Seq::setScoreView(ScoreView* v)
     }
     cs = cv ? cv->score()->masterScore() : 0;
     topMovement = cs;
-    if (cv->drawingScore()->title() == "Temporary Album Score") {
+    if (cv && (cv->drawingScore()->title() == "Temporary Album Score")) {
         topMovement = Album::activeAlbum->getDominant();
     }
     nextMovementIndex = topMovement ? 1 : 0;
