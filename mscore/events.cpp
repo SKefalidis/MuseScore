@@ -456,12 +456,13 @@ void ScoreView::mousePressEventNormal(QMouseEvent* ev)
             }
         }
         if (e) {
-            if (e->isNote() || e->isHarmony()) {
-                e->score()->updateCapo();
-                mscore->play(e);
-            }
             _score = e->score();
             _score->setUpdateAll();
+            if (e->isNote() || e->isHarmony()) {
+                e->score()->updateCapo();
+                seq->setScoreView(this); // initializes instruments (we can have different instruments in different movements)
+                mscore->play(e);
+            }
         }
     } else {
         // special case: check if measure is selected
