@@ -210,6 +210,7 @@ void AlbumManager::changeMode(bool checked)
             if (m_tempScoreTabIndex != -1) {
                 mscore->setCurrentScoreView(m_tempScoreTabIndex);
             } else {
+                mscore->scores().removeOne(m_album->getDominant());
                 mscore->setCurrentScoreView(mscore->appendScore(m_album->getDominant()));
                 mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
                 m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
