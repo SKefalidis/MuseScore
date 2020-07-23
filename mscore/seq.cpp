@@ -22,6 +22,7 @@
 #include "musescore.h"
 
 #include "audio/midi/msynthesizer.h"
+#include "libmscore/album.h"
 #include "libmscore/rendermidi.h"
 #include "libmscore/slur.h"
 #include "libmscore/tie.h"
@@ -223,6 +224,9 @@ void Seq::setScoreView(ScoreView* v)
         disconnect(cs, SIGNAL(playlistChanged()), this, SLOT(setPlaylistChanged()));
     }
     cs = cv ? cv->score()->masterScore() : 0;
+    if (cv->drawingScore()->title() == "Temporary Album Score") {
+        cs = Album::activeAlbum->getDominant();
+    }
     topMovement = cs;
     nextMovementIndex = topMovement ? 1 : 0;
     midi = MidiRenderer(cs);
@@ -276,7 +280,7 @@ void Seq::setNextMovement(int i)
         nextMovementIndex = i + 1;
     } else {
         cs = topMovement;
-        nextMovementIndex = i + 1;
+        nextMovementIndex = 1;
     }
 
     midi = MidiRenderer(cs);
