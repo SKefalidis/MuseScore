@@ -1,15 +1,13 @@
 Notes:
  - Improve the automated tests
  - Album shortcuts
- - Active album, Active score behavior
  - Album of albums
 
  Refactor and Code Quality:
  - Cleanup the main branch
 
  Bugs:
- - Add instrument to the active score (very buggy)
- - Fix all the places where inActiveAlbum should be inActiveAlbum and the dominantScore is the one in the scoreview (e.g. the teleporting stuff)
+ - Fix all the places where inActiveAlbum should be inActiveAlbum and the dominantScore is the one in the scoreview (e.g. the teleporting stuff, sequencer setScoreView)
  - The temporary score uses the style of the first movement (as expected) but changing it's style changes the style of the first movement and not of the temporary score
 
  Investigate:
