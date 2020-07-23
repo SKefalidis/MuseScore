@@ -347,6 +347,13 @@ void ScoreView::mouseReleaseEvent(QMouseEvent* mouseEvent)
         }
 
         if (modifySelection) {
+            if (_score != m_drawingScore) {
+                for (auto x : *static_cast<MasterScore*>(m_drawingScore)->movements()) {
+                    if (x != _score) {
+                        x->deselectAll();
+                    }
+                }
+            }
             _score->select(elementToSelect);
             modifySelection = false;
             elementToSelect = nullptr;
@@ -452,6 +459,13 @@ void ScoreView::mousePressEventNormal(QMouseEvent* ev)
         }
         if (e) {
             _score = e->score();
+            if (_score != m_drawingScore) {
+                for (auto x : *static_cast<MasterScore*>(m_drawingScore)->movements()) {
+                    if (x != _score) {
+                        x->deselectAll();
+                    }
+                }
+            }
             _score->setUpdateAll();
             if (e->isNote() || e->isHarmony()) {
                 e->score()->updateCapo();
