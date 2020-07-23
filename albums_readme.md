@@ -10,6 +10,7 @@ Notes:
  Bugs:
  - Add instrument to the active score (very buggy)
  - Fix all the places where inActiveAlbum should be inActiveAlbum and the dominantScore is the one in the scoreview (e.g. the teleporting stuff)
+ - The temporary score uses the style of the first movement (as expected) but changing it's style changes the style of the first movement and not of the temporary score
 
  Investigate:
  - Disabled score->doLayout in ScoreView::paintEvent, did I break something???
