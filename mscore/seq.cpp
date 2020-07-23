@@ -224,10 +224,10 @@ void Seq::setScoreView(ScoreView* v)
         disconnect(cs, SIGNAL(playlistChanged()), this, SLOT(setPlaylistChanged()));
     }
     cs = cv ? cv->score()->masterScore() : 0;
-    if (cv->drawingScore()->title() == "Temporary Album Score") {
-        cs = Album::activeAlbum->getDominant();
-    }
     topMovement = cs;
+    if (cv->drawingScore()->title() == "Temporary Album Score") {
+        topMovement = Album::activeAlbum->getDominant();
+    }
     nextMovementIndex = topMovement ? 1 : 0;
     midi = MidiRenderer(cs);
     midi.setMinChunkSize(10);
