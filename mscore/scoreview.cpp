@@ -270,7 +270,7 @@ void ScoreView::setScore(Score* s)
 ScoreView::~ScoreView()
 {
     if (_score) {
-        if (Album::scoreInActiveAlbum(static_cast<MasterScore*>(_score))) {
+        if (Album::scoreInActiveAlbum(static_cast<MasterScore*>(_score)) && Album::activeAlbum->getDominant()) {
             for (auto& x : *Album::activeAlbum->getDominant()->movements()) {
                 x->removeViewer(this);
             }
