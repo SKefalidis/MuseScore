@@ -191,7 +191,11 @@ void AlbumManager::changeMode(bool checked)
             }
 
             m_tempScore->setEmptyMovement(true);
-            m_tempScore->setfirstRealMovement(1);
+            if (m_album->generateContents()) {
+                m_tempScore->setfirstRealMovement(2);
+            } else {
+                m_tempScore->setfirstRealMovement(1);
+            }
             m_tempScore->setName("Temporary Album Score");
             m_tempScore->setPartOfActiveAlbum(true);
             m_album->setDominant(m_tempScore);
@@ -448,7 +452,7 @@ void AlbumManager::playAlbum()
                     }
                     mscore->currentScoreView()->gotoMeasure(m_items.at(m_playbackIndex)->albumItem.score->firstMeasure());       // rewind before playing
                 } else {
-                    seq->setNextMovement(m_playbackIndex + 1); // first movement is empty
+                    seq->setNextMovement(m_playbackIndex + m_album->getDominant()->firstRealMovement()); // first movement or first 2 movements is/are empty
                     mscore->currentScoreView()->gotoMeasure(seq->score()->firstMeasure());       // rewind before playing
                 }
                 //
