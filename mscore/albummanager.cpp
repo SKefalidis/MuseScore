@@ -954,6 +954,7 @@ AlbumManagerItem::AlbumManagerItem(AlbumItem& item, QTableWidgetItem* listItem, 
         MasterScore* score = mscore->readScore(path);
         albumItem.setScore(score);
     }
+    albumItem.setScore(albumItem.score);
     albumItem.score->setPartOfActiveAlbum(true);
     this->listItem = listItem;
     this->listDurationItem = listDurationItem;
