@@ -1,4 +1,5 @@
 Notes:
+ - Mass changes
  - Improve the automated tests
  - Album shortcuts
  - Album of albums
