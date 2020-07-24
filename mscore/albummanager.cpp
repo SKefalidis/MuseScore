@@ -87,7 +87,7 @@ AlbumManager::AlbumManager(QWidget* parent)
     // the rest
     updateDurations();
     mscore->restoreGeometry(this);
-    m_album = std::unique_ptr<Album>(new Album()); // placeholder
+    setAlbum(std::unique_ptr<Album>(new Album()));
 
     connect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
     connect(mscore->getTab1(), &ScoreTab::tabRemoved, this, &AlbumManager::tabRemoved);
@@ -750,7 +750,11 @@ void AlbumManager::itemDoubleClicked(QTableWidgetItem* item)
     }
 
     if (scoreModeButton->isChecked()) {
-        mscore->openScore(aItem->albumItem.fileInfo.absoluteFilePath());
+        if (!aItem->albumItem.fileInfo.absoluteFilePath().isEmpty()) {
+            mscore->openScore(aItem->albumItem.fileInfo.absoluteFilePath());
+        } else {
+            mscore->setCurrentScoreView(mscore->appendScore(aItem->albumItem.score));
+        }
         aItem->albumItem.score->doLayout();
     } else {
         mscore->currentScoreView()->gotoMeasure(aItem->albumItem.score->firstMeasure()); // move to the chosen measure
@@ -835,8 +839,10 @@ void AlbumManager::setAlbum(std::unique_ptr<Album> a)
     std::cout << "setting album" << std::endl;
     scoreList->setRowCount(0);
     m_items.clear(); // TODO_SK: also free all
-    for (auto x : m_album->albumItems()) {
-        m_album->removeScore(x->score);
+    if (m_album) {
+        for (auto x : m_album->albumItems()) {
+            m_album->removeScore(x->score);
+        }
     }
     Album::activeAlbum = nullptr;
     if (!a)
