@@ -46,6 +46,7 @@ AlbumItem::AlbumItem(Album& album, MasterScore *score, bool enabled)
     m_enabled = enabled;
     fileInfo.setFile(score->importedFilePath());
     score->setPartOfActiveAlbum(true);
+    updateDuration();
     std::cout << "album item created..." << std::endl;
 }
 
