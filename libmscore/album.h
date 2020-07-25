@@ -39,12 +39,13 @@ class AlbumItem : public QObject {
 
 public:
     AlbumItem(Album& album);
+    AlbumItem(Album& album, XmlReader& reader);
     AlbumItem(Album& album, MasterScore* score, bool enabled = true);
     ~AlbumItem();
 
     void setEnabled(bool b);
     bool enabled() const;
-    void setScore(MasterScore* score);
+    int setScore(MasterScore* score);
     void readAlbumItem(XmlReader& reader);
     void writeAlbumItem(XmlWriter& writer, bool absolutePathEnabled) const;
 
@@ -62,7 +63,7 @@ private slots:
 
 private:
     bool m_enabled { true };
-    int m_duration { 0 };
+    int m_duration { -1 };
 };
 
 //---------------------------------------------------------
@@ -74,7 +75,7 @@ class Album : public QObject {
 
 public:
     Album(){};
-    void addAlbumItem(unique_ptr<AlbumItem> aItem);
+    void addAlbumItem(unique_ptr<AlbumItem> aItem); // make private with AlbumItem friend
     void addScore(MasterScore* score, bool enabled = true);
     void addSectionBreak(AlbumItem* aItem);
     void addSectionBreaks();

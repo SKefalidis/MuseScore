@@ -23,7 +23,7 @@
 #include "libmscore/album.h"
 #include "mscore/preferences.h"
 
-#define DIR QString("libmscore/albums/")
+#define DIR QString("libmscore/albumsIO/")
 
 using namespace Ms;
 
@@ -31,7 +31,7 @@ using namespace Ms;
 //   TestAlbums
 //---------------------------------------------------------
 
-class TestAlbums : public QObject, public MTest
+class TestAlbumsIO : public QObject, public MTest
 {
     Q_OBJECT
 
@@ -47,7 +47,7 @@ private slots:
 //   initTestCase
 //---------------------------------------------------------
 
-void TestAlbums::initTestCase()
+void TestAlbumsIO::initTestCase()
 {
     initMTest();
 }
@@ -57,7 +57,7 @@ void TestAlbums::initTestCase()
 //   read a .msca (Album) file, write to a new file and verify both files are identical
 //---------------------------------------------------------
 
-void TestAlbums::saveAlbumTest(const char* file)
+void TestAlbumsIO::saveAlbumTest(const char* file)
 {
     MScore::debugMode = true;
     Album* album = readAlbum(DIR + QString(file) + ".msca");
@@ -68,5 +68,5 @@ void TestAlbums::saveAlbumTest(const char* file)
     delete album;
 }
 
-QTEST_MAIN(TestAlbums)
+QTEST_MAIN(TestAlbumsIO)
 #include "tst_albumsIO.moc"

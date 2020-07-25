@@ -17,7 +17,7 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #=============================================================================
 
-set(TARGET tst_albums)
+set(TARGET tst_albumsIO)
 
 set(MTEST_LINK_MSCOREAPP TRUE)
 
