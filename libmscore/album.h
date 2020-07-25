@@ -74,7 +74,6 @@ class Album : public QObject {
     Q_OBJECT
 
 public:
-    Album(){};
     void addScore(MasterScore* score, bool enabled = true);
     void addSectionBreak(AlbumItem* aItem);
     void addSectionBreaks();
