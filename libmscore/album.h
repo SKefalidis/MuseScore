@@ -99,6 +99,8 @@ public:
     const QString& albumTitle() const;
     void setAlbumTitle(const QString& newTitle); // delete?
     const QFileInfo& fileInfo() const;
+    bool albumModeActive() const;
+    void setAlbumModeActive(bool b);
     bool generateContents() const;
     void setGenerateContents(bool enabled);
     bool addPageBreaksEnabled() const;
@@ -116,6 +118,7 @@ private:
     QString m_albumTitle                            { "" };
     QFileInfo m_fileInfo                            {};
     MasterScore* m_dominantScore                    { nullptr };
+    bool m_albumModeActive                          { false };
 
     bool m_generateContents                         { false };
     bool m_addPageBreaksEnabled                     { false };

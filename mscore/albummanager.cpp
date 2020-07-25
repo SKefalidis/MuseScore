@@ -176,11 +176,13 @@ void AlbumManager::changeMode(bool checked)
     Q_UNUSED(checked);
     disconnect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
     if (scoreModeButton->isChecked()) {
+        m_album->setAlbumModeActive(false);
         albumModeButton->setChecked(false);
         if (m_tempScoreTabIndex == mscore->getTab1()->currentIndex()) {
             mscore->openScore(m_album->albumItems().at(0)->fileInfo.absoluteFilePath());
         }
     } else if (albumModeButton->isChecked()) {
+        m_album->setAlbumModeActive(true);
         if (!m_album->getDominant()) {
             MasterScore* m_tempScore = m_items.at(0)->albumItem.score->clone(); // clone breaks editing sync for the 1st movement
             while (m_tempScore->systems().size() > 1) { // remove the measures of the cloned masterscore, that way editing is synced
