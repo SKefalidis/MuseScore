@@ -297,6 +297,7 @@ void AlbumManager::albumNameChanged(const QString& text)
     if (!m_album->getDominant()) {
         return;
     }
+    m_album->setAlbumTitle(text);
 
     VBox* box = toVBox(m_album->getDominant()->measures()->first());
     qreal pageHeight = m_album->getDominant()->pages().at(0)->height();

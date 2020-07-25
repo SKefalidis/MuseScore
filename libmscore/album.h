@@ -97,7 +97,7 @@ public:
 
     std::vector<AlbumItem*> albumItems() const;
     const QString& albumTitle() const;
-    void setAlbumTitle(const QString& newTitle); // delete?
+    void setAlbumTitle(const QString& newTitle);
     const QFileInfo& fileInfo() const;
     bool albumModeActive() const;
     void setAlbumModeActive(bool b);
