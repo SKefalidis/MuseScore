@@ -62,16 +62,13 @@ void TestAlbums::initTestCase()
 void TestAlbums::albumItemWithScoreTest()
 {
     Album myAlbum;
-    MasterScore aScore;
-    AlbumItem aItem(myAlbum, &aScore, true);
+    MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
+    AlbumItem aItem(myAlbum, aScore, true);
 
     QCOMPARE(&aItem.album, &myAlbum);
     QVERIFY(myAlbum.albumItems().size() == 1);
 
-    QVERIFY(aScore.partOfActiveAlbum());
-    QCOMPARE(aItem.duration(), aScore.duration());  // TODO_SK: add a masterscore with non-zero duration
-
-    albumItemTest(myAlbum, aItem, aScore);
+    albumItemTest(myAlbum, aItem, *aScore);
 }
 
 //---------------------------------------------------------
@@ -81,23 +78,20 @@ void TestAlbums::albumItemWithScoreTest()
 void TestAlbums::albumItemWithoutScoreTest()
 {
     Album myAlbum;
-    MasterScore aScore;
+    MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
     AlbumItem aItem(myAlbum);
 
     QCOMPARE(&aItem.album, &myAlbum);
     QVERIFY(myAlbum.albumItems().size() == 1);
 
     // without score
-    QVERIFY(!aScore.partOfActiveAlbum());
+    QVERIFY(!aScore->partOfActiveAlbum());
     QCOMPARE(aItem.duration(), -1);
 
-    QCOMPARE(aItem.setScore(&aScore), 0);
+    QCOMPARE(aItem.setScore(aScore), 0);
 
-    // with score
-    QVERIFY(aScore.partOfActiveAlbum());
-    QCOMPARE(aItem.duration(), aScore.duration());
-
-    albumItemTest(myAlbum, aItem, aScore);
+    albumItemTest(myAlbum, aItem, *aScore);
+    delete aScore;
 }
 
 //---------------------------------------------------------
@@ -108,7 +102,14 @@ void TestAlbums::albumItemTest(Album& myAlbum, AlbumItem& aItem, MasterScore& aS
 {
     MasterScore bScore;
 
-    // TODO_SK: check the duration updates (test setScore)
+    QVERIFY(aScore.partOfActiveAlbum());
+
+    QCOMPARE(aItem.duration(), aScore.duration());
+    int scoreDuration1 = aScore.duration();
+    aScore.appendMeasures(2);
+    int scoreDuration2 = aScore.duration();
+    QVERIFY(scoreDuration1 < scoreDuration2);
+    QCOMPARE(aItem.duration(), aScore.duration());
 
     QVERIFY(aItem.enabled());
     QCOMPARE(aItem.enabled(), aScore.enabled()); // true
