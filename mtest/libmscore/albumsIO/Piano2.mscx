@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <museScore version="3.01">
   <programVersion>4.0.0</programVersion>
-  <programRevision>e122e7c</programRevision>
+  <programRevision>3543170</programRevision>
   <Score>
     <LayerTag id="0" tag="default"></LayerTag>
     <currentLayer>0</currentLayer>
@@ -10,7 +10,7 @@
       <pageWidth>8.27</pageWidth>
       <pageHeight>11.69</pageHeight>
       <pagePrintableWidth>7.4826</pagePrintableWidth>
-      <Spatium>1.76389</Spatium>
+      <Spatium>1.764</Spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -106,6 +106,15 @@
         <Text>
           <style>Title</style>
           <text>Piano2</text>
+          </Text>
+        <Text>
+          <style>Composer</style>
+          <text>Oregano
+</text>
+          </Text>
+        <Text>
+          <style>Lyricist</style>
+          <text>Garlic</text>
           </Text>
         </VBox>
       <Measure>
