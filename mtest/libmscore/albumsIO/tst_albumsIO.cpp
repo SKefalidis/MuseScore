@@ -36,11 +36,13 @@ class TestAlbumsIO : public QObject, public MTest
     Q_OBJECT
 
     void saveAlbumTest(const char* file);
+    void stringsTest(const char* file);
 
 private slots:
     void initTestCase();
 
-    void albums1() { saveAlbumTest("smallPianoAlbumTest"); };
+    void albumsIO() { saveAlbumTest("smallPianoAlbumTest"); };
+    void albumsStrings() { stringsTest("smallPianoAlbumTest"); };
 };
 
 //---------------------------------------------------------
@@ -65,6 +67,30 @@ void TestAlbumsIO::saveAlbumTest(const char* file)
     QFileInfo fi(QString(file) + "_auto" + ".msca");
     QVERIFY(saveAlbum(album, fi.absoluteFilePath()));   // wrong path, but not deleted for debugging
     QVERIFY(saveCompareAlbum(album, DIR + QString(file) + "_auto" + ".msca", DIR + QString(file) + ".msca"));
+    delete album;
+}
+
+//---------------------------------------------------------
+//   stringsTest
+//---------------------------------------------------------
+
+void TestAlbumsIO::stringsTest(const char* file)
+{
+    MScore::debugMode = true;
+    Album* album = readAlbum(DIR + QString(file) + ".msca");
+    QVERIFY(album);
+    auto x = album->composers();
+    QVERIFY(x.size() == 2);
+    QCOMPARE(x.at(0), "Sergios - Anestis Kefalidis");
+    QCOMPARE(x.at(1), "Oregano");
+    auto y = album->composers();
+    QVERIFY(y.size() == 1);
+    QCOMPARE(y.at(0), "Garlic");
+    auto z = album->scoreTitles();
+    QVERIFY(z.size() == 3);
+    QCOMPARE(z.at(0), "Piano 1");
+    QCOMPARE(z.at(1), "Piano 2");
+    QCOMPARE(z.at(2), "Piano 3");
     delete album;
 }
 
