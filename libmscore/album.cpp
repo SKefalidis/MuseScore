@@ -36,18 +36,23 @@ namespace Ms {
 AlbumItem::AlbumItem(Album& album)
     : album(album)
 {
+    album.addAlbumItem(unique_ptr<AlbumItem>(this));
+}
+
+AlbumItem::AlbumItem(Album& album, XmlReader& reader)
+    : AlbumItem(album)
+{
+    readAlbumItem(reader);
 }
 
 AlbumItem::AlbumItem(Album& album, MasterScore *score, bool enabled)
     : AlbumItem(album)
 {
-    std::cout << "New album item..." << std::endl;
     this->score = score;
-    m_enabled = enabled;
-    fileInfo.setFile(score->importedFilePath());
+    setEnabled(enabled);
     score->setPartOfActiveAlbum(true);
     updateDuration();
-    std::cout << "album item created..." << std::endl;
+    fileInfo.setFile(score->importedFilePath());
 }
 
 AlbumItem::~AlbumItem()
@@ -77,12 +82,20 @@ bool AlbumItem::enabled() const
 //   setScore
 //---------------------------------------------------------
 
-void AlbumItem::setScore(MasterScore* score)
+int AlbumItem::setScore(MasterScore* score)
 {
+    // if you want to change the score, create a new AlbumItem
+    if (this->score != nullptr) {
+        Q_ASSERT(false);
+        return -1;
+    }
     disconnect(score, &MasterScore::durationChanged, this, &AlbumItem::updateDuration);
     this->score = score;
-    connect(score, &MasterScore::durationChanged, this, &AlbumItem::updateDuration);
+    setEnabled(m_enabled);
+    score->setPartOfActiveAlbum(true);
     updateDuration();
+    connect(score, &MasterScore::durationChanged, this, &AlbumItem::updateDuration);
+    return 0;
 }
 
 //---------------------------------------------------------
@@ -91,6 +104,7 @@ void AlbumItem::setScore(MasterScore* score)
 
 void AlbumItem::readAlbumItem(XmlReader& reader)
 {
+    std::cout << "reading album item" << std::endl;
     while (reader.readNextStartElement()) {
         const QStringRef& tag(reader.name());
         if (tag == "name") {
@@ -188,9 +202,7 @@ void Album::addScore(MasterScore* score, bool enabled)
         return;
     }
     std::cout << "Adding score to album..." << std::endl;
-
-    unique_ptr<AlbumItem> albumItem(new AlbumItem(*this, score, enabled));
-    addAlbumItem(std::move(albumItem));
+    new AlbumItem(*this, score, enabled);
 }
 
 //---------------------------------------------------------
@@ -395,9 +407,7 @@ void Album::readAlbum(XmlReader& reader)
         if (tag == "name") {
             m_albumTitle = reader.readElementText();
         } else if (tag == "Score") {
-            unique_ptr<AlbumItem> albumItem(new AlbumItem(*this));
-            albumItem->readAlbumItem(reader);
-            addAlbumItem(std::move(albumItem));
+            new AlbumItem(*this, reader);
         } else if (tag == "generateContents") {
             m_generateContents = reader.readBool();
         } else if (tag == "addPageBreaks") {
