@@ -100,7 +100,7 @@ void TestAlbums::albumItemConstructorWithoutScoreTest()
 
 void TestAlbums::albumItemTest(Album& myAlbum, AlbumItem& aItem, MasterScore& aScore)
 {
-    MasterScore bScore;
+    MasterScore* bScore = new MasterScore();
 
     QVERIFY(aScore.partOfActiveAlbum());
 
@@ -117,7 +117,9 @@ void TestAlbums::albumItemTest(Album& myAlbum, AlbumItem& aItem, MasterScore& aS
     QVERIFY(!aItem.enabled());
     QCOMPARE(aItem.enabled(), aScore.enabled()); // false
 
-    QCOMPARE(aItem.setScore(&bScore), -1);
+    QCOMPARE(aItem.setScore(bScore), -1);
+
+    delete bScore;
 }
 
 QTEST_MAIN(TestAlbums)
