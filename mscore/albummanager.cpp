@@ -255,6 +255,9 @@ void AlbumManager::tabRemoved(int index)
 {
     albumModeButton->blockSignals(true);
     scoreModeButton->blockSignals(true);
+    if (m_tempScoreTabIndex == -1) {
+        return;
+    }
     if (index == m_tempScoreTabIndex) {
         scoreModeButton->setChecked(true);
         m_tempScoreTabIndex = -1;
