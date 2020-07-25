@@ -35,15 +35,15 @@ class TestAlbums : public QObject, public MTest
 {
     Q_OBJECT
 
-    void albumItemWithScoreTest();
-    void albumItemWithoutScoreTest();
+    void albumItemConstructorWithScoreTest();
+    void albumItemConstructorWithoutScoreTest();
     void albumItemTest(Album& myAlbum, AlbumItem& aItem, MasterScore& aScore);
 
 private slots:
     void initTestCase();
 
-    void albumItemWithScore() { albumItemWithScoreTest(); };
-    void albumItemWithoutScore() { albumItemWithoutScoreTest(); };
+    void albumItemWithScore() { albumItemConstructorWithScoreTest(); };
+    void albumItemWithoutScore() { albumItemConstructorWithoutScoreTest(); };
 };
 
 //---------------------------------------------------------
@@ -56,10 +56,10 @@ void TestAlbums::initTestCase()
 }
 
 //---------------------------------------------------------
-//   albumItemWithScoreTest
+//   albumItemConstructorWithScoreTest
 //---------------------------------------------------------
 
-void TestAlbums::albumItemWithScoreTest()
+void TestAlbums::albumItemConstructorWithScoreTest()
 {
     Album myAlbum;
     MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
@@ -72,10 +72,10 @@ void TestAlbums::albumItemWithScoreTest()
 }
 
 //---------------------------------------------------------
-//   albumItemWithoutScoreTest
+//   albumItemConstructorWithoutScoreTest
 //---------------------------------------------------------
 
-void TestAlbums::albumItemWithoutScoreTest()
+void TestAlbums::albumItemConstructorWithoutScoreTest()
 {
     Album myAlbum;
     MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");

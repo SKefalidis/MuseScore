@@ -566,17 +566,6 @@ void AlbumManager::openSettingsDialog(bool checked)
     }
 }
 
-
-//---------------------------------------------------------
-//   albumScores
-///     this is a leftover before the refactor
-//---------------------------------------------------------
-
-const std::vector<AlbumItem*> AlbumManager::albumScores() const
-{
-    return m_album->albumItems();
-}
-
 //---------------------------------------------------------
 //   addClicked
 ///     Add an existing score to the Album.\n

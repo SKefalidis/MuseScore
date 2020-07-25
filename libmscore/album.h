@@ -83,9 +83,9 @@ public:
     void removeScore(MasterScore* score);
     void removeScore(int index);
     void swap(int indexA, int indexB);
-    static bool scoreInActiveAlbum(MasterScore* score);
     MasterScore* getDominant() const;
-    void setDominant(MasterScore* ms);
+    void setDominant(MasterScore* ms); // I don't like this function.
+
     QStringList composers() const;
     QStringList lyricists() const;
     QStringList scoreTitles() const;
@@ -109,6 +109,7 @@ public:
     void setDefaultPlaybackDelay(int ms);
 
     static Album* activeAlbum;
+    static bool scoreInActiveAlbum(MasterScore* score);
 
 public slots:
     void setAlbumLayoutMode(LayoutMode lm);
