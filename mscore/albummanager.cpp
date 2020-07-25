@@ -808,7 +808,8 @@ void AlbumManager::swap(int indexA, int indexB)
 
     // update the combined score to reflect the changes
     if (m_album->getDominant()) {
-        std::swap(m_album->getDominant()->movements()->at(indexA + 1), m_album->getDominant()->movements()->at(indexB + 1));
+        int offset = m_album->getDominant()->firstRealMovement();
+        std::swap(m_album->getDominant()->movements()->at(indexA + offset), m_album->getDominant()->movements()->at(indexB + offset));
         // these should probably only run if the current tab is the one with the tempScore
 //        tempScore->update(); probably not needed
         m_album->getDominant()->doLayout(); // position the movements correctly
