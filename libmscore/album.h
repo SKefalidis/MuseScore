@@ -75,7 +75,6 @@ class Album : public QObject {
 
 public:
     Album(){};
-    void addAlbumItem(unique_ptr<AlbumItem> aItem); // make private with AlbumItem friend
     void addScore(MasterScore* score, bool enabled = true);
     void addSectionBreak(AlbumItem* aItem);
     void addSectionBreaks();
@@ -115,6 +114,10 @@ public slots:
     void setAlbumLayoutMode(LayoutMode lm);
 
 private:
+    // Every albumItem adds itself to an Album in its constructor.
+    friend AlbumItem::AlbumItem(Album&);
+    void addAlbumItem(unique_ptr<AlbumItem> aItem);
+
     std::vector<unique_ptr<AlbumItem>> m_albumItems {};
     QString m_albumTitle                            { "" };
     QFileInfo m_fileInfo                            {};
