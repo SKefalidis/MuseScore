@@ -63,12 +63,12 @@ void TestAlbums::albumItemConstructorWithScoreTest()
 {
     Album myAlbum;
     MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
-    AlbumItem aItem(myAlbum, aScore, true);
+    AlbumItem* aItem = new AlbumItem(myAlbum, aScore, true);
 
-    QCOMPARE(&aItem.album, &myAlbum);
+    QCOMPARE(&aItem->album, &myAlbum);
     QVERIFY(myAlbum.albumItems().size() == 1);
 
-    albumItemTest(myAlbum, aItem, *aScore);
+    albumItemTest(myAlbum, *aItem, *aScore);
 }
 
 //---------------------------------------------------------
@@ -79,18 +79,18 @@ void TestAlbums::albumItemConstructorWithoutScoreTest()
 {
     Album myAlbum;
     MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
-    AlbumItem aItem(myAlbum);
+    AlbumItem* aItem = new AlbumItem(myAlbum, aScore, true);
 
-    QCOMPARE(&aItem.album, &myAlbum);
+    QCOMPARE(&aItem->album, &myAlbum);
     QVERIFY(myAlbum.albumItems().size() == 1);
 
     // without score
     QVERIFY(!aScore->partOfActiveAlbum());
-    QCOMPARE(aItem.duration(), -1);
+    QCOMPARE(aItem->duration(), -1);
 
-    QCOMPARE(aItem.setScore(aScore), 0);
+    QCOMPARE(aItem->setScore(aScore), 0);
 
-    albumItemTest(myAlbum, aItem, *aScore);
+    albumItemTest(myAlbum, *aItem, *aScore);
     delete aScore;
 }
 
