@@ -15,6 +15,7 @@
  Implementation of Element, ElementList
 */
 
+#include "album.h"
 #include "element.h"
 #include "accidental.h"
 #include "ambitus.h"
@@ -474,7 +475,7 @@ QPointF Element::canvasPos() const
         return p;
     }
 
-    if (parent()->isPage() && albumParent()) {
+    if (parent()->isPage() && albumParent() && Album::activeAlbum->albumModeActive()) {
         p += albumParent()->canvasPos();
         return p;
     }
