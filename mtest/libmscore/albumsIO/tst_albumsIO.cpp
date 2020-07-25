@@ -84,29 +84,29 @@ void TestAlbumsIO::stringsTest(const char* file)
 
     auto x = album->composers();
     QVERIFY(x.size() == 2);
-    QCOMPARE(x.at(0), "Sergios - Anestis Kefalidis");
-    QCOMPARE(x.at(1), "Oregano");
+    QCOMPARE(x.at(0), QString("Sergios - Anestis Kefalidis"));
+    QCOMPARE(x.at(1), QString("Oregano"));
     auto y = album->composers();
     QVERIFY(y.size() == 1);
-    QCOMPARE(y.at(0), "Garlic");
+    QCOMPARE(y.at(0), QString("Garlic"));
     auto z = album->scoreTitles();
     QVERIFY(z.size() == 3);
-    QCOMPARE(z.at(0), "Piano 1");
-    QCOMPARE(z.at(1), "Piano 2");
-    QCOMPARE(z.at(2), "Piano 3");
+    QCOMPARE(z.at(0), QString("Piano 1"));
+    QCOMPARE(z.at(1), QString("Piano 2"));
+    QCOMPARE(z.at(2), QString("Piano 3"));
 
     album->removeScore(0);
 
     auto x2 = album->composers();
     QVERIFY(x2.size() == 1);
-    QCOMPARE(x2.at(0), "Oregano");
+    QCOMPARE(x2.at(0), QString("Oregano"));
     auto y2 = album->composers();
     QVERIFY(y2.size() == 1);
-    QCOMPARE(y2.at(0), "Garlic");
+    QCOMPARE(y2.at(0), QString("Garlic"));
     auto z2 = album->scoreTitles();
     QVERIFY(z2.size() == 2);
-    QCOMPARE(z2.at(1), "Piano 2");
-    QCOMPARE(z2.at(2), "Piano 3");
+    QCOMPARE(z2.at(1), QString("Piano 2"));
+    QCOMPARE(z2.at(2), QString("Piano 3"));
 
     delete album;
 }
