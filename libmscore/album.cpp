@@ -318,7 +318,7 @@ QStringList Album::composers() const
 
     for (auto& item : m_albumItems) {
         QString composer = item->score->composer();
-        if (!composers.contains(composer) && !composer.isEmpty()) {
+        if (!composers.contains(composer, Qt::CaseSensitivity::CaseInsensitive) && !composer.isEmpty()) {
             composers.push_back(composer);
         }
     }
@@ -502,6 +502,27 @@ const QFileInfo& Album::fileInfo() const
 {
     return m_fileInfo;
 }
+
+//---------------------------------------------------------
+//   albumModeActive
+//---------------------------------------------------------
+
+
+bool Album::albumModeActive() const
+{
+    return m_albumModeActive;
+}
+
+
+//---------------------------------------------------------
+//   setAlbumModeActive
+//---------------------------------------------------------
+
+void Album::setAlbumModeActive(bool b)
+{
+    m_albumModeActive = b;
+}
+
 
 //---------------------------------------------------------
 //   generateContents
