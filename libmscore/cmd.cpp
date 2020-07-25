@@ -276,7 +276,7 @@ void Score::endCmd(const bool isCmdFromInspector, bool rollback)
         undoStack()->current()->unwind();
     }
     update(false);
-    if (Album::scoreInActiveAlbum(this->masterScore()) && Album::activeAlbum->getDominant()) { // relayout the album score so that this score does not go to the top
+    if (Album::scoreInActiveAlbum(this->masterScore()) && Album::activeAlbum->getDominant() && Album::activeAlbum->albumModeActive()) { // relayout the album score so that this score does not go to the top
         Album::activeAlbum->getDominant()->update();
         Album::activeAlbum->getDominant()->doLayout();
     }
