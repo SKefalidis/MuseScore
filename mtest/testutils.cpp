@@ -171,7 +171,7 @@ bool MTest::saveScore(Score* score, const QString& name) const
 
 bool MTest::saveAlbum(Album* album, const QString& name) const
 {
-    return album->saveToFile(name, false); // absolutePath disabled for testing
+    return album->saveToFile(name); // absolutePath disabled for testing
 }
 
 //---------------------------------------------------------
