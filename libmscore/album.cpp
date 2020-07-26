@@ -420,6 +420,8 @@ void Album::readAlbum(XmlReader& reader)
             m_generateContents = reader.readBool();
         } else if (tag == "addPageBreaks") {
             m_addPageBreaksEnabled = reader.readBool();
+        } else if (tag == "titleAtTheBottom") {
+            m_titleAtTheBottom = reader.readBool();
         } else if (tag == "playbackDelay") {
             m_defaultPlaybackDelay = reader.readInt();
         }
@@ -459,6 +461,7 @@ void Album::writeAlbum(XmlWriter &writer, bool absolutePathEnabled) const
     writer.tag("name", m_albumTitle);
     writer.tag("generateContents", m_generateContents);
     writer.tag("addPageBreaks", m_addPageBreaksEnabled);
+    writer.tag("titleAtTheBottom", m_titleAtTheBottom);
     writer.tag("playbackDelay", m_defaultPlaybackDelay);
     for (auto& aItem : m_albumItems) {
         aItem->writeAlbumItem(writer, absolutePathEnabled);
