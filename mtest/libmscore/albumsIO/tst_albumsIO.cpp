@@ -86,7 +86,6 @@ void TestAlbumsIO::stringsTest(const char* file)
     for (auto& item : album->albumItems()) {
         QString path = item->fileInfo.canonicalFilePath();
         MasterScore* score = readScore(path);
-        score->updateCapo();
         item->setScore(score);
     }
 
