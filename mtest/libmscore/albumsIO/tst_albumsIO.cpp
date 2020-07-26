@@ -82,6 +82,14 @@ void TestAlbumsIO::stringsTest(const char* file)
     Album* album = readAlbum(DIR + QString(file) + ".msca");
     QVERIFY(album);
 
+    // load scores
+    for (auto& item : album->albumItems()) {
+        QString path = item->fileInfo.canonicalFilePath();
+        MasterScore* score = readScore(path);
+        score->updateCapo();
+        item->setScore(score);
+    }
+
     auto x = album->composers();
     QVERIFY(x.size() == 2);
     QCOMPARE(x.at(0), QString("Sergios - Anestis Kefalidis"));
@@ -120,6 +128,14 @@ void TestAlbumsIO::addRemoveTest(const char* file)
     MScore::debugMode = true;
     Album* album = readAlbum(DIR + QString(file) + ".msca");
     QVERIFY(album);
+
+    // load scores
+    for (auto& item : album->albumItems()) {
+        QString path = item->fileInfo.canonicalFilePath();
+        MasterScore* score = readScore(path);
+        score->updateCapo();
+        item->setScore(score);
+    }
 
     QVERIFY(album->albumItems().size() == 3);
     MasterScore* ms = album->albumItems().at(1)->score;
