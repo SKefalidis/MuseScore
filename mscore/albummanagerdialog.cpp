@@ -74,6 +74,7 @@ void AlbumManagerDialog::apply()
         albumManager->album()->addPageBreaks();
     }
     albumManager->album()->setTitleAtTheBottom(checkTitleLayout->isChecked());
+    albumManager->album()->setIncludeAbsolutePaths(checkAbsolutePathsEnabled->isChecked());
 }
 
 //---------------------------------------------------------
@@ -87,6 +88,7 @@ void AlbumManagerDialog::update()
     checkContentsGeneration->setChecked(albumManager->album()->generateContents());
     checkAddPageBreak->setChecked(albumManager->album()->addPageBreaksEnabled());
     checkTitleLayout->setChecked(albumManager->album()->titleAtTheBottom());
+    checkAbsolutePathsEnabled->setChecked(albumManager->album()->includeAbsolutePaths());
 }
 
 //---------------------------------------------------------

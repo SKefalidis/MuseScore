@@ -391,7 +391,7 @@ bool MuseScore::saveAlbum()
         fname += ".msca";
     }
 
-    fileBaseName = mscore->getSaveScoreName(tr("Save Score"), fname, filter);
+    fileBaseName = mscore->getSaveScoreName(tr("Save Album"), fname, filter);
     if (fileBaseName.isEmpty()) {
         return false;
     }
