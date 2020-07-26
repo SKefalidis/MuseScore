@@ -4460,7 +4460,7 @@ QString Score::composer() const
             Text* t = toText(x);
             if (t->tid() == Tid::COMPOSER) {
                 QString s = t->plainText();
-                while (s.back() == '\n') {
+                while (s.at(s.size() - 1) == '\n') { // change to s.back() after Qt 5.10
                     s.chop(1);
                 }
                 return s;
@@ -4481,7 +4481,7 @@ QString Score::lyricist() const
             Text* t = toText(x);
             if (t->tid() == Tid::POET) {
                 QString s = t->plainText();
-                while (s.back() == '\n') {
+                while (s.at(s.size() - 1) == '\n') { // change to s.back() after Qt 5.10
                     s.chop(1);
                 }
                 return s;
