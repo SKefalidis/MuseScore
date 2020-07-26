@@ -89,6 +89,12 @@ int AlbumItem::setScore(MasterScore* score)
         Q_ASSERT(false);
         return -1;
     }
+    // don't set an empty score
+    if (score == nullptr) {
+        Q_ASSERT(false);
+        return -1;
+    }
+
     disconnect(score, &MasterScore::durationChanged, this, &AlbumItem::updateDuration);
     this->score = score;
     setEnabled(m_enabled);
@@ -535,6 +541,26 @@ void Album::setAlbumModeActive(bool b)
     m_albumModeActive = b;
 }
 
+//---------------------------------------------------------
+//   titleAtTheBottom
+//---------------------------------------------------------
+
+bool Album::titleAtTheBottom() const
+{
+    return m_titleAtTheBottom;
+}
+
+//---------------------------------------------------------
+//   setTitleAtTheBottom
+//---------------------------------------------------------
+
+void Album::setTitleAtTheBottom(bool titleAtTheBottom)
+{
+    m_titleAtTheBottom = titleAtTheBottom;
+    if (m_dominantScore) {
+        m_dominantScore->setTitleAtTheBottom(titleAtTheBottom);
+    }
+}
 
 //---------------------------------------------------------
 //   generateContents
