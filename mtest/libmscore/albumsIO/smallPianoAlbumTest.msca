@@ -4,19 +4,23 @@
     <name>My Album</name>
     <generateContents>0</generateContents>
     <addPageBreaks>0</addPageBreaks>
+    <titleAtTheBottom>1</titleAtTheBottom>
     <playbackDelay>3000</playbackDelay>
     <Score>
       <alias></alias>
+      <path>/home/sergios/Documents/MuseScore/mtest/libmscore/albumsIO/Piano1.mscx</path>
       <relativePath>Piano1.mscx</relativePath>
       <enabled>1</enabled>
       </Score>
     <Score>
       <alias></alias>
+      <path>/home/sergios/Documents/MuseScore/mtest/libmscore/albumsIO/Piano2.mscx</path>
       <relativePath>Piano2.mscx</relativePath>
       <enabled>0</enabled>
       </Score>
     <Score>
       <alias></alias>
+      <path>/home/sergios/Documents/MuseScore/mtest/libmscore/albumsIO/testFolder/Piano3.mscx</path>
       <relativePath>testFolder/Piano3.mscx</relativePath>
       <enabled>1</enabled>
       </Score>
