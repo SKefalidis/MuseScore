@@ -289,7 +289,6 @@ void AlbumManager::tabMoved(int from, int to)
 
 //---------------------------------------------------------
 //   albumNameChanged
-//      TODO_SK: make sure that the 4 text fields exist, like in the contents
 //---------------------------------------------------------
 
 void AlbumManager::albumNameChanged(const QString& text)
@@ -306,6 +305,19 @@ void AlbumManager::albumNameChanged(const QString& text)
     box->setOffset(0, pageHeight * 0.1);
     box->setBoxHeight(Spatium(pageHeight * 0.8 / scoreSpatium));
 
+    // make sure that we have these 3 text fields
+    MeasureBase* measure = m_album->getDominant()->measures()->first();
+    measure->clearElements();
+    Text* s = new Text(m_album->getDominant(), Tid::TITLE);
+    s->setPlainText("");
+    measure->add(s);
+    s = new Text(m_album->getDominant(), Tid::COMPOSER);
+    s->setPlainText("");
+    measure->add(s);
+    s = new Text(m_album->getDominant(), Tid::POET);
+    s->setPlainText("");
+    measure->add(s);
+
     for (auto x : m_album->getDominant()->measures()->first()->el()) {
         if (x && x->isText()) {
             Text* t = toText(x);
@@ -316,12 +328,6 @@ void AlbumManager::albumNameChanged(const QString& text)
 
                 t->cursor()->setRow(0);
                 t->setPlainText(text);
-            } else if (t->tid() == Tid::SUBTITLE) {
-                t->setSize(24);
-                t->setAlign(Align::HCENTER | Align::BASELINE);
-
-                t->cursor()->setRow(0);
-                t->setPlainText("");
             } else if (t->tid() == Tid::COMPOSER) {
                 t->setSize(16);
                 t->setPlainText(m_album->composers().join("\n"));
