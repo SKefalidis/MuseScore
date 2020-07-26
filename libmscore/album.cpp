@@ -110,13 +110,13 @@ int AlbumItem::setScore(MasterScore* score)
 
 void AlbumItem::readAlbumItem(XmlReader& reader)
 {
-    std::cout << "reading album item" << std::endl;
     while (reader.readNextStartElement()) {
         const QStringRef& tag(reader.name());
         if (tag == "name") {
             reader.readElementText();
         } else if (tag == "path") {
             fileInfo.setFile(reader.readElementText());
+            album.setIncludeAbsolutePaths(true);
         } else if (tag == "relativePath") {
             if (!fileInfo.exists()) {
                 QDir dir(album.fileInfo().dir());
@@ -432,7 +432,7 @@ void Album::readAlbum(XmlReader& reader)
 //   saveToFile
 //---------------------------------------------------------
 
-bool Album::saveToFile(const QString &path, bool absolutePathEnabled)
+bool Album::saveToFile(const QString &path)
 {
     std::cout << "Saving album to file..." << std::endl;
     QFile f(path);
@@ -445,7 +445,7 @@ bool Album::saveToFile(const QString &path, bool absolutePathEnabled)
     XmlWriter writer(nullptr, &f);
     writer.header();
     writer.stag(QStringLiteral("museScore version=\"" MSC_VERSION"\""));
-    writeAlbum(writer, absolutePathEnabled);
+    writeAlbum(writer);
     writer.etag();
     f.close();
     return true;
@@ -455,7 +455,7 @@ bool Album::saveToFile(const QString &path, bool absolutePathEnabled)
 //   writeAlbum
 //---------------------------------------------------------
 
-void Album::writeAlbum(XmlWriter &writer, bool absolutePathEnabled) const
+void Album::writeAlbum(XmlWriter &writer) const
 {
     writer.stag("Album");
     writer.tag("name", m_albumTitle);
@@ -464,7 +464,7 @@ void Album::writeAlbum(XmlWriter &writer, bool absolutePathEnabled) const
     writer.tag("titleAtTheBottom", m_titleAtTheBottom);
     writer.tag("playbackDelay", m_defaultPlaybackDelay);
     for (auto& aItem : m_albumItems) {
-        aItem->writeAlbumItem(writer, absolutePathEnabled);
+        aItem->writeAlbumItem(writer, m_includeAbsolutePaths);
     }
     writer.etag();
 }
@@ -599,6 +599,24 @@ bool Album::addPageBreaksEnabled() const
 void Album::setAddPageBreaksEnabled(bool enabled)
 {
     m_addPageBreaksEnabled = enabled;
+}
+
+//---------------------------------------------------------
+//   includeAbsolutePaths
+//---------------------------------------------------------
+
+bool Album::includeAbsolutePaths() const
+{
+    return m_includeAbsolutePaths;
+}
+
+//---------------------------------------------------------
+//   setIncludeAbsolutePaths
+//---------------------------------------------------------
+
+void Album::setIncludeAbsolutePaths(bool enabled)
+{
+    m_includeAbsolutePaths = enabled;
 }
 
 //---------------------------------------------------------

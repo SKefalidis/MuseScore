@@ -91,8 +91,8 @@ public:
 
     bool loadFromFile(const QString& path);
     void readAlbum(XmlReader& reader);
-    bool saveToFile(const QString &path, bool absolutePathEnabled = true);
-    void writeAlbum(XmlWriter& writer, bool absolutePathEnabled) const;
+    bool saveToFile(const QString &path);
+    void writeAlbum(XmlWriter& writer) const;
 
     std::vector<AlbumItem*> albumItems() const;
     const QString& albumTitle() const;
@@ -106,6 +106,8 @@ public:
     void setGenerateContents(bool enabled);
     bool addPageBreaksEnabled() const;
     void setAddPageBreaksEnabled(bool enabled);
+    bool includeAbsolutePaths() const;
+    void setIncludeAbsolutePaths(bool enabled);
     int defaultPlaybackDelay() const;
     void setDefaultPlaybackDelay(int ms);
 
@@ -129,6 +131,7 @@ private:
     bool m_titleAtTheBottom                         { true };
     bool m_generateContents                         { false };
     bool m_addPageBreaksEnabled                     { false };
+    bool m_includeAbsolutePaths                     { false };
     int m_defaultPlaybackDelay                      { 3000 };
 };
 
