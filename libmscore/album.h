@@ -100,6 +100,8 @@ public:
     const QFileInfo& fileInfo() const;
     bool albumModeActive() const;
     void setAlbumModeActive(bool b);
+    bool titleAtTheBottom() const;
+    void setTitleAtTheBottom(bool titleAtTheBottom);
     bool generateContents() const;
     void setGenerateContents(bool enabled);
     bool addPageBreaksEnabled() const;
@@ -124,6 +126,7 @@ private:
     MasterScore* m_dominantScore                    { nullptr };
     bool m_albumModeActive                          { false };
 
+    bool m_titleAtTheBottom                         { true };
     bool m_generateContents                         { false };
     bool m_addPageBreaksEnabled                     { false };
     int m_defaultPlaybackDelay                      { 3000 };

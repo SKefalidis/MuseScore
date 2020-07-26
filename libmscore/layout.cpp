@@ -4412,8 +4412,9 @@ void LayoutContext::collectPage()
     const qreal slb = score->styleP(Sid::staffLowerBorder);
     bool breakPages = score->layoutMode() != LayoutMode::SYSTEM;
     bool isEmptyMovement = score->isMaster() ? static_cast<MasterScore*>(score)->emptyMovement() : false;
-    //qreal y         = prevSystem ? prevSystem->y() + prevSystem->height() : page->tm();
-    qreal ey        = page->height() - page->bm();
+    bool titleAtTheBottom = dominantScore->isMaster() ? static_cast<MasterScore*>(dominantScore)->titleAtTheBottom() : true;
+    //qreal y = prevSystem ? prevSystem->y() + prevSystem->height() : page->tm();
+    qreal ey = page->height() - page->bm();
 
     int movementsSize = dominantScore->isMaster() ? static_cast<MasterScore*>(dominantScore)->movements()->size() : -1;
     if (score->isMaster() && curSystem == score->systems().first()) {
@@ -4617,6 +4618,9 @@ void LayoutContext::collectPage()
                 dist += qMax(margin, slb);
             }
             breakPage = (y + dist) >= ey && breakPages;       // checks if the page is filled
+            if (!breakPage && breakPages && !titleAtTheBottom && curSystem->measure(0)->isVBox()) {
+                breakPage = (y + dist + score->systems().value(systemIdx)->height()) >= ey;
+            }
         }
         if (breakPage) {
             qreal dist = qMax(prevSystem->minBottom(), prevSystem->spacerDistance(false));
