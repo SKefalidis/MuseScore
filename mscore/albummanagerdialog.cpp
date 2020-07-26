@@ -73,6 +73,7 @@ void AlbumManagerDialog::apply()
     if (checkAddPageBreak->isChecked()) {
         albumManager->album()->addPageBreaks();
     }
+    albumManager->album()->setTitleAtTheBottom(checkTitleLayout->isChecked());
 }
 
 //---------------------------------------------------------
@@ -85,6 +86,7 @@ void AlbumManagerDialog::update()
     playbackDelayBox->setValue(albumManager->album()->defaultPlaybackDelay());
     checkContentsGeneration->setChecked(albumManager->album()->generateContents());
     checkAddPageBreak->setChecked(albumManager->album()->addPageBreaksEnabled());
+    checkTitleLayout->setChecked(albumManager->album()->titleAtTheBottom());
 }
 
 //---------------------------------------------------------

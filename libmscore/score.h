@@ -1343,6 +1343,7 @@ class MasterScore : public Score
     int m_firstRealMovement     { 0 };
     bool m_enabled              { true };   // used to decide whether to draw/layout the movement in multi-movement scores
                                             // ignored, for single-movement scores
+    bool m_titleAtTheBottom     { true };
     bool _readOnly              { false };
 
     CmdState _cmdState;                     // modified during cmd processing
@@ -1420,6 +1421,9 @@ public:
 
     bool enabled() const                { return m_enabled; }
     void setEnabled(bool b)             { m_enabled = b; }
+
+    int titleAtTheBottom() const        { return m_titleAtTheBottom; }
+    void setTitleAtTheBottom(bool b)    { m_titleAtTheBottom = b; }
 
     virtual void setUpdateAll() override;
 
