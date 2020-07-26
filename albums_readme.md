@@ -1,11 +1,25 @@
 Notes:
+
+Mass changes:
  - Mass changes, Actions menu, used by both albums and groups of normal scores (multible tabs selected or opened scores)
+ - Easy way to select multiple scores.
+ - Actions:
+    - Add - Replace instruments.
+    - Change style.
+    - Change composer, lyricist.
+    - Change footers/headers.
+    - Enable/disable (via filters?)
+
+Split Score:
+ - Easy way to split a score into an album
+
+General:
  - Decouple albums and multi movement scores
  - Improve the automated tests
  - Album shortcuts
  - Album of albums
- - Option to not have titles as the last system
  - There could be composer and lyricist strings in more than one place
+ - Export options, score mode, album mode, export relative path, export absolute path
 
  Refactor and Code Quality:
  - Cleanup the main branch
