@@ -38,7 +38,7 @@ class AlbumItem : public QObject {
     Q_OBJECT
 
 public:
-    AlbumItem(Album& album);
+    // AlbumItems are created by Album::createItem, don't create them manually.
     AlbumItem(Album& album, XmlReader& reader);
     AlbumItem(Album& album, MasterScore* score, bool enabled = true);
     ~AlbumItem();
@@ -46,8 +46,10 @@ public:
     void setEnabled(bool b);
     bool enabled() const;
     int setScore(MasterScore* score);
+    void addSectionBreak();
+    void addPageBreak();
     void readAlbumItem(XmlReader& reader);
-    void writeAlbumItem(XmlWriter& writer, bool absolutePathEnabled) const;
+    void writeAlbumItem(XmlWriter& writer) const;
 
     int duration() const;
 
@@ -74,16 +76,16 @@ class Album : public QObject {
     Q_OBJECT
 
 public:
+    static Album* activeAlbum;
+    static bool scoreInActiveAlbum(MasterScore* score);
+
     void addScore(MasterScore* score, bool enabled = true);
-    void addSectionBreak(AlbumItem* aItem);
-    void addSectionBreaks();
-    void addPageBreak(AlbumItem* aItem);
-    void addPageBreaks();
     void removeScore(MasterScore* score);
     void removeScore(int index);
     void swap(int indexA, int indexB);
-    MasterScore* getDominant() const;
-    void setDominant(MasterScore* ms); // I don't like this function.
+
+    void addSectionBreaks();
+    void addPageBreaks();
 
     QStringList composers() const;
     QStringList lyricists() const;
@@ -94,7 +96,10 @@ public:
     bool saveToFile(const QString &path);
     void writeAlbum(XmlWriter& writer) const;
 
+    MasterScore* getDominant() const;
+    void setDominant(MasterScore* ms); // I don't like this function.
     std::vector<AlbumItem*> albumItems() const;
+
     const QString& albumTitle() const;
     void setAlbumTitle(const QString& newTitle);
     const QFileInfo& fileInfo() const;
@@ -111,16 +116,12 @@ public:
     int defaultPlaybackDelay() const;
     void setDefaultPlaybackDelay(int ms);
 
-    static Album* activeAlbum;
-    static bool scoreInActiveAlbum(MasterScore* score);
-
 public slots:
     void setAlbumLayoutMode(LayoutMode lm);
 
 private:
-    // Every albumItem adds itself to an Album in its constructor.
-    friend AlbumItem::AlbumItem(Album&);
-    void addAlbumItem(unique_ptr<AlbumItem> aItem);
+    void createItem(XmlReader& reader);
+    void createItem(MasterScore* score, bool enabled);
 
     std::vector<unique_ptr<AlbumItem>> m_albumItems {};
     QString m_albumTitle                            { "" };

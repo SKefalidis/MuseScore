@@ -358,7 +358,7 @@ void MuseScore::openAlbum(const QString& fn)
     auto newAlbum = std::unique_ptr<Album>(new Album());
     newAlbum->loadFromFile(fn);
     albumManager->setAlbum(std::move(newAlbum));
-    addRecentAlbum(albumManager->album().get());
+    addRecentAlbum(&albumManager->album());
     writeSessionFile(false);
 }
 
@@ -396,9 +396,9 @@ bool MuseScore::saveAlbum()
         return false;
     }
 
-    albumManager->album()->saveToFile(fileBaseName);
-    mscore->lastSaveDirectory = albumManager->album()->fileInfo().absolutePath();
-    addRecentAlbum(albumManager->album().get());
+    albumManager->album().saveToFile(fileBaseName);
+    mscore->lastSaveDirectory = albumManager->album().fileInfo().absolutePath();
+    addRecentAlbum(&albumManager->album());
     writeSessionFile(false);
     return true;
 }

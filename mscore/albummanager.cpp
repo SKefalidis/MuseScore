@@ -59,7 +59,7 @@ AlbumManager::AlbumManager(QWidget* parent)
     playButton->setIcon(*icons[int(Icons::play_ICON)]);
     rewindButton->setIcon(*icons[int(Icons::start_ICON)]);
 
-    connect(albumTitleEdit,     &QLineEdit::textChanged,    this, &AlbumManager::albumNameChanged);
+    connect(albumTitleEdit,     &QLineEdit::textChanged,    this, &AlbumManager::updateAlbumTitle);
     connect(add,                &QPushButton::clicked,      this, &AlbumManager::addClicked);
     connect(addNew,             &QPushButton::clicked,      this, &AlbumManager::addNewClicked);
     connect(up,                 &QPushButton::clicked,      this, &AlbumManager::upClicked);
@@ -243,7 +243,7 @@ void AlbumManager::tabChanged()
     } else if (mscore->getTab1()->currentIndex() != m_tempScoreTabIndex && albumModeButton->isChecked()) {
         scoreModeButton->setChecked(true);
     }
-    changeMode(true);
+    changeMode();
     albumModeButton->blockSignals(false);
     scoreModeButton->blockSignals(false);
 }
@@ -262,12 +262,12 @@ void AlbumManager::tabRemoved(int index)
     if (index == m_tempScoreTabIndex) {
         scoreModeButton->setChecked(true);
         m_tempScoreTabIndex = -1;
-        changeMode(true);
+        changeMode();
     } else if (index < m_tempScoreTabIndex) {
         m_tempScoreTabIndex--;
     } else if (index - 1 == m_tempScoreTabIndex) {
         albumModeButton->setChecked(true);
-        changeMode(true);
+        changeMode();
     }
     scoreModeButton->blockSignals(false);
     albumModeButton->blockSignals(false);
@@ -289,15 +289,24 @@ void AlbumManager::tabMoved(int from, int to)
 }
 
 //---------------------------------------------------------
-//   albumNameChanged
+//   updateAlbumName
 //---------------------------------------------------------
 
-void AlbumManager::albumNameChanged(const QString& text)
+void AlbumManager::updateAlbumTitle(const QString& text)
+{
+    m_album->setAlbumTitle(text);
+    updateFrontCover();
+}
+
+//---------------------------------------------------------
+//   updateFrontCover
+//---------------------------------------------------------
+
+void AlbumManager::updateFrontCover()
 {
     if (!m_album->getDominant()) {
         return;
     }
-    m_album->setAlbumTitle(text);
 
     VBox* box = toVBox(m_album->getDominant()->measures()->first());
     qreal pageHeight = m_album->getDominant()->pages().at(0)->height();
@@ -328,7 +337,7 @@ void AlbumManager::albumNameChanged(const QString& text)
                 t->setSize(36);
 
                 t->cursor()->setRow(0);
-                t->setPlainText(text);
+                t->setPlainText(m_album->albumTitle());
             } else if (t->tid() == Tid::COMPOSER) {
                 t->setSize(16);
                 t->setPlainText(m_album->composers().join("\n"));
@@ -338,7 +347,6 @@ void AlbumManager::albumNameChanged(const QString& text)
             }
         }
     }
-    updateContents();
 }
 
 //---------------------------------------------------------
@@ -351,7 +359,7 @@ void AlbumManager::updateContents()
         return;
     }
 
-    if (!album()->generateContents()) {
+    if (!m_album->generateContents()) {
         return;
     }
 
@@ -634,14 +642,13 @@ void AlbumManager::addAlbumItem(AlbumItem& albumItem)
     AlbumManagerItem* albumManagerItem = new AlbumManagerItem(albumItem, li, tid);
     m_items.push_back(albumManagerItem);
     scoreList->blockSignals(false);
-    connect(albumManagerItem, &AlbumManagerItem::durationChanged, this, &AlbumManager::updateTotalDuration);
     albumManagerItem->updateDurationLabel();
+
+    updateFrontCover();
+    updateContents();
 
     // update the combined score to reflect the changes
     if (m_album->getDominant()) {
-        m_album->getDominant()->addMovement(albumItem.score);
-        m_album->getDominant()->update();
-        m_album->getDominant()->doLayout(); // position the movements correctly
         mscore->currentScoreView()->update(); // repaint
     }
 }
@@ -805,11 +812,6 @@ void AlbumManager::swap(int indexA, int indexB)
 
     // update the combined score to reflect the changes
     if (m_album->getDominant()) {
-        int offset = m_album->getDominant()->firstRealMovement();
-        std::swap(m_album->getDominant()->movements()->at(indexA + offset), m_album->getDominant()->movements()->at(indexB + offset));
-        // these should probably only run if the current tab is the one with the tempScore
-//        tempScore->update(); probably not needed
-        m_album->getDominant()->doLayout(); // position the movements correctly
         mscore->currentScoreView()->update(); // repaint
     }
 }
@@ -825,7 +827,10 @@ void AlbumManager::removeClicked(bool checked)
     m_items.erase(m_items.begin() + scoreList->currentRow());
     m_album->removeScore(scoreList->currentRow());
     scoreList->removeRow(scoreList->currentRow());
+
     updateDurations();
+    updateFrontCover();
+    updateContents();
 }
 
 //---------------------------------------------------------
@@ -876,9 +881,9 @@ void AlbumManager::setAlbum(std::unique_ptr<Album> a)
 //   album
 //---------------------------------------------------------
 
-const std::unique_ptr<Album>& AlbumManager::album() const
+Album& AlbumManager::album() const
 {
-    return m_album;
+    return *m_album.get();
 }
 
 //---------------------------------------------------------
@@ -961,8 +966,6 @@ AlbumManagerItem::AlbumManagerItem(AlbumItem& item, QTableWidgetItem* listItem, 
         MasterScore* score = mscore->readScore(path);
         albumItem.setScore(score);
     }
-//    albumItem.setScore(albumItem.score);
-    albumItem.score->setPartOfActiveAlbum(true);
     this->listItem = listItem;
     this->listDurationItem = listDurationItem;
     setEnabled(albumItem.enabled());
@@ -1008,7 +1011,7 @@ void AlbumManagerItem::updateDurationLabel()
 {
     int tempSeconds = albumItem.score->duration();
     listDurationItem->setText(durationToString(tempSeconds));
-    emit durationChanged();
+    mscore->getAlbumManager()->updateTotalDuration();
 }
 
 }

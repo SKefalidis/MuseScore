@@ -64,17 +64,17 @@ void AlbumManagerDialog::start()
 void AlbumManagerDialog::apply()
 {
     AlbumManager* albumManager = static_cast<AlbumManager*>(parent());
-    albumManager->album()->setDefaultPlaybackDelay(playbackDelayBox->value());
-    albumManager->album()->setGenerateContents(checkContentsGeneration->isChecked());
+    albumManager->album().setDefaultPlaybackDelay(playbackDelayBox->value());
+    albumManager->album().setGenerateContents(checkContentsGeneration->isChecked());
     if (checkContentsGeneration->isChecked()) {
-        albumManager->album()->getDominant()->setfirstRealMovement(2);
+        albumManager->album().getDominant()->setfirstRealMovement(2);
     }
-    albumManager->album()->setAddPageBreaksEnabled(checkAddPageBreak->isChecked());
+    albumManager->album().setAddPageBreaksEnabled(checkAddPageBreak->isChecked());
     if (checkAddPageBreak->isChecked()) {
-        albumManager->album()->addPageBreaks();
+        albumManager->album().addPageBreaks();
     }
-    albumManager->album()->setTitleAtTheBottom(checkTitleLayout->isChecked());
-    albumManager->album()->setIncludeAbsolutePaths(checkAbsolutePathsEnabled->isChecked());
+    albumManager->album().setTitleAtTheBottom(checkTitleLayout->isChecked());
+    albumManager->album().setIncludeAbsolutePaths(checkAbsolutePathsEnabled->isChecked());
 }
 
 //---------------------------------------------------------
@@ -84,11 +84,11 @@ void AlbumManagerDialog::apply()
 void AlbumManagerDialog::update()
 {
     AlbumManager* albumManager = static_cast<AlbumManager*>(parent());
-    playbackDelayBox->setValue(albumManager->album()->defaultPlaybackDelay());
-    checkContentsGeneration->setChecked(albumManager->album()->generateContents());
-    checkAddPageBreak->setChecked(albumManager->album()->addPageBreaksEnabled());
-    checkTitleLayout->setChecked(albumManager->album()->titleAtTheBottom());
-    checkAbsolutePathsEnabled->setChecked(albumManager->album()->includeAbsolutePaths());
+    playbackDelayBox->setValue(albumManager->album().defaultPlaybackDelay());
+    checkContentsGeneration->setChecked(albumManager->album().generateContents());
+    checkAddPageBreak->setChecked(albumManager->album().addPageBreaksEnabled());
+    checkTitleLayout->setChecked(albumManager->album().titleAtTheBottom());
+    checkAbsolutePathsEnabled->setChecked(albumManager->album().includeAbsolutePaths());
 }
 
 //---------------------------------------------------------
@@ -117,6 +117,6 @@ void AlbumManagerDialog::buttonBoxClicked(QAbstractButton* button)
 
 void AlbumManagerDialog::setAlbumLayoutMode(int i)
 {
-    static_cast<AlbumManager*>(parent())->album()->setAlbumLayoutMode(static_cast<LayoutMode>(albumViewModeCombo->itemData(i).toInt()));
+    static_cast<AlbumManager*>(parent())->album().setAlbumLayoutMode(static_cast<LayoutMode>(albumViewModeCombo->itemData(i).toInt()));
 }
 }
