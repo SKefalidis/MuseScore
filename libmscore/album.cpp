@@ -62,6 +62,10 @@ void AlbumItem::setEnabled(bool b)
 {
     m_enabled = b;
     score->setEnabled(b);
+    if (album.getDominant()) {
+        album.getDominant()->update();
+        album.getDominant()->doLayout();
+    }
 }
 
 bool AlbumItem::enabled() const
