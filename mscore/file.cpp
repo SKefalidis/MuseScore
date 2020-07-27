@@ -482,6 +482,9 @@ MasterScore* MuseScore::openScoreWithoutAppending(const QString& fn)
 
     // load the score
     MasterScore* score = readScore(fn);
+    if (score) {
+        score->updateCapo();
+    }
     return score;
 }
 

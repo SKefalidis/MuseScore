@@ -599,7 +599,7 @@ void AlbumManager::addClicked(bool checked)
     for (const QString& fn : files) {
         MasterScore* score = mscore->readScore(fn);
         m_album->addScore(score);
-        addAlbumItem(*m_album->albumItems().back()); // TODO_SK: Convert to reference and use the unique ptr reference
+        addAlbumItem(*m_album->albumItems().back());
     }
 }
 
@@ -617,7 +617,7 @@ void AlbumManager::addNewClicked(bool checked)
         return;
     }
     m_album->addScore(score);
-    addAlbumItem(*m_album->albumItems().back()); // TODO_SK: Convert to reference and use the unique ptr reference
+    addAlbumItem(*m_album->albumItems().back());
 }
 
 //---------------------------------------------------------
@@ -866,12 +866,9 @@ void AlbumManager::setAlbum(std::unique_ptr<Album> a)
     for (auto& item : m_album->albumItems()) {
         QString path = item->fileInfo.canonicalFilePath();
         MasterScore* score = mscore->openScoreWithoutAppending(path);
-        score->updateCapo();
         item->setScore(score);
-        addAlbumItem(*item); // TODO_SK: Convert to reference and use the unique ptr reference
+        addAlbumItem(*item);
     }
-
-    m_album->addSectionBreaks(); // TODO_SK: normally I should add the sections breaks while loading, but the scores haven't been loaded so I can't
     scoreList->blockSignals(false);
 
     Album::activeAlbum = m_album.get();
@@ -984,6 +981,9 @@ AlbumManagerItem::~AlbumManagerItem()
 void AlbumManagerItem::setEnabled(bool b)
 {
     albumItem.setEnabled(b);
+    if (mscore->getAlbumManager()->album().getDominant()) {
+        mscore->currentScoreView()->update(); // repaint
+    }
     if (b) {
         if (listItem) {
             listItem->setTextColor(Qt::black);
