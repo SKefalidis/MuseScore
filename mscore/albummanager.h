@@ -43,9 +43,6 @@ public:
 
 public slots:
     void updateDurationLabel();
-
-signals:
-    void durationChanged();
 };
 
 //---------------------------------------------------------
@@ -60,7 +57,7 @@ public:
     AlbumManager(QWidget* parent = 0);
     ~AlbumManager();
 
-    const std::unique_ptr<Album>& album() const;
+    Album& album() const;
     void setAlbum(std::unique_ptr<Album> album);
 
 protected:
@@ -68,40 +65,44 @@ protected:
     bool eventFilter(QObject* obj, QEvent* ev) override;
 
 private slots:
+    friend class AlbumManagerItem;
     void addAlbumItem(AlbumItem& albumItem);
     void itemDoubleClicked(QTableWidgetItem* item);
-    void swap(int indexA, int indexB);
-    void updateButtons();
     void itemChanged(QTableWidgetItem* item);     // score name in list is edited
+
     void tabChanged();
     void tabRemoved(int index);
     void tabMoved(int from, int to);
 
     // The unused 'checked' parameters exist because Qt 5 style signals/slots don't
     // accept default values.
-    void albumNameChanged(const QString& text);
+    void openSettingsDialog(bool checked = false);
+    void changeMode(bool checked = false);
     void addClicked(bool checked = false);
     void addNewClicked(bool checked = false);
-    void upClicked(bool checked = false);
-    void downClicked(bool checked = false);
     void removeClicked(bool checked = false);
     void deleteClicked(bool checked = false);
-    void changeMode(bool checked = false);
-    void openSettingsDialog(bool checked = false);
+    void upClicked(bool checked = false);
+    void downClicked(bool checked = false);
+    void swap(int indexA, int indexB);
+    void updateButtons();
+    void updateScoreOrder(QModelIndex sourceParent, int sourceStart, int sourceEnd, QModelIndex destinationParent,
+                          int destinationRow);
+
     void playAlbum(bool checked);
     void playAlbum();
     void startPlayback();
     void rewindAlbum(bool checked = false);
-    void updateScoreOrder(QModelIndex sourceParent, int sourceStart, int sourceEnd, QModelIndex destinationParent,
-                          int destinationRow);
 
+    void updateAlbumTitle(const QString& text);
+    void updateFrontCover();
+    void updateContents();
     void updateTotalDuration();
 
 private:
     virtual void showEvent(QShowEvent*) override;
     virtual void hideEvent(QHideEvent*) override;
     void updateDurations();
-    void updateContents();
 
     AlbumManagerDialog* m_settingsDialog    { nullptr };
     std::unique_ptr<Album> m_album          { nullptr }; /// ??

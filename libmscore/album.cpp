@@ -33,26 +33,17 @@ namespace Ms {
 //---------------------------------------------------------
 //---------------------------------------------------------
 
-AlbumItem::AlbumItem(Album& album)
-    : album(album)
-{
-    album.addAlbumItem(unique_ptr<AlbumItem>(this));
-}
-
 AlbumItem::AlbumItem(Album& album, XmlReader& reader)
-    : AlbumItem(album)
+    : album(album)
 {
     readAlbumItem(reader);
 }
 
-AlbumItem::AlbumItem(Album& album, MasterScore *score, bool enabled)
-    : AlbumItem(album)
+AlbumItem::AlbumItem(Album& album, MasterScore* score, bool enabled)
+    : album(album)
 {
-    this->score = score;
-    setEnabled(enabled);
-    score->setPartOfActiveAlbum(true);
-    updateDuration();
-    fileInfo.setFile(score->importedFilePath());
+    m_enabled = enabled;
+    setScore(score);
 }
 
 AlbumItem::~AlbumItem()
@@ -95,13 +86,47 @@ int AlbumItem::setScore(MasterScore* score)
         return -1;
     }
 
-    disconnect(score, &MasterScore::durationChanged, this, &AlbumItem::updateDuration);
     this->score = score;
     setEnabled(m_enabled);
     score->setPartOfActiveAlbum(true);
+    fileInfo.setFile(score->importedFilePath());
+
+    addSectionBreak();
+    if (album.addPageBreaksEnabled()) {
+        addPageBreak();
+    }
+
     updateDuration();
     connect(score, &MasterScore::durationChanged, this, &AlbumItem::updateDuration);
     return 0;
+}
+
+//---------------------------------------------------------
+//   addSectionBreak
+//---------------------------------------------------------
+
+void AlbumItem::addSectionBreak()
+{
+    if (!score->lastMeasure()->sectionBreak()) { // add only if there isn't one
+        LayoutBreak* lb = new LayoutBreak(score);
+        lb->setLayoutBreakType(LayoutBreak::Type::SECTION);
+        score->lastMeasure()->add(lb);
+        score->update();
+    }
+}
+
+//---------------------------------------------------------
+//   addPageBreak
+//---------------------------------------------------------
+
+void AlbumItem::addPageBreak()
+{
+    if (!score->lastMeasure()->pageBreak()) { // add only if there isn't one
+        LayoutBreak* lb = new LayoutBreak(score);
+        lb->setLayoutBreakType(LayoutBreak::Type::PAGE);
+        score->lastMeasure()->add(lb);
+        score->update();
+    }
 }
 
 //---------------------------------------------------------
@@ -138,11 +163,11 @@ void AlbumItem::readAlbumItem(XmlReader& reader)
 //---------------------------------------------------------
 
 
-void AlbumItem::writeAlbumItem(XmlWriter& writer, bool absolutePathEnabled) const
+void AlbumItem::writeAlbumItem(XmlWriter& writer) const
 {
     writer.stag("Score");
     writer.tag("alias", "");
-    if (absolutePathEnabled) {
+    if (album.includeAbsolutePaths()) {
         writer.tag("path", fileInfo.absoluteFilePath());
     }
     QDir dir(album.fileInfo().dir());
@@ -182,19 +207,17 @@ void AlbumItem::updateDuration()
 Album* Album::activeAlbum = nullptr;
 
 //---------------------------------------------------------
-//   addAlbumItem
+//   createItem
 //---------------------------------------------------------
 
-void Album::addAlbumItem(unique_ptr<AlbumItem> aItem)
+void Album::createItem(XmlReader& reader)
 {
-    // add section break to the end of the movement (if one does not already exist)
-    if (aItem->score) {
-        addSectionBreak(aItem.get());
-    }
-    if (aItem->score && m_addPageBreaksEnabled) {
-        addPageBreak(aItem.get());
-    }
-    m_albumItems.push_back(std::move(aItem));
+    m_albumItems.push_back(std::unique_ptr<AlbumItem>(new AlbumItem(*this, reader)));
+}
+
+void Album::createItem(MasterScore* score, bool enabled)
+{
+    m_albumItems.push_back(std::unique_ptr<AlbumItem>(new AlbumItem(*this, score, enabled)));
 }
 
 //---------------------------------------------------------
@@ -208,56 +231,12 @@ void Album::addScore(MasterScore* score, bool enabled)
         return;
     }
     std::cout << "Adding score to album..." << std::endl;
-    new AlbumItem(*this, score, enabled);
-}
+    createItem(score, enabled);
 
-//---------------------------------------------------------
-//   addSectionBreak
-//---------------------------------------------------------
-
-void Album::addSectionBreak(AlbumItem* aItem)
-{
-    if (!aItem->score->lastMeasure()->sectionBreak()) { // add only if there isn't one
-        LayoutBreak* lb = new LayoutBreak(aItem->score);
-        lb->setLayoutBreakType(LayoutBreak::Type::SECTION);
-        aItem->score->lastMeasure()->add(lb);
-        aItem->score->update();
-    }
-}
-
-//---------------------------------------------------------
-//   addSectionBreaks
-//---------------------------------------------------------
-
-void Album::addSectionBreaks()
-{
-    for (auto& aItem : m_albumItems) {
-        addSectionBreak(aItem.get());
-    }
-}
-
-//---------------------------------------------------------
-//   addPageBreak
-//---------------------------------------------------------
-
-void Album::addPageBreak(AlbumItem* aItem)
-{
-    if (!aItem->score->lastMeasure()->pageBreak()) { // add only if there isn't one
-        LayoutBreak* lb = new LayoutBreak(aItem->score);
-        lb->setLayoutBreakType(LayoutBreak::Type::PAGE);
-        aItem->score->lastMeasure()->add(lb);
-        aItem->score->update();
-    }
-}
-
-//---------------------------------------------------------
-//   addPageBreaks
-//---------------------------------------------------------
-
-void Album::addPageBreaks()
-{
-    for (auto& aItem : m_albumItems) {
-        addPageBreak(aItem.get());
+    if (m_dominantScore) {
+        m_dominantScore->addMovement(score);
+        m_dominantScore->update();
+        m_dominantScore->doLayout(); // position the movements correctly
     }
 }
 
@@ -291,41 +270,33 @@ void Album::removeScore(int index)
 void Album::swap(int indexA, int indexB)
 {
     std::swap(m_albumItems.at(indexA), m_albumItems.at(indexB));
-}
-
-//---------------------------------------------------------
-//   scoreInAlbum
-//---------------------------------------------------------
-
-bool Album::scoreInActiveAlbum(MasterScore* score)
-{
-    if (!activeAlbum)
-        return false;
-
-    for (auto& x : activeAlbum->m_albumItems) {
-        if (x->score == score) {
-            return true;
-        }
+    if (m_dominantScore) {
+        int offset = m_dominantScore->firstRealMovement();
+        std::swap(m_dominantScore->movements()->at(indexA + offset), m_dominantScore->movements()->at(indexB + offset));
+        m_dominantScore->doLayout(); // position the movements correctly
     }
-    return false;
 }
 
 //---------------------------------------------------------
-//   getDominant
+//   addSectionBreaks
 //---------------------------------------------------------
 
-MasterScore *Album::getDominant() const
+void Album::addSectionBreaks()
 {
-    return m_dominantScore;
+    for (auto& aItem : m_albumItems) {
+        aItem->addSectionBreak();
+    }
 }
 
 //---------------------------------------------------------
-//   setDominant
+//   addPageBreaks
 //---------------------------------------------------------
 
-void Album::setDominant(MasterScore* ms)
+void Album::addPageBreaks()
 {
-    m_dominantScore = ms;
+    for (auto& aItem : m_albumItems) {
+        aItem->addPageBreak();
+    }
 }
 
 //---------------------------------------------------------
@@ -384,6 +355,41 @@ QStringList Album::scoreTitles() const
 }
 
 //---------------------------------------------------------
+//   scoreInAlbum
+//---------------------------------------------------------
+
+bool Album::scoreInActiveAlbum(MasterScore* score)
+{
+    if (!activeAlbum)
+        return false;
+
+    for (auto& x : activeAlbum->m_albumItems) {
+        if (x->score == score) {
+            return true;
+        }
+    }
+    return false;
+}
+
+//---------------------------------------------------------
+//   getDominant
+//---------------------------------------------------------
+
+MasterScore *Album::getDominant() const
+{
+    return m_dominantScore;
+}
+
+//---------------------------------------------------------
+//   setDominant
+//---------------------------------------------------------
+
+void Album::setDominant(MasterScore* ms)
+{
+    m_dominantScore = ms;
+}
+
+//---------------------------------------------------------
 //   loadFromFile
 //---------------------------------------------------------
 
@@ -415,7 +421,7 @@ void Album::readAlbum(XmlReader& reader)
         if (tag == "name") {
             m_albumTitle = reader.readElementText();
         } else if (tag == "Score") {
-            new AlbumItem(*this, reader);
+            createItem(reader);
         } else if (tag == "generateContents") {
             m_generateContents = reader.readBool();
         } else if (tag == "addPageBreaks") {
@@ -464,7 +470,7 @@ void Album::writeAlbum(XmlWriter &writer) const
     writer.tag("titleAtTheBottom", m_titleAtTheBottom);
     writer.tag("playbackDelay", m_defaultPlaybackDelay);
     for (auto& aItem : m_albumItems) {
-        aItem->writeAlbumItem(writer, m_includeAbsolutePaths);
+        aItem->writeAlbumItem(writer);
     }
     writer.etag();
 }
@@ -490,7 +496,7 @@ void Album::setAlbumLayoutMode(LayoutMode lm)
 
 std::vector<AlbumItem*> Album::albumItems() const
 {
-    std::vector<AlbumItem*> ai;
+    std::vector<AlbumItem*> ai {};
     for (auto& x : m_albumItems) {
         ai.push_back(x.get());
     }

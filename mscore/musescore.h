@@ -588,6 +588,7 @@ public:
 
     bool checkDirty(MasterScore*);
     IPlayPanel* playPanelInterface() const;
+    AlbumManager* getAlbumManager() const { return albumManager; }
     PlayPanel* getPlayPanel() const { return playPanel; }
     Mixer* getMixer() const { return mixer; }
     QMenu* genCreateMenu(QWidget* parent = 0);

@@ -86,7 +86,7 @@ the end of each score.</string>
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Don't allow titles to be at the bottom
+        <string>Allow titles to be at the bottom
  of the page.</string>
        </property>
       </widget>
