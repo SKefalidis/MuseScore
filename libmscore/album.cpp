@@ -81,12 +81,14 @@ int AlbumItem::setScore(MasterScore* score)
 {
     // if you want to change the score, create a new AlbumItem
     if (this->score != nullptr) {
-        Q_ASSERT(false);
+        qDebug() << "The AlbumItem already has a Score, don't set a new one. Create a new AlbumItem." << endl;
+//        Q_ASSERT(false);
         return -1;
     }
     // don't set an empty score
     if (score == nullptr) {
-        Q_ASSERT(false);
+        qDebug() << "You are trying to set an empty score." << endl;
+//        Q_ASSERT(false);
         return -1;
     }
 
@@ -214,34 +216,39 @@ Album* Album::activeAlbum = nullptr;
 //   createItem
 //---------------------------------------------------------
 
-void Album::createItem(XmlReader& reader)
+AlbumItem* Album::createItem(XmlReader& reader)
 {
-    m_albumItems.push_back(std::unique_ptr<AlbumItem>(new AlbumItem(*this, reader)));
+    AlbumItem* a = new AlbumItem(*this, reader);
+    m_albumItems.push_back(std::unique_ptr<AlbumItem>(a));
+    return a;
 }
 
-void Album::createItem(MasterScore* score, bool enabled)
+AlbumItem* Album::createItem(MasterScore* score, bool enabled)
 {
-    m_albumItems.push_back(std::unique_ptr<AlbumItem>(new AlbumItem(*this, score, enabled)));
+    AlbumItem* a = new AlbumItem(*this, score, enabled);
+    m_albumItems.push_back(std::unique_ptr<AlbumItem>(a));
+    return a;
 }
 
 //---------------------------------------------------------
 //   addScore
 //---------------------------------------------------------
 
-void Album::addScore(MasterScore* score, bool enabled)
+AlbumItem* Album::addScore(MasterScore* score, bool enabled)
 {
     if (!score) {
         std::cout << "There is no score to add to album..." << std::endl;
-        return;
+        return nullptr;
     }
     std::cout << "Adding score to album..." << std::endl;
-    createItem(score, enabled);
+    AlbumItem* a = createItem(score, enabled);
 
     if (m_dominantScore) {
         m_dominantScore->addMovement(score);
         m_dominantScore->update();
         m_dominantScore->doLayout(); // position the movements correctly
     }
+    return a;
 }
 
 //---------------------------------------------------------

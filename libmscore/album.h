@@ -79,7 +79,7 @@ public:
     static Album* activeAlbum;
     static bool scoreInActiveAlbum(MasterScore* score);
 
-    void addScore(MasterScore* score, bool enabled = true);
+    AlbumItem* addScore(MasterScore* score, bool enabled = true);
     void removeScore(MasterScore* score);
     void removeScore(int index);
     void swap(int indexA, int indexB);
@@ -120,8 +120,8 @@ public slots:
     void setAlbumLayoutMode(LayoutMode lm);
 
 private:
-    void createItem(XmlReader& reader);
-    void createItem(MasterScore* score, bool enabled);
+    AlbumItem* createItem(XmlReader& reader);
+    AlbumItem* createItem(MasterScore* score, bool enabled);
 
     std::vector<unique_ptr<AlbumItem>> m_albumItems {};
     QString m_albumTitle                            { "" };

@@ -85,7 +85,7 @@ void TestAlbumsIO::stringsTest(const char* file)
     // load scores
     for (auto& item : album->albumItems()) {
         QString path = item->fileInfo.canonicalFilePath();
-        MasterScore* score = readScore(path);
+        MasterScore* score = readScoreAlbums(path);
         item->setScore(score);
     }
 
@@ -95,27 +95,27 @@ void TestAlbumsIO::stringsTest(const char* file)
     QVERIFY(x.size() == 2);
     QCOMPARE(x.at(0), QString("Sergios - Anestis Kefalidis"));
     QCOMPARE(x.at(1), QString("Oregano"));
-    auto y = album->composers();
+    auto y = album->lyricists();
     QVERIFY(y.size() == 1);
     QCOMPARE(y.at(0), QString("Garlic"));
     auto z = album->scoreTitles();
     QVERIFY(z.size() == 3);
-    QCOMPARE(z.at(0), QString("Piano 1"));
-    QCOMPARE(z.at(1), QString("Piano 2"));
-    QCOMPARE(z.at(2), QString("Piano 3"));
+    QCOMPARE(z.at(0), QString("Piano1"));
+    QCOMPARE(z.at(1), QString("Piano2"));
+    QCOMPARE(z.at(2), QString("Piano3"));
 
     album->removeScore(0);
 
     auto x2 = album->composers();
     QVERIFY(x2.size() == 1);
     QCOMPARE(x2.at(0), QString("Oregano"));
-    auto y2 = album->composers();
+    auto y2 = album->lyricists();
     QVERIFY(y2.size() == 1);
     QCOMPARE(y2.at(0), QString("Garlic"));
     auto z2 = album->scoreTitles();
     QVERIFY(z2.size() == 2);
-    QCOMPARE(z2.at(1), QString("Piano 2"));
-    QCOMPARE(z2.at(2), QString("Piano 3"));
+    QCOMPARE(z2.at(0), QString("Piano2"));
+    QCOMPARE(z2.at(1), QString("Piano3"));
 
     delete album;
 }
@@ -133,7 +133,7 @@ void TestAlbumsIO::addRemoveTest(const char* file)
     // load scores
     for (auto& item : album->albumItems()) {
         QString path = item->fileInfo.canonicalFilePath();
-        MasterScore* score = readScore(path);
+        MasterScore* score = readScoreAlbums(path);
         item->setScore(score);
     }
 
