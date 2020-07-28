@@ -35,6 +35,7 @@ protected:
 
     MTest();
     Ms::MasterScore* readScore(const QString& name);
+    Ms::MasterScore* readScoreAlbums(const QString& path);
     Ms::MasterScore* readCreatedScore(const QString& name);
     Ms::Album* readAlbum(const QString& name);
     bool saveScore(Ms::Score*, const QString& name) const;

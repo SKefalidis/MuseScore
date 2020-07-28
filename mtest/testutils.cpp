@@ -91,6 +91,11 @@ MasterScore* MTest::readScore(const QString& name)
     return readCreatedScore(path);
 }
 
+MasterScore* MTest::readScoreAlbums(const QString& path)
+{
+    return readCreatedScore(path);
+}
+
 //---------------------------------------------------------
 //   readCreatedScore
 //---------------------------------------------------------

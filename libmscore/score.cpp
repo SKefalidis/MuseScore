@@ -5034,7 +5034,11 @@ QString Score::realTitle() const
     }
     Text* firstText = toText(first);
     if (firstText->tid() == Tid::TITLE) {
-        return QString(firstText->plainText());
+        QString s = firstText->plainText();
+        while (s.at(s.size() - 1) == '\n') { // change to s.back() after Qt 5.10
+            s.chop(1);
+        }
+        return s;
     }
     return QString();
 }

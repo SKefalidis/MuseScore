@@ -35,15 +35,12 @@ class TestAlbums : public QObject, public MTest
 {
     Q_OBJECT
 
-    void albumItemConstructorWithScoreTest();
-    void albumItemConstructorWithoutScoreTest();
-    void albumItemTest(Album& myAlbum, AlbumItem& aItem, MasterScore& aScore);
+    void albumAddScore();
 
 private slots:
     void initTestCase();
 
-    void albumItemWithScore() { albumItemConstructorWithScoreTest(); };
-    void albumItemWithoutScore() { albumItemConstructorWithoutScoreTest(); };
+    void albumAddScoreTest() { albumAddScore(); };
 };
 
 //---------------------------------------------------------
@@ -55,69 +52,37 @@ void TestAlbums::initTestCase()
     initMTest();
 }
 
-//---------------------------------------------------------
-//   albumItemConstructorWithScoreTest
-//---------------------------------------------------------
-
-void TestAlbums::albumItemConstructorWithScoreTest()
-{
-    Album myAlbum;
-    MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
-    AlbumItem* aItem = new AlbumItem(myAlbum, aScore, true);
-
-    QCOMPARE(&aItem->album, &myAlbum);
-    QVERIFY(myAlbum.albumItems().size() == 1);
-
-    albumItemTest(myAlbum, *aItem, *aScore);
-}
-
-//---------------------------------------------------------
-//   albumItemConstructorWithoutScoreTest
-//---------------------------------------------------------
-
-void TestAlbums::albumItemConstructorWithoutScoreTest()
-{
-    Album myAlbum;
-    MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
-    AlbumItem* aItem = new AlbumItem(myAlbum, aScore, true);
-
-    QCOMPARE(&aItem->album, &myAlbum);
-    QVERIFY(myAlbum.albumItems().size() == 1);
-
-    // without score
-    QVERIFY(!aScore->partOfActiveAlbum());
-    QCOMPARE(aItem->duration(), -1);
-
-    QCOMPARE(aItem->setScore(aScore), 0);
-
-    albumItemTest(myAlbum, *aItem, *aScore);
-    delete aScore;
-}
 
 //---------------------------------------------------------
 //   albumItemTest
 //---------------------------------------------------------
 
-void TestAlbums::albumItemTest(Album& myAlbum, AlbumItem& aItem, MasterScore& aScore)
+void TestAlbums::albumAddScore()
 {
+    Album myAlbum;
+    MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
     MasterScore* bScore = new MasterScore();
+    AlbumItem* aItem = myAlbum.addScore(aScore, true);
 
-    QVERIFY(aScore.partOfActiveAlbum());
+    QCOMPARE(&aItem->album, &myAlbum);
+    QVERIFY(myAlbum.albumItems().size() == 1);
 
-    QCOMPARE(aItem.duration(), aScore.duration());
-    int scoreDuration1 = aScore.duration();
-    aScore.appendMeasures(2);
-    int scoreDuration2 = aScore.duration();
+    QVERIFY(aScore->partOfActiveAlbum());
+
+    QCOMPARE(aItem->duration(), aScore->duration());
+    int scoreDuration1 = aScore->duration();
+    aScore->appendMeasures(2);
+    int scoreDuration2 = aScore->duration();
     QVERIFY(scoreDuration1 < scoreDuration2);
-    QCOMPARE(aItem.duration(), aScore.duration());
+    QCOMPARE(aItem->duration(), aScore->duration());
 
-    QVERIFY(aItem.enabled());
-    QCOMPARE(aItem.enabled(), aScore.enabled()); // true
-    aItem.setEnabled(false);
-    QVERIFY(!aItem.enabled());
-    QCOMPARE(aItem.enabled(), aScore.enabled()); // false
+    QVERIFY(aItem->enabled());
+    QCOMPARE(aItem->enabled(), aScore->enabled()); // true
+    aItem->setEnabled(false);
+    QVERIFY(!aItem->enabled());
+    QCOMPARE(aItem->enabled(), aScore->enabled()); // false
 
-    QCOMPARE(aItem.setScore(bScore), -1);
+    QCOMPARE(aItem->setScore(bScore), -1);
 
     delete bScore;
 }
