@@ -1370,6 +1370,7 @@ class MasterScore : public Score
 public:
     MasterScore();
     MasterScore(const MStyle&);
+    MasterScore(MasterScore* ms, bool b = true);
     virtual ~MasterScore();
     MasterScore* clone();
 

@@ -120,6 +120,7 @@ private slots:
 
 public:
     ExcerptsDialog(MasterScore*, QWidget* parent = 0);
+    static void createMovementExcerpt(Excerpt*);
 };
 } // namespace Ms
 #endif

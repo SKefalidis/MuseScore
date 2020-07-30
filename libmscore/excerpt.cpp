@@ -154,7 +154,6 @@ void Excerpt::createExcerpt(Excerpt* excerpt)
 {
     MasterScore* oscore = excerpt->oscore();
     Score* score        = excerpt->partScore();
-
     QList<Part*>& parts = excerpt->parts();
     QList<int> srcStaves;
 
@@ -165,7 +164,7 @@ void Excerpt::createExcerpt(Excerpt* excerpt)
     }
     score->setCurrentLayer(oscore->currentLayer());
     score->layer().clear();
-    foreach (const Layer& l, oscore->layer()) {
+    for (const Layer& l : oscore->layer()) {
         score->layer().append(l);
     }
 

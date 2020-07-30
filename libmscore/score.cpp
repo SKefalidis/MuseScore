@@ -4796,6 +4796,44 @@ MasterScore::MasterScore(const MStyle& s)
     setStyle(s);
 }
 
+MasterScore::MasterScore(MasterScore* ms, bool b)
+    : Score(ms, b)
+{
+    _tempomap    = new TempoMap;
+    _sigmap      = new TimeSigMap();
+    _repeatList  = new RepeatList(this);
+    _revisions   = new Revisions;
+    _movements = new Movements;
+    _movements->push_back(this);
+    setMasterScore(this);
+
+    _pos[int(POS::CURRENT)] = Fraction(0,1);
+    _pos[int(POS::LEFT)]    = Fraction(0,1);
+    _pos[int(POS::RIGHT)]   = Fraction(0,1);
+
+#if defined(Q_OS_WIN)
+    metaTags().insert("platform", "Microsoft Windows");
+#elif defined(Q_OS_MAC)
+    metaTags().insert("platform", "Apple Macintosh");
+#elif defined(Q_OS_LINUX)
+    metaTags().insert("platform", "Linux");
+#else
+    metaTags().insert("platform", "Unknown");
+#endif
+    metaTags().insert("movementNumber", "");
+    metaTags().insert("movementTitle", "");
+    metaTags().insert("workNumber", "");
+    metaTags().insert("workTitle", "");
+    metaTags().insert("arranger", "");
+    metaTags().insert("composer", "");
+    metaTags().insert("lyricist", "");
+    metaTags().insert("poet", "");
+    metaTags().insert("translator", "");
+    metaTags().insert("source", "");
+    metaTags().insert("copyright", "");
+    metaTags().insert("creationDate", QDate::currentDate().toString(Qt::ISODate));
+}
+
 MasterScore::~MasterScore()
 {
     delete _revisions;

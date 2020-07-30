@@ -1126,6 +1126,7 @@ void ScoreView::paintEvent(QPaintEvent* ev)
     if (!m_drawingScore) {
         return;
     }
+
     QPainter vp(this);
     vp.setRenderHint(QPainter::Antialiasing, preferences.getBool(PREF_UI_CANVAS_MISC_ANTIALIASEDDRAWING));
     vp.setRenderHint(QPainter::TextAntialiasing, true);
