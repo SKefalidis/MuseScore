@@ -19,9 +19,11 @@
 
 #include "excerptsdialog.h"
 #include "musescore.h"
+#include "libmscore/album.h"
 #include "libmscore/score.h"
 #include "libmscore/part.h"
 #include "libmscore/undo.h"
+#include "mscore/scoreview.h"
 #include "icons.h"
 
 namespace Ms {
@@ -162,12 +164,41 @@ void MuseScore::startExcerptsDialog()
     if (cs == 0) {
         return;
     }
-    ExcerptsDialog ed(cs->masterScore(), 0);
+    MasterScore* ms = cs->masterScore();
+    if (cv->drawingScore()->title() == "Temporary Album Score") {
+        ms = static_cast<MasterScore*>(cv->drawingScore());
+        int partCount = ms->parts().size();
+        for (int i = 0; i < partCount; i++) {
+            for (auto x : *ms->movements()) {
+                if (x->score()->parts().at(i)->partName().compare(ms->parts().at(i)->partName(), Qt::CaseSensitivity::CaseInsensitive)) {
+                    std::cout << "Parts not matching..." << std::endl;
+                    return;
+                }
+            }
+        }
+        for (auto score : *ms->movements()) {
+            std::cout << score->title().toStdString() << std::endl;
+            if (score->title() == "Temporary Album Score") {
+                continue;
+            }
+            QList<Excerpt*> excerpts = Excerpt::createAllExcerpt(score);
+            for (Excerpt* e : excerpts) {
+                ExcerptsDialog::createMovementExcerpt(e);
+            }
+            score->update();
+        }
+    }
+
+    ExcerptsDialog ed(ms, 0);
     MuseScore::restoreGeometry(&ed);
     ed.exec();
     MuseScore::saveGeometry(&ed);
     cs->setLayoutAll();
     cs->update();
+    if (ms != cs->masterScore()) {
+        ms->setLayoutAll();
+        ms->update();
+    }
 }
 
 //---------------------------------------------------------
@@ -536,7 +567,7 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
         return;
     }
 
-    Score* nscore = new Score(e->oscore());
+    MasterScore* nscore = new MasterScore(e->oscore());
     e->setPartScore(nscore);
 
     qDebug() << " + Add part : " << e->title();
@@ -551,8 +582,47 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
         }
     }
 
+    if (score->title() == "Temporary Album Score") {
+        QString s;
+        for (auto m : *score->movements()) {
+            if (m->title() == "Temporary Album Score") {
+                continue;
+            }
+            nscore->addMovement(static_cast<MasterScore*>(m->excerpts().at(excerptList->currentRow())->partScore()));
+        }
+        nscore->setLayoutAll();
+        nscore->update();
+    }
+    nscore->doLayout();
     partList->setEnabled(false);
     title->setEnabled(false);
+}
+
+void ExcerptsDialog::createMovementExcerpt(Excerpt* e)
+{
+    if (e->partScore()) {
+        return;
+    }
+    if (e->parts().isEmpty()) {
+        qDebug("no parts");
+        return;
+    }
+
+    MasterScore* nscore = new MasterScore(e->oscore());
+    e->setPartScore(nscore);
+
+    qDebug() << " + Add part : " << e->title();
+    e->oscore()->undo(new AddExcerpt(e));
+    Excerpt::createExcerpt(e);
+
+    // a new excerpt is created in AddExcerpt, make sure the parts are filed
+    for (Excerpt* ee : e->oscore()->excerpts()) {
+        if (ee->partScore() == nscore && ee != e) {
+            ee->parts().clear();
+            ee->parts().append(e->parts());
+        }
+    }
+    nscore->doLayout();
 }
 
 //---------------------------------------------------------
@@ -564,7 +634,7 @@ void ExcerptsDialog::accept()
     score->startCmd();
 
     // first pass : see if actual parts needs to be deleted
-    foreach (Excerpt* e, score->excerpts()) {
+    for (Excerpt* e : score->excerpts()) {
         Score* partScore  = e->partScore();
         ExcerptItem* item = isInPartsList(e);
         if (!isInPartsList(e) && partScore) {        // Delete it because not in the list anymore
@@ -616,7 +686,7 @@ void ExcerptsDialog::accept()
         bool found = false;
 
         // Looks for the excerpt and its position.
-        foreach (Excerpt* e, score->excerpts()) {
+        for (Excerpt* e : score->excerpts()) {
             if (((ExcerptItem*)cur)->excerpt() == ExcerptItem(e).excerpt()) {
                 found = true;
                 break;

@@ -578,6 +578,7 @@ public slots:
     void mixerPreferencesChanged(bool showMidiControls);
     void checkForUpdates();
     void restartAudioEngine();
+    void updateInspectorSlot();
 
 public:
     MuseScore();

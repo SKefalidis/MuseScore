@@ -316,7 +316,7 @@ void ScoreTab::setCurrent(int n)
     stack->setCurrentWidget(vs);
     clearTab2();
     if (v) {
-        MasterScore* score = v->score()->masterScore();
+        MasterScore* score = v->drawingScore()->isMaster() ? static_cast<MasterScore*>(v->drawingScore()) : v->drawingScore()->masterScore();
         QList<Excerpt*>& excerpts = score->excerpts();
         if (!excerpts.isEmpty()) {
             TabScoreView* tsv = tabScoreView(n);
@@ -387,6 +387,7 @@ void ScoreTab::updateExcerpts()
     } else {
         tab2->setVisible(false);
     }
+
     setExcerpt(0);
 
     getAction("file-part-export")->setEnabled(excerpts.size() > 0);
@@ -438,7 +439,9 @@ void ScoreTab::setExcerpt(int n)
         v = static_cast<ScoreView*>(vs->widget(0));
     }
     stack->setCurrentWidget(vs);
-    emit currentScoreViewChanged(v);
+    score->doLayout();
+    v->update();
+//    emit currentScoreViewChanged(v); disabled because it calls changeMode in the Album and this causes the excerpt tabs to disappear because setCurrentScoreView is called from changeMode
 }
 
 //---------------------------------------------------------
@@ -542,7 +545,7 @@ void ScoreTab::removeTab(int idx, bool noCurrentChangedSignal)
             break;
         }
     }
-    foreach (Excerpt* excerpt, score->excerpts()) {
+    for (Excerpt* excerpt : score->excerpts()) {
         Score* sc = excerpt->partScore();
         for (int i = 0; i < stack->count(); ++i) {
             QSplitter* vs = static_cast<QSplitter*>(stack->widget(i));

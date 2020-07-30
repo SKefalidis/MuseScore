@@ -2854,7 +2854,7 @@ void MuseScore::setCurrentScoreView(ScoreView* view)
     }
 
     if (cs) {
-        cs->masterScore()->setPlaybackScore(_playPartOnly ? cs : cs->masterScore());
+//        cs->masterScore()->setPlaybackScore(_playPartOnly ? cs : cs->masterScore());
     }
 
     // set midi import panel
@@ -3309,6 +3309,11 @@ void MuseScore::restartAudioEngine()
             qDebug("sequencer init failed");
         }
     }
+}
+
+void MuseScore::updateInspectorSlot()
+{
+    updateInspector();
 }
 
 //---------------------------------------------------------
@@ -6499,6 +6504,22 @@ void MuseScore::endCmd(const bool isCmdFromInspector, const bool undoRedo)
             }
             currentScore->setPlayNote(false);
             currentScore->setPlayChord(false);
+        }
+        if (currentScoreView()->drawingScore()->title() == "Temporary Album Score") {
+            MasterScore* ms = static_cast<MasterScore*>(currentScoreView()->drawingScore());
+            if (ms->excerptsChanged()) {
+                if (tab1) {
+                    tab1->blockSignals(ctab != tab1);
+                    tab1->updateExcerpts();
+                    tab1->blockSignals(false);
+                }
+                if (tab2) {
+                    tab2->blockSignals(ctab != tab2);
+                    tab2->updateExcerpts();
+                    tab2->blockSignals(false);
+                }
+                ms->setExcerptsChanged(false);
+            }
         }
         MasterScore* ms = currentScore->isMaster() ? static_cast<MasterScore*>(currentScore) : currentScore->masterScore();
         if (ms->excerptsChanged()) {
