@@ -4,8 +4,6 @@ General:
  - Album shortcuts
  - Preferences
  - Album of albums
- - Parts???
- - Undo??? Φτιαχνω για ολα τα movements κα ιγια ολα τα οργανα τα parts τους. Και μετα περνω αυτα και τα προσθετω ως movements στα parts του πρωτου
  - Single file
  - Mixer
  - Timeline
@@ -19,9 +17,12 @@ General:
  - Something better than cv->drawingScore()->title() == "Temporary Album Score"
  - AlbumItems from Xml should have a condition that says whether the scores have been loaded or not. If not no action should be able to happen.
  - Skip first movement in doLayout if you don't want a front cover
- - mouseREleaseEvent. Maybe update() the ScoreView???
 
  Bugs:
+ - Parts
+    - playback
+    - syncing???
+    - deleting parts
  - Fix all the places where inActiveAlbum should be inActiveAlbum and the dominantScore is the one in the scoreview (e.g. the teleporting stuff, sequencer setScoreView)
 
  Investigate:

@@ -20,6 +20,7 @@
 #include "excerptsdialog.h"
 #include "musescore.h"
 #include "libmscore/album.h"
+#include "libmscore/page.h"
 #include "libmscore/score.h"
 #include "libmscore/part.h"
 #include "libmscore/undo.h"
@@ -175,17 +176,6 @@ void MuseScore::startExcerptsDialog()
                     return;
                 }
             }
-        }
-        for (auto score : *ms->movements()) {
-            std::cout << score->title().toStdString() << std::endl;
-            if (score->title() == "Temporary Album Score") {
-                continue;
-            }
-            QList<Excerpt*> excerpts = Excerpt::createAllExcerpt(score);
-            for (Excerpt* e : excerpts) {
-                ExcerptsDialog::createMovementExcerpt(e);
-            }
-            score->update();
         }
     }
 
@@ -588,14 +578,30 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
             if (m->title() == "Temporary Album Score") {
                 continue;
             }
+            createMovementExcerpt(prepareMovementExcerpt(e, m));
             nscore->addMovement(static_cast<MasterScore*>(m->excerpts().at(excerptList->currentRow())->partScore()));
         }
         nscore->setLayoutAll();
         nscore->update();
+    } else {
+        nscore->undoChangeStyleVal(MSQE_Sid::Sid::spatium, 25.016); // hack: normally it's 25 but it draws crazy stuff with that
     }
     nscore->doLayout();
     partList->setEnabled(false);
     title->setEnabled(false);
+}
+
+Excerpt* ExcerptsDialog::prepareMovementExcerpt(Excerpt* masterExcerpt, MasterScore* score)
+{
+    Excerpt* e = new Excerpt(score);
+    for (int i = 0; i < masterExcerpt->oscore()->parts().size(); i++) {
+        if (masterExcerpt->parts().contains(masterExcerpt->oscore()->parts().at(i))) {
+            e->parts().append(score->parts().at(i));
+        }
+    }
+    e->tracks() = masterExcerpt->tracks();
+    e->setTitle(masterExcerpt->title());
+    return e;
 }
 
 void ExcerptsDialog::createMovementExcerpt(Excerpt* e)
@@ -622,6 +628,7 @@ void ExcerptsDialog::createMovementExcerpt(Excerpt* e)
             ee->parts().append(e->parts());
         }
     }
+    nscore->undoChangeStyleVal(MSQE_Sid::Sid::spatium, 25.016); // hack: normally it's 25 but it draws crazy stuff with that
     nscore->doLayout();
 }
 
