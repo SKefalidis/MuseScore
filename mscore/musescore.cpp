@@ -2854,7 +2854,7 @@ void MuseScore::setCurrentScoreView(ScoreView* view)
     }
 
     if (cs) {
-//        cs->masterScore()->setPlaybackScore(_playPartOnly ? cs : cs->masterScore());
+        cs->masterScore()->setPlaybackScore(_playPartOnly ? cs : cs->masterScore());
     }
 
     // set midi import panel
