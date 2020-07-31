@@ -22,6 +22,7 @@
 #include "musescore.h"
 
 #include "audio/midi/msynthesizer.h"
+#include "mixer/mixer.h"
 #include "libmscore/album.h"
 #include "libmscore/rendermidi.h"
 #include "libmscore/slur.h"
@@ -1127,6 +1128,7 @@ void Seq::initInstruments(bool realTime)
             }
         }
     }
+    mscore->getMixer()->setScore(cs);
 }
 
 //---------------------------------------------------------

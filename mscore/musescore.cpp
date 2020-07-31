@@ -6637,7 +6637,7 @@ void MuseScore::cmd(QAction* a, const QString& cmd)
     if (cmd == "instruments") {
         editInstrList();
         if (mixer) {
-            mixer->setScore(cs);
+            mixer->setScore(currentScoreView() ? currentScoreView()->score() : cs);
         }
     } else if (cmd == "rewind") {
         if (cs) {
@@ -7174,7 +7174,7 @@ void MuseScore::noteTooShortForTupletDialog()
 void MuseScore::instrumentChanged()
 {
     if (mixer) {
-        mixer->setScore(cs);
+        mixer->setScore(currentScoreView() ? currentScoreView()->score() : cs);
     }
 }
 
