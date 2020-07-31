@@ -17,11 +17,11 @@ General:
  - Something better than cv->drawingScore()->title() == "Temporary Album Score"
  - AlbumItems from Xml should have a condition that says whether the scores have been loaded or not. If not no action should be able to happen.
  - Skip first movement in doLayout if you don't want a front cover
+ - MuseScore cs vs scoreView->score and drawingScore
 
  Bugs:
  - Parts
     - playback
-    - syncing???
     - deleting parts
  - Fix all the places where inActiveAlbum should be inActiveAlbum and the dominantScore is the one in the scoreview (e.g. the teleporting stuff, sequencer setScoreView)
 
