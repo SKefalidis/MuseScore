@@ -350,7 +350,7 @@ void Mixer::setScore(Score* score)
     // No equality check, this function seems to need to cause
     // mixer update every time it gets called.
     _activeScore = score;
-//    setPlaybackScore(_activeScore ? _activeScore->masterScore()->playbackScore() : nullptr);
+    setPlaybackScore(_activeScore ? _activeScore->masterScore()->playbackScore() : nullptr);
 
     partOnlyCheckBox->setChecked(mscore->playPartOnly());
     partOnlyCheckBox->setEnabled(_activeScore && !_activeScore->isMaster());

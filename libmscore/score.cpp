@@ -4805,7 +4805,7 @@ MasterScore::MasterScore(MasterScore* ms, bool b)
     _revisions   = new Revisions;
     _movements = new Movements;
     _movements->push_back(this);
-    setMasterScore(this);
+//    setMasterScore(this); disabled because the masterScore is set in Score's constructor
 
     _pos[int(POS::CURRENT)] = Fraction(0,1);
     _pos[int(POS::LEFT)]    = Fraction(0,1);
