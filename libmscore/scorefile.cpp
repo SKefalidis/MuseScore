@@ -595,6 +595,9 @@ QImage Score::createThumbnail()
 
 bool Score::saveCompressedFile(QIODevice* f, const QFileInfo& info, bool onlySelection, bool doCreateThumbnail)
 {
+    if (movements()->size() > 1) {
+        return false;
+    }
     MQZipWriter uz(f);
 
     QString fn = info.completeBaseName() + ".mscx";
@@ -695,6 +698,9 @@ bool Score::saveCompressedFile(QIODevice* f, const QFileInfo& info, bool onlySel
 
 bool Score::saveFile(QFileInfo& info)
 {
+    if (movements()->size() > 1) {
+        return false;
+    }
     if (readOnly() && info == *masterScore()->fileInfo()) {
         return false;
     }
@@ -771,6 +777,9 @@ extern QString revision;
 
 bool Score::saveFile(QIODevice* f, bool msczFormat, bool onlySelection)
 {
+    if (movements()->size() > 1) {
+        return false;
+    }
     XmlWriter xml(this, f);
     xml.setWriteOmr(msczFormat);
     xml.header();

@@ -560,7 +560,7 @@ bool MuseScore::saveFile()
 
 bool MuseScore::saveFile(MasterScore* score)
 {
-    if (score == 0) {
+    if (score == 0 || score->movements()->size() > 1) { // don't save multi-movement scores (temporary album score)
         return false;
     }
     if (score->created()) {
