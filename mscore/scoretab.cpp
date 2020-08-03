@@ -316,7 +316,7 @@ void ScoreTab::setCurrent(int n)
     stack->setCurrentWidget(vs);
     clearTab2();
     if (v) {
-        MasterScore* score = v->drawingScore()->isMaster() ? static_cast<MasterScore*>(v->drawingScore()) : v->drawingScore()->masterScore();
+        MasterScore* score = v->drawingScore()->masterScore(); //v->drawingScore()->isMaster() ? static_cast<MasterScore*>(v->drawingScore()) : v->drawingScore()->masterScore();
         QList<Excerpt*>& excerpts = score->excerpts();
         if (!excerpts.isEmpty()) {
             TabScoreView* tsv = tabScoreView(n);
