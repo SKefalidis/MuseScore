@@ -594,8 +594,6 @@ protected:
     void cmdToggleHideEmpty();
     void cmdSetVisible();
     void cmdUnsetVisible();
-    inline virtual Movements* movements();
-    inline virtual const Movements* movements() const;
 
 signals:
     void posChanged(POS, unsigned);
@@ -613,6 +611,9 @@ public:
 
     virtual bool isMaster() const { return false; }
     virtual bool readOnly() const;
+
+    inline virtual Movements* movements();
+    inline virtual const Movements* movements() const;
 
     static void onElementDestruction(Element* se);
 
