@@ -18,6 +18,7 @@
 #include "fotomode.h"
 #include "tourhandler.h"
 #include "scoreaccessibility.h"
+#include "timeline.h"
 #include "libmscore/score.h"
 #include "libmscore/keysig.h"
 #include "libmscore/timesig.h"
@@ -475,6 +476,7 @@ void ScoreView::mousePressEventNormal(QMouseEvent* ev)
             if (e->isNote() || e->isHarmony()) {
                 e->score()->updateCapo();
                 seq->setScoreView(this); // initializes instruments (we can have different instruments in different movements)
+                mscore->timeline()->setScore(score());
                 mscore->play(e);
             }
         }
