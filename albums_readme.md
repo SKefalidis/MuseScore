@@ -1,36 +1,55 @@
 Notes:
 
-General:
- - Album shortcuts (1)
- - Preferences (1)
- - Timeline (2)
- - Play panel? (1)
- - Mixer album-mode (with all the instruments)
- - Album of albums
- - Single file, export album option
+Week 1:
+    Parts:
+    - Playback improvements (adjust canvas position)
+    - Deleting parts, improvements
+    General:
+    - Autosave for albums
+    - Comments
+    - Codestyle
+    - Start center 'Open a Score...' to 'Open File...'
+
+Week 2 - 3:
+    Bugfixes and refactoring.
+    Git cleanup.
+    Preferences.
+    Contents page -> pages + improved alignment.
+    Polish:
+    - Export album (single file).
+    - Export options (front cover, add page breaks for printing).
+    - Drawing options (front cover).
+    - Improved page breaks and section breaks handling (add them only in album mode).
+
+Week 4:
+    Shortcuts.
+    Select elements from different scores in album-mode.
+    Mass changes:
+     - Mass changes, Actions menu, used by both albums and groups of normal scores (multible tabs selected or opened scores)
+     - Easy way to select multiple scores.
+     - Actions:
+        - Add - Replace instruments.
+        - Change style.
+        - Change footers/headers.
+
+Week 5+ (further improvements):
+    Mixer for album-mode (with all the instruments).
+    Parts with different instrumentation.
+    Timeline for the entire Temporary Album Score.
+    Albums inside and Album.
+    Tools to split a score into multiple scores (an album).
+    Improved composer/lyricist handling. Give the user an option in the inspector to include (or not) that string in the front cover.
+    Add new movement with the same instrumentation as the last one in the album
+
+
 
  Refactor and Code Quality:
- - Cleanup the main branch.
- - Codestyle.
  - Decouple albums and multi movement scores.
- - Add comments.
  - Refactor scoreview and mscore code.
  - Something better than cv->drawingScore()->title() == "Temporary Album Score"
  - AlbumItems from Xml should have a condition that says whether the scores have been loaded or not. If not no action should be able to happen.
  - Skip first movement in doLayout if you don't want a front cover
  - MuseScore cs vs scoreView->score and drawingScore
-
- Parts:
- - playback
- - deleting parts
-
-Mass changes:
- - Mass changes, Actions menu, used by both albums and groups of normal scores (multible tabs selected or opened scores)
- - Easy way to select multiple scores.
- - Actions:
-    - Add - Replace instruments.
-    - Change style.
-    - Change footers/headers.
 
 Investigate:
 - Disabled score->doLayout in ScoreView::paintEvent, did I break something???
@@ -38,13 +57,3 @@ Investigate:
 
 Bugs:
 - Fix all the places where inActiveAlbum should be inActiveAlbum and the dominantScore is the one in the scoreview (e.g. the teleporting stuff, sequencer setScoreView)
-
- Low Priority:
- - Albums in the start center?
- - Start center 'Open a Score...' to 'Open File...'?
- - Select elements from different scores in album-mode.
- - Score mode printing
- - There could be composer and lyricist strings in more than one place
- - Add new movement with the same instrumentation as the last one in the album
- Split Score:
-  - Easy way to split a score into an album
