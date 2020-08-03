@@ -523,7 +523,7 @@ void ExcerptsDialog::assignTracks(QMultiMap<int, int> tracks)
 //   isInPartList
 //---------------------------------------------------------
 
-ExcerptItem* ExcerptsDialog::isInPartsList(Excerpt* e)
+ExcerptItem* ExcerptsDialog::isInExcerptsList(Excerpt* e)
 {
     int n = excerptList->count();
     for (int i = 0; i < n; ++i) {
@@ -641,17 +641,27 @@ void ExcerptsDialog::accept()
     score->startCmd();
 
     // first pass : see if actual parts needs to be deleted
-    for (Excerpt* e : score->excerpts()) {
+    for (int i = 0; i < score->excerpts().size(); i++) {
+        Excerpt* e = score->excerpts().at(i);
         Score* partScore  = e->partScore();
-        ExcerptItem* item = isInPartsList(e);
-        if (!isInPartsList(e) && partScore) {        // Delete it because not in the list anymore
+        ExcerptItem* item = isInExcerptsList(e);
+        if (!isInExcerptsList(e) && partScore) {        // Delete it because not in the list anymore
             score->deleteExcerpt(e);
+            if (score->title() == "Temporary Album Score") {
+                for (auto m : *score->movements()) {
+                    if (m->title() == "Temporary Album Score") {
+                        continue;
+                    }
+                    m->deleteExcerpt(m->excerpts().at(i));
+                }
+            }
         } else {
             if (item->text() != e->title()) {
                 score->undo(new ChangeExcerptTitle(e, item->text()));
             }
         }
     }
+
     // Second pass : Create new parts
     int n = excerptList->count();
     for (int i = 0; i < n; ++i) {
