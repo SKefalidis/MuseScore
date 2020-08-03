@@ -6640,6 +6640,15 @@ void MuseScore::cmd(QAction* a, const QString& cmd)
             mixer->setScore(currentScoreView() ? currentScoreView()->score() : cs);
         }
     } else if (cmd == "rewind") {
+        if (cv && cv->drawingScore()->movements()->size() > 1) {
+            seq->setNextMovement(0);
+            seq->rewindStart();
+            Fraction tick = loop() ? seq->score()->loopInTick() : Fraction(0,1);
+            Measure* m = cs->tick2measureMM(tick);
+            if (m) {
+                cv->gotoMeasure(m);
+            }
+        }
         if (cs) {
             Fraction tick = loop() ? cs->loopInTick() : Fraction(0,1);
             seq->seek(tick.ticks());

@@ -226,10 +226,10 @@ void Seq::setScoreView(ScoreView* v)
     }
     cs = cv ? cv->score()->masterScore() : 0;
     topMovement = cs;
-    if (cv && (cv->drawingScore()->title() == "Temporary Album Score")) {
-        topMovement = Album::activeAlbum->getDominant();
+    if (cv && (cv->drawingScore()->movements()->size() > 1)) {
+        topMovement = cv->drawingScore()->masterScore();
     }
-    nextMovementIndex = topMovement ? 1 : 0;
+    nextMovementIndex = topMovement ? topMovement->firstRealMovement() : 0;
     midi = MidiRenderer(cs);
     midi.setMinChunkSize(10);
 
@@ -245,19 +245,19 @@ void Seq::setScoreView(ScoreView* v)
 }
 
 //---------------------------------------------------------
-//   setNextScore
+//   setNextMovement
 ///     used to setup next movement for playback
 ///     FIXME: probably crahses if the score is closed
 //---------------------------------------------------------
 
 void Seq::setNextMovement()
 {
-    if (nextMovementIndex < int(topMovement->movements()->size()) && nextMovementIndex >= 0) {
+    if (nextMovementIndex < int(topMovement->movements()->size()) && nextMovementIndex >= topMovement->firstRealMovement()) {
         cs = topMovement->movements()->at(nextMovementIndex);
         nextMovementIndex++;
     } else {
-        cs = topMovement;
-        nextMovementIndex = 1;
+        cs = topMovement->movements()->at(topMovement->firstRealMovement());
+        nextMovementIndex = topMovement->firstRealMovement() + 1;
     }
 
     midi = MidiRenderer(cs);
@@ -276,12 +276,12 @@ void Seq::setNextMovement()
 
 void Seq::setNextMovement(int i)
 {
-    if (i < int(topMovement->movements()->size()) && i >= 0) {
+    if (i < int(topMovement->movements()->size()) && i >= topMovement->firstRealMovement()) {
         cs = topMovement->movements()->at(i);
         nextMovementIndex = i + 1;
     } else {
-        cs = topMovement;
-        nextMovementIndex = 1;
+        cs = topMovement->movements()->at(topMovement->firstRealMovement());
+        nextMovementIndex = topMovement->firstRealMovement() + 1;
     }
 
     midi = MidiRenderer(cs);
@@ -846,7 +846,6 @@ void Seq::process(unsigned framesPerPeriod, float* buffer)
         }
         // Got a message from JACK Transport panel: Stop
         else if (state == Transport::PLAY && driverState == Transport::STOP) {
-//            setNextScore(); // advance to the next movement automatically
             state = Transport::STOP;
             // Muting all notes
             stopNotes(-1, true);
@@ -862,6 +861,12 @@ void Seq::process(unsigned framesPerPeriod, float* buffer)
                 }
             } else {
                 emit toGui('0');
+            }
+            if (topMovement->movements()->size() > 1) {
+                setNextMovement();
+            }
+            if (cs != topMovement->movements()->at(topMovement->firstRealMovement())) {
+                start();
             }
         } else if (state != driverState) {
             qDebug("Seq: state transition %d -> %d ?",
