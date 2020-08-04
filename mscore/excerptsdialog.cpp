@@ -573,6 +573,7 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
     }
 
     if (score->title() == "Temporary Album Score") {
+        nscore->movements()->at(0)->setEmptyMovement(true);
         QString s;
         for (auto m : *score->movements()) {
             if (m->title() == "Temporary Album Score") {
