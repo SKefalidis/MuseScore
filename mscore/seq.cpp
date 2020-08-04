@@ -259,7 +259,7 @@ void Seq::setNextMovement()
         cs = topMovement->movements()->at(topMovement->firstRealMovement());
         nextMovementIndex = topMovement->firstRealMovement() + 1;
     }
-    mscore->currentScoreView()->setActiveScore(cs); // for cursor during playback
+    mscore->currentScoreView()->setActiveScore(mscore->currentScoreView()->drawingScore()->movements()->at(nextMovementIndex - 1)); // for cursor during playback
 
     midi = MidiRenderer(cs);
     midi.setMinChunkSize(10);
@@ -284,7 +284,7 @@ void Seq::setNextMovement(int i)
         cs = topMovement->movements()->at(topMovement->firstRealMovement());
         nextMovementIndex = topMovement->firstRealMovement() + 1;
     }
-    mscore->currentScoreView()->setActiveScore(cs); // for cursor during playback
+    mscore->currentScoreView()->setActiveScore(mscore->currentScoreView()->drawingScore()->movements()->at(nextMovementIndex - 1)); // for cursor during playback
 
     midi = MidiRenderer(cs);
     midi.setMinChunkSize(10);
