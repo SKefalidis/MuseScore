@@ -1704,7 +1704,7 @@ void ScoreView::constraintCanvas(int* dxx, int* dyy)
     Page* lastPage  = score()->pages().back();
 
     int movementsCount = m_drawingScore->masterScore()->movements()->size();
-    if (movementsCount> 1) {
+    if (movementsCount > 1) {
         firstPage = m_drawingScore->masterScore()->pages().front();
         lastPage = m_drawingScore->masterScore()->pages().back();
     }

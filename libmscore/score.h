@@ -1412,20 +1412,20 @@ public:
     void insertMovement(MasterScore* score, int atIndex);
     void removeMovement(MasterScore* score);
 
-    bool emptyMovement() const          { return m_emptyMovement; }
-    void setEmptyMovement(bool b)       { m_emptyMovement = b; }
+    bool emptyMovement() const { return m_emptyMovement; }
+    void setEmptyMovement(bool b) { m_emptyMovement = b; }
 
-    int pageIndexInAlbum() const        { return m_pageIndexInAlbum; }
-    void setPageIndexInAlbum(int i)     { m_pageIndexInAlbum = i; }
+    int pageIndexInAlbum() const { return m_pageIndexInAlbum; }
+    void setPageIndexInAlbum(int i) { m_pageIndexInAlbum = i; }
 
-    int firstRealMovement() const       { return m_firstRealMovement; }
-    void setfirstRealMovement(int i)    { m_firstRealMovement = i; }
+    int firstRealMovement() const { return m_firstRealMovement; }
+    void setfirstRealMovement(int i) { m_firstRealMovement = i; }
 
-    bool enabled() const                { return m_enabled; }
-    void setEnabled(bool b)             { m_enabled = b; }
+    bool enabled() const { return m_enabled; }
+    void setEnabled(bool b) { m_enabled = b; }
 
-    int titleAtTheBottom() const        { return m_titleAtTheBottom; }
-    void setTitleAtTheBottom(bool b)    { m_titleAtTheBottom = b; }
+    int titleAtTheBottom() const { return m_titleAtTheBottom; }
+    void setTitleAtTheBottom(bool b) { m_titleAtTheBottom = b; }
 
     virtual void setUpdateAll() override;
 

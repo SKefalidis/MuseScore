@@ -451,7 +451,8 @@ void AlbumManager::playAlbum()
     }
 
     // connection used to move to the next score automatically during playback
-    connect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum), Qt::ConnectionType::UniqueConnection);
+    connect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum),
+            Qt::ConnectionType::UniqueConnection);
 
     if (m_playbackIndex == -1) {
         m_playbackIndex++;
@@ -470,7 +471,8 @@ void AlbumManager::playAlbum()
                     } else {
                         Q_ASSERT(false);
                         std::cout << "There is some kind of problem... AlbumManager::playAlbum" << std::endl;
-                        m_items.at(m_playbackIndex)->albumItem.score = mscore->openScore(m_items.at(m_playbackIndex)->albumItem.fileInfo.absoluteFilePath());
+                        m_items.at(m_playbackIndex)->albumItem.score = mscore->openScore(m_items.at(
+                                                                                             m_playbackIndex)->albumItem.fileInfo.absoluteFilePath());
                     }
                     mscore->currentScoreView()->gotoMeasure(m_items.at(m_playbackIndex)->albumItem.score->firstMeasure());       // rewind before playing
                 } else {
@@ -562,7 +564,7 @@ void AlbumManager::updateScoreOrder(QModelIndex sourceParent, int sourceStart, i
             }
         }
     }
-    exit_loops:;
+exit_loops:;
     updateButtons();
 }
 
@@ -635,7 +637,8 @@ void AlbumManager::addAlbumItem(AlbumItem& albumItem)
     QTableWidgetItem* li = new QTableWidgetItem(name);
     scoreList->setRowCount(scoreList->rowCount() + 1);
     scoreList->setItem(scoreList->rowCount() - 1, 0, li);
-    li->setFlags(Qt::ItemFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable));
+    li->setFlags(Qt::ItemFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled
+                               | Qt::ItemIsUserCheckable));
     li->setCheckState(Qt::CheckState::Checked);
     QTableWidgetItem* tid = new QTableWidgetItem("00:00:00");
     scoreList->setItem(scoreList->rowCount() - 1, 1, tid);
@@ -699,9 +702,9 @@ QString durationToString(int seconds)
     int tempHours = tempMinutes / 60;
     tempMinutes -= tempHours * 60;
 
-    return (QString::number(tempHours).rightJustified(2, '0') + ":"
-        + QString::number(tempMinutes).rightJustified(2, '0') + ":"
-        + QString::number(tempSeconds).rightJustified(2, '0'));
+    return QString::number(tempHours).rightJustified(2, '0') + ":"
+           + QString::number(tempMinutes).rightJustified(2, '0') + ":"
+           + QString::number(tempSeconds).rightJustified(2, '0');
 }
 
 //---------------------------------------------------------
@@ -858,8 +861,9 @@ void AlbumManager::setAlbum(std::unique_ptr<Album> a)
         }
     }
     Album::activeAlbum = nullptr;
-    if (!a)
+    if (!a) {
         return;
+    }
 
     m_album = std::move(a);
 
@@ -1014,5 +1018,4 @@ void AlbumManagerItem::updateDurationLabel()
     listDurationItem->setText(durationToString(tempSeconds));
     mscore->getAlbumManager()->updateTotalDuration();
 }
-
 }

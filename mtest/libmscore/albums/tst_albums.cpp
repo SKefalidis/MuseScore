@@ -40,7 +40,7 @@ class TestAlbums : public QObject, public MTest
 private slots:
     void initTestCase();
 
-    void albumAddScoreTest() { albumAddScore(); };
+    void albumAddScoreTest() { albumAddScore(); }
 };
 
 //---------------------------------------------------------
@@ -51,7 +51,6 @@ void TestAlbums::initTestCase()
 {
     initMTest();
 }
-
 
 //---------------------------------------------------------
 //   albumItemTest

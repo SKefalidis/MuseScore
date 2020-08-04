@@ -24,7 +24,6 @@
 #include "measure.h"
 
 namespace Ms {
-
 //---------------------------------------------------------
 //---------------------------------------------------------
 //
@@ -167,7 +166,6 @@ void AlbumItem::readAlbumItem(XmlReader& reader)
 //---------------------------------------------------------
 //   saveAlbumItem
 //---------------------------------------------------------
-
 
 void AlbumItem::writeAlbumItem(XmlWriter& writer) const
 {
@@ -371,8 +369,9 @@ QStringList Album::scoreTitles() const
 
 bool Album::scoreInActiveAlbum(MasterScore* score)
 {
-    if (!activeAlbum)
+    if (!activeAlbum) {
         return false;
+    }
 
     for (auto& x : activeAlbum->m_albumItems) {
         if (x->score == score) {
@@ -386,7 +385,7 @@ bool Album::scoreInActiveAlbum(MasterScore* score)
 //   getDominant
 //---------------------------------------------------------
 
-MasterScore *Album::getDominant() const
+MasterScore* Album::getDominant() const
 {
     return m_dominantScore;
 }
@@ -404,7 +403,7 @@ void Album::setDominant(MasterScore* ms)
 //   loadFromFile
 //---------------------------------------------------------
 
-bool Album::loadFromFile(const QString &path)
+bool Album::loadFromFile(const QString& path)
 {
     std::cout << "Loading album from file..." << std::endl;
     QFile f(path);
@@ -449,7 +448,7 @@ void Album::readAlbum(XmlReader& reader)
 //   saveToFile
 //---------------------------------------------------------
 
-bool Album::saveToFile(const QString &path)
+bool Album::saveToFile(const QString& path)
 {
     std::cout << "Saving album to file..." << std::endl;
     QFile f(path);
@@ -461,7 +460,7 @@ bool Album::saveToFile(const QString &path)
     m_fileInfo.setFile(path);
     XmlWriter writer(nullptr, &f);
     writer.header();
-    writer.stag(QStringLiteral("museScore version=\"" MSC_VERSION"\""));
+    writer.stag(QStringLiteral("museScore version=\"" MSC_VERSION "\""));
     writeAlbum(writer);
     writer.etag();
     f.close();
@@ -472,7 +471,7 @@ bool Album::saveToFile(const QString &path)
 //   writeAlbum
 //---------------------------------------------------------
 
-void Album::writeAlbum(XmlWriter &writer) const
+void Album::writeAlbum(XmlWriter& writer) const
 {
     writer.stag("Album");
     writer.tag("name", m_albumTitle);
@@ -545,12 +544,10 @@ const QFileInfo& Album::fileInfo() const
 //   albumModeActive
 //---------------------------------------------------------
 
-
 bool Album::albumModeActive() const
 {
     return m_albumModeActive;
 }
-
 
 //---------------------------------------------------------
 //   setAlbumModeActive
@@ -653,5 +650,4 @@ void Album::setDefaultPlaybackDelay(int ms)
 {
     m_defaultPlaybackDelay = ms;
 }
-
 }     // namespace Ms

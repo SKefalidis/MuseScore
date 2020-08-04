@@ -961,7 +961,7 @@ Page* Score::searchPage(const QPointF& p) const
     // this is a workaround, find something better
     QList<Page*> temp_pages {};
     for (auto x : systems()) {
-        if(!temp_pages.contains(x->page())) {
+        if (!temp_pages.contains(x->page())) {
             temp_pages.append(x->page());
         }
     }
