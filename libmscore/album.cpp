@@ -396,6 +396,11 @@ MasterScore* Album::getDominant() const
 
 void Album::setDominant(MasterScore* ms)
 {
+    if (m_dominantScore) {
+        m_dominantScore->setPartOfActiveAlbum(false);
+        // TODO_SK: remove the score from the scoreList and delete it
+    }
+    ms->setPartOfActiveAlbum(true);
     m_dominantScore = ms;
 }
 

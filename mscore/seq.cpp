@@ -864,11 +864,17 @@ void Seq::process(unsigned framesPerPeriod, float* buffer)
             } else {
                 emit toGui('0');
             }
-            if (topMovement->movements()->size() > 1) {
-                setNextMovement();
-            }
-            if (cs != topMovement->movements()->at(topMovement->firstRealMovement())) {
-                start();
+            //
+            // TODO_SK: See if I can move some of AlbumManager::play logic here. For now, this is disabled for the dominant album score.
+            //          Works for parts.
+            //
+            if (mscore->currentScoreView()->drawingScore()->title() != "Temporary Album Score") {
+                if (topMovement->movements()->size() > 1) {
+                    setNextMovement();
+                }
+                if (cs != topMovement->movements()->at(topMovement->firstRealMovement())) {
+                    start();
+                }
             }
         } else if (state != driverState) {
             qDebug("Seq: state transition %d -> %d ?",

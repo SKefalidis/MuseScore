@@ -169,55 +169,66 @@ void AlbumManager::retranslate()
 //---------------------------------------------------------
 //   changeMode
 ///     Change between score mode and album mode.
+///     Switching to album-mode either changes the tab to Temporary Album Score or
+///     if it does not exist, creates the Temporary Album Score.
+///     Switching to score-mode changes the tab to the first score of the album.
 //---------------------------------------------------------
 
 void AlbumManager::changeMode(bool checked)
 {
     Q_UNUSED(checked);
-    disconnect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
+
+    disconnect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged); // used to avoid changeMode-tabChanged recursion
+    albumModeButton->blockSignals(true); // used to avoid buttonToggled-changeMode recursion
+    scoreModeButton->blockSignals(true); // >>
+
     if (scoreModeButton->isChecked()) {
-        m_album->setAlbumModeActive(false);
-        albumModeButton->setChecked(false);
         if (m_tempScoreTabIndex == mscore->getTab1()->currentIndex()) {
             mscore->openScore(m_album->albumItems().at(0)->fileInfo.absoluteFilePath());
         }
+        albumModeButton->setChecked(false);
     } else if (albumModeButton->isChecked()) {
-        m_album->setAlbumModeActive(true);
         if (!m_album->getDominant()) {
-            MasterScore* m_tempScore = m_items.at(0)->albumItem.score->clone(); // clone breaks editing sync for the 1st movement
+            //
+            // clone the first score and use the clone as the main/dominant score and as the front cover.
+            //
+            MasterScore* m_tempScore = m_items.at(0)->albumItem.score->clone();
             m_tempScore->setMasterScore(m_tempScore);
+            m_tempScore->setName("Temporary Album Score");
             m_tempScore->style().reset(m_tempScore);
-            while (m_tempScore->systems().size() > 1) { // remove the measures of the cloned masterscore, that way editing is synced
+            // remove all systems/measures other than the first one (that is used for the front cover).
+            while (m_tempScore->systems().size() > 1) {
                 for (auto x : m_tempScore->systems().last()->measures()) {
                     m_tempScore->removeElement(x);
                 }
                 m_tempScore->systems().removeLast();
             }
+            m_tempScore->setEmptyMovement(true); // TODO_SK: rename emptyMovement (it's not really empty)
 
-            m_tempScore->setEmptyMovement(true);
             if (m_album->generateContents()) {
                 m_tempScore->setfirstRealMovement(2);
             } else {
                 m_tempScore->setfirstRealMovement(1);
             }
-            m_tempScore->setName("Temporary Album Score");
-            m_tempScore->setPartOfActiveAlbum(true);
+
             m_album->setDominant(m_tempScore);
 
             mscore->setCurrentScoreView(mscore->appendScore(m_tempScore));
             mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
             m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
 
+            // add the album's scores as movements and layout the combined score
             for (auto item : m_items) {
-                cout << "adding score: " << item->albumItem.score->title().toStdString() << endl;
                 m_tempScore->addMovement(item->albumItem.score);
             }
             m_tempScore->setLayoutAll();
             m_tempScore->update();
         } else {
             if (m_tempScoreTabIndex != -1) {
+                // there is a tab for the Temporary Album Score
                 mscore->setCurrentScoreView(m_tempScoreTabIndex);
             } else {
+                // Temporary Album Score does not have a tab
                 mscore->scores().removeOne(m_album->getDominant());
                 mscore->setCurrentScoreView(mscore->appendScore(m_album->getDominant()));
                 mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
@@ -227,7 +238,12 @@ void AlbumManager::changeMode(bool checked)
         scoreModeButton->setChecked(false);
     } else {
         Q_ASSERT(false);
+        return;
     }
+    m_album->setAlbumModeActive(albumModeButton->isChecked());
+
+    albumModeButton->blockSignals(false);
+    scoreModeButton->blockSignals(false);
     connect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
 }
 
@@ -237,20 +253,18 @@ void AlbumManager::changeMode(bool checked)
 
 void AlbumManager::tabChanged()
 {
-    albumModeButton->blockSignals(true);
-    scoreModeButton->blockSignals(true);
     if (mscore->getTab1()->currentIndex() == m_tempScoreTabIndex && scoreModeButton->isChecked()) {
         albumModeButton->setChecked(true);
     } else if (mscore->getTab1()->currentIndex() != m_tempScoreTabIndex && albumModeButton->isChecked()) {
         scoreModeButton->setChecked(true);
     }
-    changeMode();
-    albumModeButton->blockSignals(false);
-    scoreModeButton->blockSignals(false);
 }
 
 //---------------------------------------------------------
 //   tabRemoved
+///     Syncs m_tempScoreTabIndex (the index of the tab of the Temporary Album Score)
+///     and changes mode of operation if needed.
+///     If there is no Temporary Album Score tab, this does nothing.
 //---------------------------------------------------------
 
 void AlbumManager::tabRemoved(int index)
@@ -258,24 +272,20 @@ void AlbumManager::tabRemoved(int index)
     if (m_tempScoreTabIndex == -1) {
         return;
     }
-    albumModeButton->blockSignals(true);
-    scoreModeButton->blockSignals(true);
+
     if (index == m_tempScoreTabIndex) {
-        scoreModeButton->setChecked(true);
         m_tempScoreTabIndex = -1;
-        changeMode();
+        scoreModeButton->setChecked(true);
     } else if (index < m_tempScoreTabIndex) {
         m_tempScoreTabIndex--;
-    } else if (index - 1 == m_tempScoreTabIndex) {
+    } else if ((index - 1 == m_tempScoreTabIndex) || (index == 0 && m_tempScoreTabIndex == 1)) {
         albumModeButton->setChecked(true);
-        changeMode();
     }
-    scoreModeButton->blockSignals(false);
-    albumModeButton->blockSignals(false);
 }
 
 //---------------------------------------------------------
 //   tabMoved
+///     Syncs m_tempScoreTabIndex (the index of the tab of the Temporary Album Score).
 //---------------------------------------------------------
 
 void AlbumManager::tabMoved(int from, int to)
@@ -435,7 +445,10 @@ void AlbumManager::updateContents()
 
 //---------------------------------------------------------
 //   playAlbum
-///     TODO_SK: rethink this
+///     Used for playback in both album-mode and score mode.
+///     In album-mode, the difference from the normal multi-movement playback
+///     (whose code resides in seq.cpp) is this also supports section-break pauses
+///     between movements.
 //---------------------------------------------------------
 
 void AlbumManager::playAlbum()
@@ -466,18 +479,12 @@ void AlbumManager::playAlbum()
                 //
                 if (scoreModeButton->isChecked()) {
                     if (m_items.at(m_playbackIndex)->albumItem.score) {
-                        // TODO_SK: It should not open a new score (it already has one) it should append the score to MuseScoreCore's scoreList
-                        mscore->openScore(m_items.at(m_playbackIndex)->albumItem.fileInfo.absoluteFilePath());         // what if the files have not been saved?
-                    } else {
-                        Q_ASSERT(false);
-                        std::cout << "There is some kind of problem... AlbumManager::playAlbum" << std::endl;
-                        m_items.at(m_playbackIndex)->albumItem.score = mscore->openScore(m_items.at(
-                                                                                             m_playbackIndex)->albumItem.fileInfo.absoluteFilePath());
+                        mscore->openScore(m_items.at(m_playbackIndex)->albumItem.fileInfo.absoluteFilePath());
                     }
-                    mscore->currentScoreView()->gotoMeasure(m_items.at(m_playbackIndex)->albumItem.score->firstMeasure());       // rewind before playing
+                    mscore->currentScoreView()->gotoMeasure(m_items.at(m_playbackIndex)->albumItem.score->firstMeasure()); // rewind before playing
                 } else {
                     seq->setNextMovement(m_playbackIndex + m_album->getDominant()->firstRealMovement()); // first movement or first 2 movements is/are empty
-                    mscore->currentScoreView()->gotoMeasure(seq->score()->firstMeasure());       // rewind before playing
+                    mscore->currentScoreView()->gotoMeasure(seq->score()->firstMeasure()); // rewind before playing
                 }
                 //
                 // start playback
@@ -494,7 +501,7 @@ void AlbumManager::playAlbum()
                 m_playbackIndex++;
                 playAlbum();
             }
-        } else { // album ended, reset for
+        } else { // album ended, reset
             rewindAlbum();
             disconnect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
             m_continuing = false;
@@ -601,8 +608,7 @@ void AlbumManager::addClicked(bool checked)
         );
     for (const QString& fn : files) {
         MasterScore* score = mscore->readScore(fn);
-        m_album->addScore(score);
-        addAlbumItem(*m_album->albumItems().back());
+        addAlbumItem(*m_album->addScore(score));
     }
 }
 
@@ -619,8 +625,7 @@ void AlbumManager::addNewClicked(bool checked)
     if (!score) {
         return;
     }
-    m_album->addScore(score);
-    addAlbumItem(*m_album->albumItems().back());
+    addAlbumItem(*m_album->addScore(score));
 }
 
 //---------------------------------------------------------
@@ -633,19 +638,21 @@ void AlbumManager::addNewClicked(bool checked)
 void AlbumManager::addAlbumItem(AlbumItem& albumItem)
 {
     scoreList->blockSignals(true);
-    QString name = albumItem.score->title();
-    QTableWidgetItem* li = new QTableWidgetItem(name);
+
+    // score title item
+    QTableWidgetItem* titleItem = new QTableWidgetItem(albumItem.score->title());
     scoreList->setRowCount(scoreList->rowCount() + 1);
-    scoreList->setItem(scoreList->rowCount() - 1, 0, li);
-    li->setFlags(Qt::ItemFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled
-                               | Qt::ItemIsUserCheckable));
-    li->setCheckState(Qt::CheckState::Checked);
-    QTableWidgetItem* tid = new QTableWidgetItem("00:00:00");
-    scoreList->setItem(scoreList->rowCount() - 1, 1, tid);
-    tid->setFlags(Qt::ItemFlags(Qt::ItemIsEnabled));
-    AlbumManagerItem* albumManagerItem = new AlbumManagerItem(albumItem, li, tid);
+    scoreList->setItem(scoreList->rowCount() - 1, 0, titleItem);
+    titleItem->setFlags(Qt::ItemFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled
+                               | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable));
+    titleItem->setCheckState(Qt::CheckState::Checked);
+    // score duration item
+    QTableWidgetItem* durationItem = new QTableWidgetItem("00:00:00");
+    scoreList->setItem(scoreList->rowCount() - 1, 1, durationItem);
+    durationItem->setFlags(Qt::ItemFlags(Qt::ItemIsEnabled));
+    // combine and add in the scoreList
+    AlbumManagerItem* albumManagerItem = new AlbumManagerItem(albumItem, titleItem, durationItem);
     m_items.push_back(albumManagerItem);
-    scoreList->blockSignals(false);
     albumManagerItem->updateDurationLabel();
 
     updateFrontCover();
@@ -655,6 +662,8 @@ void AlbumManager::addAlbumItem(AlbumItem& albumItem)
     if (m_album->getDominant()) {
         mscore->currentScoreView()->update(); // repaint
     }
+
+    scoreList->blockSignals(false);
 }
 
 //---------------------------------------------------------
@@ -675,6 +684,8 @@ void AlbumManager::updateDurations()
 
 //---------------------------------------------------------
 //   updateTotalDuration
+///     Calculates and updates the duration label for
+///     the entire Album.
 //---------------------------------------------------------
 
 void AlbumManager::updateTotalDuration()
