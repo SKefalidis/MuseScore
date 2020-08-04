@@ -21,7 +21,6 @@
 #define ALBUM_H
 
 namespace Ms {
-
 class Album;
 class MasterScore;
 class XmlReader;
@@ -34,7 +33,8 @@ using std::unique_ptr;
 //   AlbumItem
 //---------------------------------------------------------
 
-class AlbumItem : public QObject {
+class AlbumItem : public QObject
+{
     Q_OBJECT
 
 public:
@@ -72,7 +72,8 @@ private:
 //   Album
 //---------------------------------------------------------
 
-class Album : public QObject {
+class Album : public QObject
+{
     Q_OBJECT
 
 public:
@@ -93,7 +94,7 @@ public:
 
     bool loadFromFile(const QString& path);
     void readAlbum(XmlReader& reader);
-    bool saveToFile(const QString &path);
+    bool saveToFile(const QString& path);
     void writeAlbum(XmlWriter& writer) const;
 
     MasterScore* getDominant() const;
@@ -123,7 +124,7 @@ private:
     AlbumItem* createItem(XmlReader& reader);
     AlbumItem* createItem(MasterScore* score, bool enabled);
 
-    std::vector<unique_ptr<AlbumItem>> m_albumItems {};
+    std::vector<unique_ptr<AlbumItem> > m_albumItems {};
     QString m_albumTitle                            { "" };
     QFileInfo m_fileInfo                            {};
     MasterScore* m_dominantScore                    { nullptr };
@@ -135,7 +136,6 @@ private:
     bool m_includeAbsolutePaths                     { false };
     int m_defaultPlaybackDelay                      { 3000 };
 };
-
 }     // namespace Ms
 
 #endif // ALBUM_H

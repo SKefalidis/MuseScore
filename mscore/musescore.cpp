@@ -2620,7 +2620,7 @@ void MuseScore::addRecentAlbum(Album* album)
     }
 }
 
-void MuseScore::addRecentAlbum(const QString &albumPath)
+void MuseScore::addRecentAlbum(const QString& albumPath)
 {
     if (albumPath.isEmpty()) {
         return;

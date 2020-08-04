@@ -24,13 +24,12 @@
 #include "ui_albummanagerdialog.h"
 
 namespace Ms {
-
 //---------------------------------------------------------
 //   AlbumManagerDialog
 //---------------------------------------------------------
 
-AlbumManagerDialog::AlbumManagerDialog(QWidget* parent) :
-    QDialog(parent)
+AlbumManagerDialog::AlbumManagerDialog(QWidget* parent)
+    : QDialog(parent)
 {
     setObjectName("AlbumManagerDialog");
     setupUi(this);

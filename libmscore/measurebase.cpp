@@ -124,7 +124,7 @@ void MeasureBase::setSystem(System* s)
 {
     setParent((Element*)s);
     if (albumParentPage != nullptr && s != nullptr) {
-       s->setAlbumParent((Element*)albumParentPage);
+        s->setAlbumParent((Element*)albumParentPage);
     }
 }
 

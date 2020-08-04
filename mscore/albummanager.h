@@ -86,8 +86,7 @@ private slots:
     void downClicked(bool checked = false);
     void swap(int indexA, int indexB);
     void updateButtons();
-    void updateScoreOrder(QModelIndex sourceParent, int sourceStart, int sourceEnd, QModelIndex destinationParent,
-                          int destinationRow);
+    void updateScoreOrder(QModelIndex sourceParent, int sourceStart, int sourceEnd, QModelIndex destinationParent,int destinationRow);
 
     void playAlbum(bool checked);
     void playAlbum();
@@ -115,7 +114,7 @@ private:
     bool m_continuing       { false };
 };
 
-QString durationToString (int seconds);
+QString durationToString(int seconds);
 }
 
 #endif
