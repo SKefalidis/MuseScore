@@ -560,7 +560,7 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
     if (score->movements()->size() > 1) { // for album-mode
         MasterScore* nscore = new MasterScore(e->oscore());
         e->setPartScore(nscore);
-        nscore->setName(e->oscore()->title() +"_part_" + e->oscore()->excerpts().size());
+        nscore->setName(e->oscore()->title() + "_part_" + e->oscore()->excerpts().size());
         qDebug() << " + Add part : " << e->title();
         score->undo(new AddExcerpt(e));
         Excerpt::createExcerpt(e);
@@ -610,7 +610,7 @@ Excerpt* ExcerptsDialog::prepareMovementExcerpt(Excerpt* masterExcerpt, MasterSc
     Excerpt* e = new Excerpt(score);
     for (auto part : masterExcerpt->parts()) {
         int index = masterExcerpt->oscore()->parts().indexOf(part);
-         e->parts().append(score->parts().at(index));
+        e->parts().append(score->parts().at(index));
     }
     e->tracks() = masterExcerpt->tracks();
     e->setTitle(masterExcerpt->title());
@@ -629,7 +629,7 @@ Excerpt* ExcerptsDialog::createMovementExcerpt(Excerpt* e)
 
     MasterScore* nscore = new MasterScore(e->oscore());
     e->setPartScore(nscore);
-    nscore->setName(e->oscore()->title() +"_albumPart_" + e->oscore()->excerpts().size());
+    nscore->setName(e->oscore()->title() + "_albumPart_" + e->oscore()->excerpts().size());
     qDebug() << " + Add part : " << e->title();
     e->oscore()->addAlbumExcerpt(e);
     Excerpt::createExcerpt(e);
