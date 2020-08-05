@@ -644,7 +644,7 @@ void AlbumManager::addAlbumItem(AlbumItem& albumItem)
     scoreList->setRowCount(scoreList->rowCount() + 1);
     scoreList->setItem(scoreList->rowCount() - 1, 0, titleItem);
     titleItem->setFlags(Qt::ItemFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled
-                               | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable));
+                                      | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable));
     titleItem->setCheckState(Qt::CheckState::Checked);
     // score duration item
     QTableWidgetItem* durationItem = new QTableWidgetItem("00:00:00");
