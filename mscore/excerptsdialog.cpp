@@ -573,19 +573,17 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
             }
         }
 
-        if (score->movements()->size() > 1) {
-            for (auto m : *score->movements()) {
-                if (m == score) {
-                    continue;
-                }
-                createMovementExcerpt(prepareMovementExcerpt(e, m));
-                nscore->addMovement(static_cast<MasterScore*>(m->albumExcerpts().at(excerptList->currentRow())->partScore()));
+        for (auto m : *score->movements()) {
+            if (m == score) {
+                continue;
             }
-            nscore->setLayoutAll();
-            nscore->setUpdateAll();
-            nscore->undoChangeStyleVal(MSQE_Sid::Sid::spatium, 25.016); // hack: normally it's 25 but it draws crazy stuff with that
-            nscore->update();
+            Excerpt* ee = createMovementExcerpt(prepareMovementExcerpt(e, m));
+            nscore->addMovement(static_cast<MasterScore*>(ee->partScore()));
         }
+        nscore->setLayoutAll();
+        nscore->setUpdateAll();
+        nscore->undoChangeStyleVal(MSQE_Sid::Sid::spatium, 25.016); // hack: normally it's 25 but it draws crazy stuff with that
+        nscore->update();
     } else {
         Score* nscore = new Score(e->oscore());
         e->setPartScore(nscore);
@@ -620,14 +618,14 @@ Excerpt* ExcerptsDialog::prepareMovementExcerpt(Excerpt* masterExcerpt, MasterSc
     return e;
 }
 
-void ExcerptsDialog::createMovementExcerpt(Excerpt* e)
+Excerpt* ExcerptsDialog::createMovementExcerpt(Excerpt* e)
 {
     if (e->partScore()) {
-        return;
+        return e;
     }
     if (e->parts().isEmpty()) {
         qDebug("no parts");
-        return;
+        return e;
     }
 
     MasterScore* nscore = new MasterScore(e->oscore());
@@ -646,6 +644,7 @@ void ExcerptsDialog::createMovementExcerpt(Excerpt* e)
     }
     nscore->undoChangeStyleVal(MSQE_Sid::Sid::spatium, 25.016); // hack: normally it's 25 but it draws crazy stuff with that
     nscore->doLayout();
+    return e;
 }
 
 //---------------------------------------------------------
