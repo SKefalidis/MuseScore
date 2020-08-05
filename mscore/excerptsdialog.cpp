@@ -608,10 +608,9 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
 Excerpt* ExcerptsDialog::prepareMovementExcerpt(Excerpt* masterExcerpt, MasterScore* score)
 {
     Excerpt* e = new Excerpt(score);
-    for (int i = 0; i < masterExcerpt->oscore()->parts().size(); i++) {
-        if (masterExcerpt->parts().contains(masterExcerpt->oscore()->parts().at(i))) {
-            e->parts().append(score->parts().at(i));
-        }
+    for (auto part : masterExcerpt->parts()) {
+        int index = masterExcerpt->oscore()->parts().indexOf(part);
+         e->parts().append(score->parts().at(index));
     }
     e->tracks() = masterExcerpt->tracks();
     e->setTitle(masterExcerpt->title());
