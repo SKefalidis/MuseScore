@@ -557,35 +557,51 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
         return;
     }
 
-    MasterScore* nscore = new MasterScore(e->oscore());
-    e->setPartScore(nscore);
+    if (score->movements()->size() > 1) {
+        MasterScore* nscore = new MasterScore(e->oscore());
+        e->setPartScore(nscore);
 
-    qDebug() << " + Add part : " << e->title();
-    score->undo(new AddExcerpt(e));
-    Excerpt::createExcerpt(e);
+        qDebug() << " + Add part : " << e->title();
+        score->undo(new AddExcerpt(e));
+        Excerpt::createExcerpt(e);
 
-    // a new excerpt is created in AddExcerpt, make sure the parts are filed
-    for (Excerpt* ee : e->oscore()->excerpts()) {
-        if (ee->partScore() == nscore && ee != e) {
-            ee->parts().clear();
-            ee->parts().append(e->parts());
-        }
-    }
-
-    if (score->title() == "Temporary Album Score") {
-        for (auto m : *score->movements()) {
-            if (m->title() == "Temporary Album Score") {
-                continue;
+        // a new excerpt is created in AddExcerpt, make sure the parts are filed
+        for (Excerpt* ee : e->oscore()->excerpts()) {
+            if (ee->partScore() == nscore && ee != e) {
+                ee->parts().clear();
+                ee->parts().append(e->parts());
             }
-            createMovementExcerpt(prepareMovementExcerpt(e, m));
-            nscore->addMovement(static_cast<MasterScore*>(m->excerpts().at(excerptList->currentRow())->partScore()));
         }
-        nscore->setLayoutAll();
-        nscore->update();
+
+        if (score->movements()->size() > 1) {
+            for (auto m : *score->movements()) {
+                if (m == score) {
+                    continue;
+                }
+                createMovementExcerpt(prepareMovementExcerpt(e, m));
+                nscore->addMovement(static_cast<MasterScore*>(m->excerpts().at(excerptList->currentRow())->partScore()));
+            }
+            nscore->setLayoutAll();
+            nscore->undoChangeStyleVal(MSQE_Sid::Sid::spatium, 25.016); // hack: normally it's 25 but it draws crazy stuff with that
+            nscore->update();
+        }
     } else {
-        nscore->undoChangeStyleVal(MSQE_Sid::Sid::spatium, 25.016); // hack: normally it's 25 but it draws crazy stuff with that
+        Score* nscore = new Score(e->oscore());
+        e->setPartScore(nscore);
+
+        qDebug() << " + Add part : " << e->title();
+        score->undo(new AddExcerpt(e));
+        Excerpt::createExcerpt(e);
+
+        // a new excerpt is created in AddExcerpt, make sure the parts are filed
+        for (Excerpt* ee : e->oscore()->excerpts()) {
+            if (ee->partScore() == nscore && ee != e) {
+                ee->parts().clear();
+                ee->parts().append(e->parts());
+            }
+        }
     }
-    nscore->doLayout();
+
     partList->setEnabled(false);
     title->setEnabled(false);
 }
