@@ -178,6 +178,10 @@ void AlbumManager::changeMode(bool checked)
 {
     Q_UNUSED(checked);
 
+    if (m_album->albumItems().size() == 0) {
+        return;
+    }
+
     disconnect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged); // used to avoid changeMode-tabChanged recursion
     albumModeButton->blockSignals(true); // used to avoid buttonToggled-changeMode recursion
     scoreModeButton->blockSignals(true); // >>
