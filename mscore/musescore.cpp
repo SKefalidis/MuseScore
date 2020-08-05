@@ -5365,7 +5365,7 @@ void MuseScore::undoRedo(bool undo)
     }
     cv->startUndoRedo(undo);
     updateInputState(cs);
-    endCmd(/* undoRedo */ true);
+    endCmd(true, /* undoRedo */ true);
     if (pianorollEditor) {
         pianorollEditor->update();
     }
@@ -6545,6 +6545,14 @@ void MuseScore::endCmd(const bool isCmdFromInspector, const bool undoRedo)
 #ifdef SCRIPT_INTERFACE
     getPluginEngine()->endEndCmd(this);
 #endif
+    // takes care of updating the scoreview after undoing in album-mode
+    if (undoRedo) {
+        cv->score()->doLayout();
+        cv->score()->update();
+        cv->drawingScore()->doLayout();
+        cv->drawingScore()->update();
+        cv->update();
+    }
 }
 
 //---------------------------------------------------------
