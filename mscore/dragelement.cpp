@@ -120,6 +120,7 @@ void ScoreView::doDragElement(QMouseEvent* ev)
         }
     }
     updateGrips();
+    _score->doLayout(); // used by albumExcerpts
     _score->update();
 //    _drawingScore->doLayout(); // relayout the album score so that this score does not go to the beginning
 }

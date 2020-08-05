@@ -163,6 +163,32 @@ void MasterScore::rebuildExcerptsMidiMapping()
             }
         }
     }
+    for (Excerpt* ex : albumExcerpts()) {
+        for (Part* p : ex->partScore()->parts()) {
+            const Part* masterPart = p->masterPart();
+            if (!masterPart->score()->isMaster()) {
+                qWarning() << "rebuildExcerptsMidiMapping: no part in master score is linked with " << p->partName();
+                continue;
+            }
+            Q_ASSERT(p->instruments()->size() == masterPart->instruments()->size());
+            for (const auto& item : *masterPart->instruments()) {
+                const Instrument* iMaster = item.second;
+                const int tick = item.first;
+                Instrument* iLocal = p->instrument(Fraction::fromTicks(tick));
+                const int nchannels = iMaster->channel().size();
+                if (iLocal->channel().size() != nchannels) {
+                    // may happen, e.g., if user changes an instrument
+                    (*iLocal) = (*iMaster);
+                    continue;
+                }
+                for (int c = 0; c < nchannels; ++c) {
+                    Channel* cLocal = iLocal->channel(c);
+                    const Channel* cMaster = iMaster->channel(c);
+                    cLocal->setChannel(cMaster->channel());
+                }
+            }
+        }
+    }
 }
 
 //---------------------------------------------------------

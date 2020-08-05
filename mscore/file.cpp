@@ -2028,7 +2028,7 @@ bool MuseScore::exportParts()
     QString confirmReplaceMessage = tr("\"%1\" already exists.\nDo you want to replace it?\n");
     QString replaceMessage = tr("Replace");
     QString skipMessage = tr("Skip");
-    foreach (Excerpt* e, thisScore->excerpts()) {
+    for (Excerpt* e : thisScore->excerpts()) {
         Score* pScore = e->partScore();
         QString partfn = fi.absolutePath() + "/" + fi.completeBaseName() + "-"
                          + createDefaultFileName(pScore->title()) + "." + ext;
@@ -2063,7 +2063,7 @@ bool MuseScore::exportParts()
     if (ext.toLower() == "pdf") {
         QList<Score*> scores;
         scores.append(thisScore);
-        foreach (Excerpt* e, thisScore->excerpts()) {
+        for (Excerpt* e : thisScore->excerpts()) {
             scores.append(e->partScore());
         }
         QString partfn(fi.absolutePath() + "/" + fi.completeBaseName() + "-"
