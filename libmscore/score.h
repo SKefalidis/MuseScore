@@ -628,6 +628,8 @@ public:
 
     virtual inline QList<Excerpt*>& excerpts();
     virtual inline const QList<Excerpt*>& excerpts() const;
+    virtual inline QList<Excerpt*>& albumExcerpts();
+    virtual inline const QList<Excerpt*>& albumExcerpts() const;
 
     virtual ElementType type() const override { return ElementType::SCORE; }
 
@@ -1334,6 +1336,7 @@ class MasterScore : public Score
     bool _expandRepeats         { MScore::playRepeats };
     bool _playlistDirty         { true };
     QList<Excerpt*> _excerpts;
+    QList<Excerpt*> _albumExcerpts;
     std::vector<PartChannelSettingsLink> _playbackSettingsLinks;
     Score* _playbackScore       { nullptr };
     Revisions* _revisions       { nullptr };
@@ -1402,6 +1405,8 @@ public:
 
     virtual QList<Excerpt*>& excerpts() override { return _excerpts; }
     virtual const QList<Excerpt*>& excerpts() const override { return _excerpts; }
+    virtual QList<Excerpt*>& albumExcerpts() override { return _albumExcerpts; }
+    virtual const QList<Excerpt*>& albumExcerpts() const override { return _albumExcerpts; }
     virtual QQueue<MidiInputEvent>* midiInputQueue() override { return &_midiInputQueue; }
     virtual std::list<MidiInputEvent>* activeMidiPitches() override { return &_activeMidiPitches; }
 
@@ -1491,8 +1496,11 @@ public:
     void setPos(POS pos, Fraction tick);
 
     void addExcerpt(Excerpt*);
+    void addAlbumExcerpt(Excerpt*);
     void removeExcerpt(Excerpt*);
+    void removeAlbumExcerpt(Excerpt*);
     void deleteExcerpt(Excerpt*);
+    void deleteAlbumExcerpt(Excerpt*);
 
     void setPlaybackScore(Score*);
     Score* playbackScore() { return _playbackScore; }
@@ -1551,6 +1559,8 @@ inline TempoMap* Score::tempomap() const { return _masterScore->tempomap(); }
 inline TimeSigMap* Score::sigmap() const { return _masterScore->sigmap(); }
 inline QList<Excerpt*>& Score::excerpts() { return _masterScore->excerpts(); }
 inline const QList<Excerpt*>& Score::excerpts() const { return _masterScore->excerpts(); }
+inline QList<Excerpt*>& Score::albumExcerpts() { return _masterScore->albumExcerpts(); }
+inline const QList<Excerpt*>& Score::albumExcerpts() const { return _masterScore->albumExcerpts(); }
 inline QQueue<MidiInputEvent>* Score::midiInputQueue() { return _masterScore->midiInputQueue(); }
 inline std::list<MidiInputEvent>* Score::activeMidiPitches() { return _masterScore->activeMidiPitches(); }
 

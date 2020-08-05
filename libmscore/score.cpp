@@ -2067,12 +2067,79 @@ void MasterScore::addExcerpt(Excerpt* ex)
 }
 
 //---------------------------------------------------------
+//   adAlbumExcerpt
+//---------------------------------------------------------
+
+void MasterScore::addAlbumExcerpt(Excerpt* ex)
+{
+    Score* score = ex->partScore();
+
+    int nstaves { 1 }; // Initialise to 1 to force writing of the first part.
+    for (Staff* s : score->staves()) {
+        const LinkedElements* ls = s->links();
+        if (ls == 0) {
+            continue;
+        }
+
+        for (auto le : *ls) {
+            if (le->score() != this) {
+                continue;
+            }
+
+            // For instruments with multiple staves, every staff will point to the
+            // same part. To prevent adding the same part several times to the excerpt,
+            // add only the part of the first staff pointing to the part.
+            Staff* ps = toStaff(le);
+            if (!(--nstaves)) {
+                ex->parts().append(ps->part());
+                nstaves = ps->part()->nstaves();
+            }
+            break;
+        }
+    }
+
+    if (ex->tracks().isEmpty()) {                           // SHOULDN'T HAPPEN, protected in the UI, but it happens during read-in!!!
+        QMultiMap<int, int> tracks;
+        for (Staff* s : score->staves()) {
+            const LinkedElements* ls = s->links();
+            if (ls == 0) {
+                continue;
+            }
+            for (auto le : *ls) {
+                Staff* ps = toStaff(le);
+                if (ps->primaryStaff()) {
+                    for (int i = 0; i < VOICES; i++) {
+                        tracks.insert(ps->idx() * VOICES + i % VOICES, s->idx() * VOICES + i % VOICES);
+                    }
+                    break;
+                }
+            }
+        }
+        ex->setTracks(tracks);
+    }
+    albumExcerpts().append(ex);
+}
+
+//---------------------------------------------------------
 //   removeExcerpt
 //---------------------------------------------------------
 
 void MasterScore::removeExcerpt(Excerpt* ex)
 {
     if (excerpts().removeOne(ex)) {
+        // delete ex;
+    } else {
+        qDebug("removeExcerpt:: ex not found");
+    }
+}
+
+//---------------------------------------------------------
+//   removeAlbumExcerpt
+//---------------------------------------------------------
+
+void MasterScore::removeAlbumExcerpt(Excerpt* ex)
+{
+    if (albumExcerpts().removeOne(ex)) {
         setExcerptsChanged(true);
         // delete ex;
     } else {
@@ -3893,6 +3960,11 @@ QList<Score*> Score::scoreList()
             scores.append(ex->partScore());
         }
     }
+    for (const Excerpt* ex : root->albumExcerpts()) {
+        if (ex->partScore()) {
+            scores.append(ex->partScore());
+        }
+    }
     return scores;
 }
 
@@ -4984,6 +5056,7 @@ MasterScore::~MasterScore()
     delete _sigmap;
     delete _tempomap;
     qDeleteAll(_excerpts);
+    qDeleteAll(_albumExcerpts);
 }
 
 //---------------------------------------------------------

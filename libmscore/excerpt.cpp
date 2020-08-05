@@ -377,6 +377,63 @@ void MasterScore::deleteExcerpt(Excerpt* excerpt)
 }
 
 //---------------------------------------------------------
+//   deleteAlbumExcerpt
+//---------------------------------------------------------
+
+void MasterScore::deleteAlbumExcerpt(Excerpt* excerpt)
+{
+    Q_ASSERT(excerpt->oscore() == this);
+    Score* partScore = excerpt->partScore();
+
+    if (!partScore) {
+        qDebug("deleteExcerpt: no partScore");
+        return;
+    }
+
+    // unlink the staves in the excerpt
+    for (Staff* st : partScore->staves()) {
+        bool hasLinksInMaster = false;
+        if (st->links()) {
+            for (auto le : *st->links()) {
+                if (le->score() == this) {
+                    hasLinksInMaster = true;
+                    break;
+                }
+            }
+        }
+        if (hasLinksInMaster) {
+            int staffIdx = st->idx();
+            // unlink the spanners
+            for (auto i = partScore->spanner().begin(); i != partScore->spanner().cend(); ++i) {
+                Spanner* sp = i->second;
+                if (sp->staffIdx() == staffIdx) {
+                    sp->undoUnlink();
+                }
+            }
+            int sTrack = staffIdx * VOICES;
+            int eTrack = sTrack + VOICES;
+            // unlink elements and annotation
+            for (Segment* s = partScore->firstSegmentMM(SegmentType::All); s; s = s->next1MM()) {
+                for (int track = eTrack - 1; track >= sTrack; --track) {
+                    Element* el = s->element(track);
+                    if (el) {
+                        el->undoUnlink();
+                    }
+                }
+                for (Element* e : s->annotations()) {
+                    if (e->staffIdx() == staffIdx) {
+                        e->undoUnlink();
+                    }
+                }
+            }
+            // unlink the staff
+            undo(new Unlink(st));
+        }
+    }
+    excerpt->oscore()->removeAlbumExcerpt(excerpt);
+}
+
+//---------------------------------------------------------
 //   cloneSpanner
 //---------------------------------------------------------
 

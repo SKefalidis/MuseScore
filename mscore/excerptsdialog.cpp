@@ -557,10 +557,10 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
         return;
     }
 
-    if (score->movements()->size() > 1) {
+    if (score->movements()->size() > 1) { // for album-mode
         MasterScore* nscore = new MasterScore(e->oscore());
         e->setPartScore(nscore);
-
+        nscore->setName(e->oscore()->title() +"_part_" + e->oscore()->excerpts().size());
         qDebug() << " + Add part : " << e->title();
         score->undo(new AddExcerpt(e));
         Excerpt::createExcerpt(e);
@@ -579,9 +579,10 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
                     continue;
                 }
                 createMovementExcerpt(prepareMovementExcerpt(e, m));
-                nscore->addMovement(static_cast<MasterScore*>(m->excerpts().at(excerptList->currentRow())->partScore()));
+                nscore->addMovement(static_cast<MasterScore*>(m->albumExcerpts().at(excerptList->currentRow())->partScore()));
             }
             nscore->setLayoutAll();
+            nscore->setUpdateAll();
             nscore->undoChangeStyleVal(MSQE_Sid::Sid::spatium, 25.016); // hack: normally it's 25 but it draws crazy stuff with that
             nscore->update();
         }
@@ -631,13 +632,13 @@ void ExcerptsDialog::createMovementExcerpt(Excerpt* e)
 
     MasterScore* nscore = new MasterScore(e->oscore());
     e->setPartScore(nscore);
-
+    nscore->setName(e->oscore()->title() +"_albumPart_" + e->oscore()->excerpts().size());
     qDebug() << " + Add part : " << e->title();
-    e->oscore()->undo(new AddExcerpt(e));
+    e->oscore()->addAlbumExcerpt(e);
     Excerpt::createExcerpt(e);
 
     // a new excerpt is created in AddExcerpt, make sure the parts are filed
-    for (Excerpt* ee : e->oscore()->excerpts()) {
+    for (Excerpt* ee : e->oscore()->albumExcerpts()) {
         if (ee->partScore() == nscore && ee != e) {
             ee->parts().clear();
             ee->parts().append(e->parts());
@@ -662,12 +663,12 @@ void ExcerptsDialog::accept()
         ExcerptItem* item = isInExcerptsList(e);
         if (!isInExcerptsList(e) && partScore) {        // Delete it because not in the list anymore
             score->deleteExcerpt(e);
-            if (score->title() == "Temporary Album Score") {
+            if (score->movements()->size() > 1) { // for album-mode
                 for (auto m : *score->movements()) {
-                    if (m->title() == "Temporary Album Score") {
+                    if (m == score) {
                         continue;
                     }
-                    m->deleteExcerpt(m->excerpts().at(i));
+                    m->deleteAlbumExcerpt(m->albumExcerpts().at(i));
                 }
             }
         } else {
