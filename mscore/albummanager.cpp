@@ -179,6 +179,8 @@ void AlbumManager::changeMode(bool checked)
     Q_UNUSED(checked);
 
     if (m_album->albumItems().size() == 0) {
+        scoreModeButton->setChecked(true);
+        albumModeButton->setChecked(false);
         return;
     }
 
