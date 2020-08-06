@@ -2,7 +2,7 @@ Notes:
 
 Week 1:
     Parts:
-    - paint event called constantly
+    - paint event called constantly (after investigating I was probably mistaken, it's okay)
     - Parts front cover not updated when changing in the temporary album score, crash when selecting title
     - load parts from .msca
     General:
