@@ -548,6 +548,17 @@ MasterScore* MuseScore::readScore(const QString& name)
 
 bool MuseScore::saveFile()
 {
+    if (cs->masterScore() == nullptr) {
+        return false;
+    } else if (cs->masterScore()->movements()->size() > 1 && Album::scoreInActiveAlbum(cs->masterScore())
+               && Album::activeAlbum->albumModeActive()) {
+        for (auto movement : *cs->masterScore()->movements()) {
+            if (!saveFile(movement)) {
+                return false;
+            }
+        }
+        return saveAlbum();
+    }
     return saveFile(cs->masterScore());
 }
 
@@ -560,9 +571,10 @@ bool MuseScore::saveFile()
 
 bool MuseScore::saveFile(MasterScore* score)
 {
-    if (score == 0 || score->movements()->size() > 1) { // don't save multi-movement scores (temporary album score)
+    if (score == nullptr) {
         return false;
     }
+
     if (score->created()) {
         QString fileBaseName = score->masterScore()->fileInfo()->completeBaseName();
         QString fileName = score->masterScore()->fileInfo()->fileName();
