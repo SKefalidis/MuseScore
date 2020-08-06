@@ -134,7 +134,7 @@ bool Score::read(XmlReader& e)
             if (MScore::noExcerpts) {
                 e.skipCurrentElement();
             } else {
-                if (isMaster()) {
+                if (isTrueMaster()) {
                     Excerpt* ex = new Excerpt(static_cast<MasterScore*>(this));
                     ex->read(e);
                     excerpts().append(ex);
@@ -167,7 +167,7 @@ bool Score::read(XmlReader& e)
             }
         } else if (tag == "name") {
             QString n = e.readElementText();
-            if (!isMaster()) {     //ignore the name if it's not a child score
+            if (!isTrueMaster()) {     //ignore the name if it's not a child score
                 excerpt()->setTitle(n);
             }
         } else if (tag == "layoutMode") {

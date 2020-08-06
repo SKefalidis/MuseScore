@@ -1771,7 +1771,7 @@ void MuseScore::printFile()
         qDebug("unable to clear printer margins");
     }
     printerDev.setColorMode(QPrinter::Color);
-    if (cs->isMaster()) {
+    if (cs->isTrueMaster()) {
         printerDev.setDocName(cs->masterScore()->fileInfo()->completeBaseName());
     } else {
         printerDev.setDocName(cs->excerpt()->title());
@@ -1785,7 +1785,7 @@ void MuseScore::printFile()
 #else
     // when setting this on windows platform, pd.exec() does not
     // show dialog
-    if (cs->isMaster()) {
+    if (cs->isTrueMaster()) {
         printerDev.setOutputFileName(
             cs->masterScore()->fileInfo()->path() + "/" + cs->masterScore()->fileInfo()->completeBaseName()
             + ".pdf");
@@ -1906,7 +1906,7 @@ void MuseScore::exportFile()
         }
     } else
 #endif
-    if (!cs->isMaster()) {
+    if (!cs->isTrueMaster()) {
         name = QString("%1/%2-%3.%4").arg(saveDirectory).arg(cs->masterScore()->fileInfo()->completeBaseName()).arg(createDefaultFileName(
                                                                                                                         cs
                                                                                                                         ->
@@ -1992,7 +1992,7 @@ bool MuseScore::exportParts()
         saveFormat = "pdf";
     }
 
-    QString scoreName = cs->isMaster() ? cs->masterScore()->fileInfo()->completeBaseName() : cs->title();
+    QString scoreName = cs->isTrueMaster() ? cs->masterScore()->fileInfo()->completeBaseName() : cs->title();
     QString name;
 #ifdef Q_OS_WIN
     if (QOperatingSystemVersion::current() <= QOperatingSystemVersion(QOperatingSystemVersion::Windows, 5, 1)) { //XP
@@ -2115,7 +2115,7 @@ bool MuseScore::saveAs(Score* cs_, bool saveCopy, const QString& path, const QSt
         // to have it accessible to resources
         QFileInfo originalScoreFileInfo(*cs_->masterScore()->fileInfo());
         cs_->masterScore()->fileInfo()->setFile(fn);
-        if (!cs_->isMaster()) {     // clone metaTags from masterScore
+        if (!cs_->isTrueMaster()) {     // clone metaTags from masterScore
             QMapIterator<QString, QString> j(cs_->masterScore()->metaTags());
             while (j.hasNext()) {
                 j.next();
@@ -2146,7 +2146,7 @@ bool MuseScore::saveAs(Score* cs_, bool saveCopy, const QString& path, const QSt
             rv = false;
             QMessageBox::critical(this, tr("Save As"), s);
         }
-        if (!cs_->isMaster()) {     // remove metaTags added above
+        if (!cs_->isTrueMaster()) {     // remove metaTags added above
             QMapIterator<QString, QString> j(cs_->masterScore()->metaTags());
             while (j.hasNext()) {
                 j.next();
@@ -2287,7 +2287,7 @@ bool MuseScore::savePdf(Score* cs_, QPrinter& printer)
     if (title.isEmpty()) { // workTitle unset?
         title = cs_->masterScore()->title();     // fall back to (master)score's tab title
     }
-    if (!cs_->isMaster()) {   // excerpt?
+    if (!cs_->isTrueMaster()) {   // excerpt?
         QString partname = cs_->metaTag("partName");
         if (partname.isEmpty()) {   // partName unset?
             partname = cs_->title();       // fall back to excerpt's tab title
@@ -2672,14 +2672,14 @@ bool MuseScore::saveAs(Score* cs_, bool saveCopy)
     QString name;
 #ifdef Q_OS_WIN
     if (QOperatingSystemVersion::current() <= QOperatingSystemVersion(QOperatingSystemVersion::Windows, 5, 1)) {  //XP
-        if (!cs_->isMaster()) {
+        if (!cs_->isTrueMaster()) {
             name = QString("%1/%2-%3").arg(saveDirectory).arg(fileBaseName).arg(createDefaultFileName(cs->title()));
         } else {
             name = QString("%1/%2").arg(saveDirectory).arg(fileBaseName);
         }
     } else
 #endif
-    if (!cs_->isMaster()) {
+    if (!cs_->isTrueMaster()) {
         name = QString("%1/%2-%3.mscz").arg(saveDirectory).arg(fileBaseName).arg(createDefaultFileName(cs->title()));
     } else {
         name = QString("%1/%2.mscz").arg(saveDirectory).arg(fileBaseName);

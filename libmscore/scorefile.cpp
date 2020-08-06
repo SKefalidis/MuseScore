@@ -135,7 +135,7 @@ void Score::writeMovement(XmlWriter& xml, bool selectionOnly, bool isTopMovement
         masterScore()->omr()->write(xml);
     }
 #endif
-    if (isMaster() && masterScore()->showOmr() && xml.writeOmr()) {
+    if (isTrueMaster() && masterScore()->showOmr() && xml.writeOmr()) {
         xml.tag("showOmr", masterScore()->showOmr());
     }
     if (_audio && xml.writeOmr()) {
@@ -251,7 +251,7 @@ void Score::writeMovement(XmlWriter& xml, bool selectionOnly, bool isTopMovement
         }
     }
     xml.setCurTrack(-1);
-    if (isMaster()) {
+    if (isTrueMaster()) {
         if (!selectionOnly) {
             for (const Excerpt* excerpt : excerpts()) {
                 if (excerpt->partScore() != this) {
@@ -275,7 +275,7 @@ void Score::writeMovement(XmlWriter& xml, bool selectionOnly, bool isTopMovement
 
 void Score::write(XmlWriter& xml, bool selectionOnly)
 {
-    if (isMaster()) {
+    if (isTrueMaster()) {
 //        MasterScore* score = toMasterScore(this); crashes because MasterScore's type is still SCORE
         MasterScore* score = static_cast<MasterScore*>(this);
         bool isTopScore = true;
@@ -792,7 +792,7 @@ bool Score::saveFile(QIODevice* f, bool msczFormat, bool onlySelection)
     }
     write(xml, onlySelection);
     xml.etag();
-    if (isMaster()) {
+    if (isTrueMaster()) {
         masterScore()->revisions()->write(xml);
     }
     if (!onlySelection) {

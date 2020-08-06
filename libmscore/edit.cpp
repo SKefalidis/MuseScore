@@ -937,7 +937,7 @@ void Score::cmdAddTimeSig(Measure* fm, int staffIdx, TimeSig* ts, bool local)
                     nsig->setDropTarget(0);                 // DEBUG
                 }
 
-                if (score->isMaster()) {
+                if (score->isTrueMaster()) {
                     masterTimeSigs[nsig->track()] = nsig;
                 }
             }
@@ -3161,7 +3161,7 @@ void Score::insertMeasure(ElementType type, MeasureBase* measure, bool createEmp
                 }
             }
 
-            if (score->isMaster()) {
+            if (score->isTrueMaster()) {
                 om = m;
             }
 
@@ -3252,7 +3252,7 @@ void Score::insertMeasure(ElementType type, MeasureBase* measure, bool createEmp
             }
         } else {
             // a frame, not a measure
-            if (score->isMaster()) {
+            if (score->isTrueMaster()) {
                 rmb = mb;
             } else if (rmb && mb != rmb) {
                 mb->linkTo(rmb);
@@ -3569,7 +3569,7 @@ void Score::timeDelete(Measure* m, Segment* startSegment, const Fraction& f)
             s->undoChangeProperty(Pid::TICK, updatedTick);
             updatedTick += s->ticks();
 
-            if (score->isMaster()) {
+            if (score->isTrueMaster()) {
                 if (s->isChordRestType() && !s->hasElements()) {
                     emptySegments.push_back(s);
                 }
@@ -5039,7 +5039,7 @@ void Score::undoAddElement(Element* element)
                 }
                 undo(new AddElement(nis));
                 // transpose root score; parts will follow
-                if (score->isMaster() && part->instrument(tickStart)->transpose() != oldV) {
+                if (score->isTrueMaster() && part->instrument(tickStart)->transpose() != oldV) {
                     auto i = part->instruments()->upper_bound(tickStart.ticks());
                     Fraction tickEnd = i
                                        == part->instruments()->end() ? Fraction(-1, 1) : Fraction::fromTicks(i->first);
