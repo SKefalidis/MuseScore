@@ -3,10 +3,10 @@ Notes:
 Week 1:
     Parts:
     - paint event called constantly (after investigating I was probably mistaken, it's okay)
-    - Parts front cover not updated when changing in the temporary album score, crash when selecting title
+    - Parts front cover not updated when changing in the temporary album score, crash when selecting title (also in master)
     - load parts from .msca
     General:
-    - Autosave for albums
+    - Autosave for albums (disabled, can I do something better?)
     - Comments
 
 Week 2 - 3:
