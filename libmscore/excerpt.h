@@ -32,12 +32,11 @@ class XmlReader;
 
 class Excerpt : public QObject
 {
-    MasterScore* _oscore; // obvious change
-
-    Score* _partScore           { 0 }; // created by me
-    QString _title; // can copy
-    QList<Part*> _parts; // in addClicked (the default is created automatically)
-    QMultiMap<int, int> _tracks; // can copy
+    MasterScore* _oscore { nullptr };
+    Score* _partScore { nullptr };
+    QString _title;
+    QList<Part*> _parts;
+    QMultiMap<int, int> _tracks;
 
 public:
     Excerpt(MasterScore* s = 0) { _oscore = s; }
