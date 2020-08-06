@@ -5568,7 +5568,7 @@ void MuseScore::autoSaveTimerTimeout()
     ScoreLoad sl;             //disable debug message "no active command"
 
     for (MasterScore* s : scoreList) {
-        if (s->autosaveDirty()) {
+        if (s->autosaveDirty() && s->movements()->size() == 1) { // don't create temp saves for album-mode
             qDebug("<%s>", qPrintable(s->fileInfo()->completeBaseName()));
             QString tmp = s->tmpName();
             if (!tmp.isEmpty()) {
