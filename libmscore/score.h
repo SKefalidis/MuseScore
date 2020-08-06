@@ -610,6 +610,7 @@ public:
     Score* clone();
 
     virtual bool isMaster() const { return false; }
+    virtual bool isTrueMaster() const { return false; }
     virtual bool readOnly() const;
 
     inline virtual Movements* movements();
@@ -1340,6 +1341,7 @@ class MasterScore : public Score
                                             // ignored, for single-movement scores
     bool m_titleAtTheBottom     { true };
     bool _readOnly              { false };
+    bool m_isPart               { false };
 
     CmdState _cmdState;                     // modified during cmd processing
 
@@ -1380,6 +1382,7 @@ public:
     virtual ElementType type() const override { return ElementType::SCORE; } // TODO: if I change it to MasterScore scores are not drawn in album-mode
 
     virtual bool isMaster() const override { return true; } // TODO: should this be removed?
+    virtual bool isTrueMaster() const override { return !m_isPart; }
     virtual bool readOnly() const override { return _readOnly; }
     void setReadOnly(bool ro) { _readOnly = ro; }
     virtual UndoStack* undoStack() const override { return _movements->undo(); }
@@ -1422,6 +1425,9 @@ public:
 
     int titleAtTheBottom() const { return m_titleAtTheBottom; }
     void setTitleAtTheBottom(bool b) { m_titleAtTheBottom = b; }
+
+    bool isPart() const { return m_isPart; }
+    void setIsPart(bool b) { m_isPart = b; }
 
     virtual void setUpdateAll() override;
 

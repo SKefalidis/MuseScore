@@ -610,7 +610,7 @@ void Element::writeProperties(XmlWriter& xml) const
                 loc.setStaff(linkedStaff->idx());
             }
             xml.stag("linked");
-            if (!me->score()->isMaster()) {
+            if (!me->score()->isTrueMaster()) {
                 if (me->score() == score()) {
                     xml.tag("score", "same");
                 } else {
@@ -692,7 +692,7 @@ bool Element::readProperties(XmlReader& e)
             e.readNext();
         } else {
             Staff* ls = s->links() ? toStaff(s->links()->mainElement()) : nullptr;
-            bool linkedIsMaster = ls ? ls->score()->isMaster() : false;
+            bool linkedIsMaster = ls ? ls->score()->isTrueMaster() : false;
             Location loc = e.location(true);
             if (ls) {
                 loc.setStaff(ls->idx());
@@ -706,7 +706,7 @@ bool Element::readProperties(XmlReader& e)
                 if (ntag == "score") {
                     QString val(e.readElementText());
                     if (val == "same") {
-                        linkedIsMaster = score()->isMaster();
+                        linkedIsMaster = score()->isTrueMaster();
                     }
                 } else if (ntag == "location") {
                     mainLoc.read(e);
@@ -744,7 +744,7 @@ bool Element::readProperties(XmlReader& e)
         int id = e.readInt();
         _links = e.linkIds().value(id);
         if (!_links) {
-            if (!score()->isMaster()) {       // DEBUG
+            if (!score()->isTrueMaster()) {       // DEBUG
                 qDebug("---link %d not found (%d)", id, e.linkIds().size());
             }
             _links = new LinkedElements(score(), id);

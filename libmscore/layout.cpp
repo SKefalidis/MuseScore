@@ -4774,7 +4774,7 @@ void Score::doLayoutRange(const Fraction& st, const Fraction& et)
     _noteHeadWidth = _scoreFont->width(SymId::noteheadBlack, spatium() / SPATIUM20);
 
     if (cmdState().layoutFlags & LayoutFlag::REBUILD_MIDI_MAPPING) {
-        if (isMaster()) {
+        if (isTrueMaster()) {
             masterScore()->rebuildMidiMapping();
         }
     }

@@ -483,7 +483,7 @@ EditStyle::EditStyle(Score* s, QWidget* parent)
           + tr("(in File > Score Properties…):")
           + QString("</p><table>");
     // show all tags for current score/part, see also Score::init()
-    if (!cs->isMaster()) {
+    if (!cs->isTrueMaster()) {
         QMapIterator<QString, QString> j(cs->masterScore()->metaTags());
         while (j.hasNext()) {
             j.next();
@@ -821,7 +821,7 @@ void EditStyle::showEvent(QShowEvent* ev)
     setValues();
     pageList->setFocus();
     cs->startCmd();
-    buttonApplyToAllParts->setEnabled(!cs->isMaster());
+    buttonApplyToAllParts->setEnabled(!cs->isTrueMaster());
     QWidget::showEvent(ev);
 }
 
