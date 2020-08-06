@@ -94,6 +94,8 @@ public:
 
     bool loadFromFile(const QString& path);
     void readAlbum(XmlReader& reader);
+    void readExcerpts(XmlReader& reader);
+    void readExcerpt(XmlReader& reader);
     bool saveToFile(const QString& path);
     void writeAlbum(XmlWriter& writer) const;
 
