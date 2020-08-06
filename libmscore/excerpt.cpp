@@ -105,6 +105,27 @@ void Excerpt::read(XmlReader& e)
 }
 
 //---------------------------------------------------------
+//   writeForAlbum
+//---------------------------------------------------------
+
+void Excerpt::writeForAlbum(XmlWriter& writer)
+{
+    writer.stag("Excerpt");
+    for (auto part : parts()) {
+        int index = oscore()->parts().indexOf(part);
+        writer.tag("partIndex", index);
+    }
+    for (auto k : _tracks.uniqueKeys()) {
+        writer.tag("key", k);
+        for (auto v : _tracks.values(k)) {
+            writer.tag("track", v);
+        }
+    }
+    writer.tag("title", title());
+    writer.etag();
+}
+
+//---------------------------------------------------------
 //   operator!=
 //---------------------------------------------------------
 

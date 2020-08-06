@@ -57,6 +57,7 @@ public:
     void setPartScore(Score* s);
 
     void read(XmlReader&);
+    void writeForAlbum(XmlWriter& writer);
 
     bool operator!=(const Excerpt&) const;
     bool operator==(const Excerpt&) const;

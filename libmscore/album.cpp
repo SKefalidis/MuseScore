@@ -18,6 +18,7 @@
 //=============================================================================
 
 #include "album.h"
+#include "excerpt.h"
 #include "score.h"
 #include "xml.h"
 #include "musescoreCore.h"
@@ -421,6 +422,7 @@ bool Album::loadFromFile(const QString& path)
     XmlReader reader(&f);
     reader.setDevice(&f);
     readAlbum(reader);
+    readExcerpts(reader);
     f.close();
     return true;
 }
@@ -445,6 +447,38 @@ void Album::readAlbum(XmlReader& reader)
             m_titleAtTheBottom = reader.readBool();
         } else if (tag == "playbackDelay") {
             m_defaultPlaybackDelay = reader.readInt();
+        }
+    }
+}
+
+//---------------------------------------------------------
+//   readExcerpts
+//---------------------------------------------------------
+
+void Album::readExcerpts(XmlReader& reader)
+{
+    while (reader.readNextStartElement()) {
+        const QStringRef& tag(reader.name());
+        if (tag == "Excerpt") {
+            readExcerpt(reader);
+        }
+    }
+}
+
+//---------------------------------------------------------
+//   readExcerpt
+//---------------------------------------------------------
+
+void Album::readExcerpt(XmlReader& reader)
+{
+    while (reader.readNextStartElement()) {
+        const QStringRef& tag(reader.name());
+        if (tag == "partIndex") {
+
+        } else if (tag == "key") {
+
+        } else if (tag == "title") {
+
         }
     }
 }
@@ -486,6 +520,11 @@ void Album::writeAlbum(XmlWriter& writer) const
     writer.tag("playbackDelay", m_defaultPlaybackDelay);
     for (auto& aItem : m_albumItems) {
         aItem->writeAlbumItem(writer);
+    }
+    writer.etag();
+    writer.stag("Excerpts");
+    for (auto e : m_dominantScore->excerpts()) {
+        e->writeForAlbum(writer);
     }
     writer.etag();
 }
