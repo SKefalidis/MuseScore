@@ -25,7 +25,6 @@
 #include "measure.h"
 
 namespace Ms {
-
 //---------------------------------------------------------
 //---------------------------------------------------------
 //
@@ -771,5 +770,4 @@ void Album::setDefaultPlaybackDelay(int ms)
 {
     m_defaultPlaybackDelay = ms;
 }
-
 }     // namespace Ms
