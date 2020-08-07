@@ -173,6 +173,15 @@ void MuseScore::startExcerptsDialog()
             for (auto x : *ms->movements()) {
                 if (x->score()->parts().at(i)->partName().compare(ms->parts().at(i)->partName(), Qt::CaseSensitivity::CaseInsensitive)) {
                     std::cout << "Parts not matching..." << std::endl;
+                    QMessageBox msgBox;
+                    msgBox.setWindowTitle(QObject::tr("Incompatible parts :-("));
+                    msgBox.setText(QString("The scores in your album have incompatible parts/instrumentation."));
+                    msgBox.setDetailedText(QString("To be able to access the `Parts` feature, all your scores in your album"
+                                                   " need to have the same instrumentation."));
+                    msgBox.setTextFormat(Qt::RichText);
+                    msgBox.setIcon(QMessageBox::Critical);
+                    msgBox.setStandardButtons(QMessageBox::Close);
+                    msgBox.exec();
                     return;
                 }
             }
