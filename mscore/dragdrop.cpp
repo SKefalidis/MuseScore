@@ -427,6 +427,7 @@ void ScoreView::dragMoveEvent(QDragMoveEvent* event)
 
 void ScoreView::dropEvent(QDropEvent* event)
 {
+    // WIP: must set the the correct _score before doing anything!
     if (state == ViewState::PLAY) {
         event->ignore();
         return;
@@ -435,7 +436,6 @@ void ScoreView::dropEvent(QDropEvent* event)
 
     editData.pos       = pos;
     editData.modifiers = event->keyboardModifiers();
-
     if (editData.dropElement) {
         bool firstStaffOnly = false;
         bool applyUserOffset = false;
