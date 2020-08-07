@@ -1419,6 +1419,7 @@ public:
     void addMovement(MasterScore* score);
     void insertMovement(MasterScore* score, int atIndex);
     void removeMovement(MasterScore* score);
+    void removeMovement(int index);
 
     bool emptyMovement() const { return m_emptyMovement; }
     void setEmptyMovement(bool b) { m_emptyMovement = b; }

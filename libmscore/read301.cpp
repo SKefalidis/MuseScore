@@ -318,6 +318,11 @@ void MasterScore::removeMovement(MasterScore* score)
     }
 }
 
+void MasterScore::removeMovement(int index)
+{
+    _movements->erase(_movements->begin() + index);
+}
+
 //---------------------------------------------------------
 //   read301
 //---------------------------------------------------------

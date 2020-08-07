@@ -291,6 +291,13 @@ AlbumItem* Album::addScore(MasterScore* score, bool enabled)
         m_dominantScore->addMovement(score);
         m_dominantScore->update();
         m_dominantScore->doLayout(); // position the movements correctly
+        if (m_dominantScore->excerpts().size() > 0) {
+            // add movement to excerpts
+            for (auto& e : m_dominantScore->excerpts()) {
+                Excerpt* ee = createMovementExcerpt(prepareMovementExcerpt(e, score));
+                static_cast<MasterScore*>(e->partScore())->addMovement(static_cast<MasterScore*>(ee->partScore()));
+            }
+        }
     }
     return a;
 }
@@ -312,7 +319,14 @@ void Album::removeScore(MasterScore* score)
 void Album::removeScore(int index)
 {
     if (m_dominantScore) {
-        m_dominantScore->removeMovement(m_albumItems.at(index)->score);
+        // remove the movement from the dominantScore
+        if (m_dominantScore->excerpts().size() > 0) {
+            // remove movement from excerpts
+            for (auto& e : m_dominantScore->excerpts()) {
+                static_cast<MasterScore*>(e->partScore())->removeMovement(index + 1);
+            }
+        }
+        m_dominantScore->removeMovement(index + 1);
     }
     m_albumItems.at(index)->score->setPartOfActiveAlbum(false);
     m_albumItems.erase(m_albumItems.begin() + index);
