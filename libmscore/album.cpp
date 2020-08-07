@@ -25,6 +25,41 @@
 #include "measure.h"
 
 namespace Ms {
+
+//---------------------------------------------------------
+//---------------------------------------------------------
+//
+//   AlbumExcerpt
+//
+//---------------------------------------------------------
+//---------------------------------------------------------
+
+AlbumExcerpt::AlbumExcerpt(XmlReader& reader)
+{
+    while (reader.readNextStartElement()) {
+        const QStringRef& tag(reader.name());
+        if (tag == "partIndex") {
+            partIndices.push_back(reader.readInt());
+        } else if (tag == "key") {
+            int k = reader.readInt();
+            reader.readNextStartElement();
+            int v = reader.readInt();
+            tracks.insert(k, v);
+        } else if (tag == "title") {
+            title = reader.readElementText();
+        }
+    }
+}
+
+//---------------------------------------------------------
+//   writeAlbumExcerpt
+//---------------------------------------------------------
+
+void AlbumExcerpt::writeAlbumExcerpt() const
+{
+
+}
+
 //---------------------------------------------------------
 //---------------------------------------------------------
 //
@@ -403,6 +438,49 @@ void Album::setDominant(MasterScore* ms)
     }
     ms->setPartOfActiveAlbum(true);
     m_dominantScore = ms;
+    // set Parts
+    if (m_dominantScore->excerpts().isEmpty()) {
+        for (auto& e : m_albumExcerpts) {
+            //
+            // prepare Excerpts
+            //
+            Excerpt* ne = new Excerpt(m_dominantScore);
+            ne->setTitle(e->title);
+            for (auto partIndex : e->partIndices) {
+                ne->parts().append(m_dominantScore->parts().at(partIndex));
+            }
+            ne->setTracks(e->tracks);
+            //
+            // create Excerpts
+            //
+            MasterScore* nscore = new MasterScore(ne->oscore());
+            ne->setPartScore(nscore);
+            nscore->setName(ne->oscore()->title() + "_part_" + ne->oscore()->excerpts().size());
+            m_dominantScore->addExcerpt(ne);
+            Excerpt::createExcerpt(ne);
+
+            // a new excerpt is created in AddExcerpt, make sure the parts are filed
+            for (Excerpt* ee : ne->oscore()->excerpts()) {
+                if (ee->partScore() == nscore && ee != ne) {
+                    ee->parts().clear();
+                    ee->parts().append(ne->parts());
+                }
+            }
+
+            for (auto m : *m_dominantScore->movements()) {
+                if (m == m_dominantScore) {
+                    continue;
+                }
+                Excerpt* ee = createMovementExcerpt(prepareMovementExcerpt(ne, m));
+                nscore->addMovement(static_cast<MasterScore*>(ee->partScore()));
+            }
+
+            nscore->setLayoutAll();
+            nscore->setUpdateAll();
+            nscore->undoChangeStyleVal(MSQE_Sid::Sid::spatium, 25.016); // hack: normally it's 25 but it draws crazy stuff with that
+            nscore->update();
+        }
+    }
 }
 
 //---------------------------------------------------------
@@ -460,25 +538,7 @@ void Album::readExcerpts(XmlReader& reader)
     while (reader.readNextStartElement()) {
         const QStringRef& tag(reader.name());
         if (tag == "Excerpt") {
-            readExcerpt(reader);
-        }
-    }
-}
-
-//---------------------------------------------------------
-//   readExcerpt
-//---------------------------------------------------------
-
-void Album::readExcerpt(XmlReader& reader)
-{
-    while (reader.readNextStartElement()) {
-        const QStringRef& tag(reader.name());
-        if (tag == "partIndex") {
-
-        } else if (tag == "key") {
-
-        } else if (tag == "title") {
-
+            m_albumExcerpts.push_back(std::unique_ptr<AlbumExcerpt>(new AlbumExcerpt(reader)));
         }
     }
 }
@@ -694,4 +754,5 @@ void Album::setDefaultPlaybackDelay(int ms)
 {
     m_defaultPlaybackDelay = ms;
 }
+
 }     // namespace Ms

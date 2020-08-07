@@ -25,9 +25,24 @@ class Album;
 class MasterScore;
 class XmlReader;
 class XmlWriter;
+class Excerpt;
 enum class LayoutMode : char;
 
 using std::unique_ptr;
+
+//---------------------------------------------------------
+//   AlbumExcerpt
+//---------------------------------------------------------
+
+struct AlbumExcerpt
+{
+    AlbumExcerpt(XmlReader& reader);
+    void writeAlbumExcerpt() const;
+
+    QString title;
+    QList<int> partIndices;
+    QMultiMap<int, int> tracks;
+};
 
 //---------------------------------------------------------
 //   AlbumItem
@@ -95,13 +110,15 @@ public:
     bool loadFromFile(const QString& path);
     void readAlbum(XmlReader& reader);
     void readExcerpts(XmlReader& reader);
-    void readExcerpt(XmlReader& reader);
     bool saveToFile(const QString& path);
     void writeAlbum(XmlWriter& writer) const;
 
     MasterScore* getDominant() const;
     void setDominant(MasterScore* ms); // I don't like this function.
     std::vector<AlbumItem*> albumItems() const;
+
+    static Excerpt* prepareMovementExcerpt(Excerpt* masterExcerpt, MasterScore* score);
+    static Excerpt* createMovementExcerpt(Excerpt*);
 
     const QString& albumTitle() const;
     void setAlbumTitle(const QString& newTitle);
@@ -127,6 +144,7 @@ private:
     AlbumItem* createItem(MasterScore* score, bool enabled);
 
     std::vector<unique_ptr<AlbumItem> > m_albumItems {};
+    std::vector<unique_ptr<AlbumExcerpt> > m_albumExcerpts {};
     QString m_albumTitle                            { "" };
     QFileInfo m_fileInfo                            {};
     MasterScore* m_dominantScore                    { nullptr };
