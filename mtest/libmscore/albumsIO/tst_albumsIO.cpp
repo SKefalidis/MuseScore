@@ -42,7 +42,8 @@ class TestAlbumsIO : public QObject, public MTest
 private slots:
     void initTestCase();
 
-    void albumsIO() { saveAlbumTest("smallPianoAlbumTest"); }
+    void albumsSimple() { saveAlbumTest("smallPianoAlbumTest"); }
+    void albumsParts() { saveAlbumTest("albumPartsTest"); }
     void albumsStrings() { stringsTest("smallPianoAlbumTest"); }
     void albumsAddRemove() { addRemoveTest("smallPianoAlbumTest"); }
 };
