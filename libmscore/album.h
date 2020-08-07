@@ -37,7 +37,7 @@ using std::unique_ptr;
 struct AlbumExcerpt
 {
     AlbumExcerpt(XmlReader& reader);
-    void writeAlbumExcerpt() const;
+    void writeAlbumExcerpt(XmlWriter& writer) const;
 
     QString title;
     QList<int> partIndices;

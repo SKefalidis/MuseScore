@@ -55,9 +55,20 @@ AlbumExcerpt::AlbumExcerpt(XmlReader& reader)
 //   writeAlbumExcerpt
 //---------------------------------------------------------
 
-void AlbumExcerpt::writeAlbumExcerpt() const
+void AlbumExcerpt::writeAlbumExcerpt(XmlWriter& writer) const
 {
-
+    writer.stag("Excerpt");
+    writer.tag("title", title);
+    for (auto partIndex : partIndices) {
+        writer.tag("partIndex", partIndex);
+    }
+    for (auto k : tracks.uniqueKeys()) {
+        writer.tag("key", k);
+        for (auto v : tracks.values(k)) {
+            writer.tag("track", v);
+        }
+    }
+    writer.etag();
 }
 
 //---------------------------------------------------------
@@ -583,8 +594,14 @@ void Album::writeAlbum(XmlWriter& writer) const
     }
     writer.etag();
     writer.stag("Excerpts");
-    for (auto e : m_dominantScore->excerpts()) {
-        e->writeForAlbum(writer);
+    if (m_dominantScore) {
+        for (auto e : m_dominantScore->excerpts()) {
+            e->writeForAlbum(writer);
+        }
+    } else {
+        for (auto& e : m_albumExcerpts) {
+            e->writeAlbumExcerpt(writer);
+        }
     }
     writer.etag();
 }
