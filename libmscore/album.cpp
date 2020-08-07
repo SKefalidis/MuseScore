@@ -18,6 +18,7 @@
 //=============================================================================
 
 #include "album.h"
+#include "part.h"
 #include "excerpt.h"
 #include "score.h"
 #include "xml.h"
@@ -284,6 +285,37 @@ AlbumItem* Album::addScore(MasterScore* score, bool enabled)
         std::cout << "There is no score to add to album..." << std::endl;
         return nullptr;
     }
+    if (m_dominantScore && m_dominantScore->excerpts().size() > 0) {
+        int partCount = m_dominantScore->parts().size();
+        for (int i = 0; i < partCount; i++) {
+            for (auto x : *m_dominantScore->movements()) {
+                if (x->score()->parts().at(i)->partName().compare(score->parts().at(i)->partName(), Qt::CaseSensitivity::CaseInsensitive)) {
+                    std::cout << "Parts not matching..." << std::endl;
+                    QMessageBox msgBox;
+                    msgBox.setWindowTitle(QObject::tr("Incompatible parts"));
+                    msgBox.setText(QString("The parts of your new score are incompatible with the rest of the album."));
+                    msgBox.setDetailedText(QString("The parts of your new score are incompatible with the rest of the album. That means "
+                                                   "that adding this score will break the `Parts` functionality for your Album. You can"
+                                                   "remove this score to restore this functionality. "));
+                    msgBox.setTextFormat(Qt::RichText);
+                    msgBox.setIcon(QMessageBox::Warning);
+                    msgBox.setStandardButtons(
+                        QMessageBox::Cancel | QMessageBox::Ignore
+                        );
+                    auto response = msgBox.exec();
+                    if (response == QMessageBox::Cancel) {
+                        return nullptr;
+                    } else {
+                        while (m_dominantScore->excerpts().size()) {
+                            m_dominantScore->removeExcerpt(m_dominantScore->excerpts().first());
+                        }
+                        goto exit_loop;
+                    }
+                }
+            }
+        }
+    }
+exit_loop:;
     std::cout << "Adding score to album..." << std::endl;
     AlbumItem* a = createItem(score, enabled);
 

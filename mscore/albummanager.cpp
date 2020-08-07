@@ -613,7 +613,10 @@ void AlbumManager::addClicked(bool checked)
         );
     for (const QString& fn : files) {
         MasterScore* score = mscore->readScore(fn);
-        addAlbumItem(*m_album->addScore(score));
+        AlbumItem* item = m_album->addScore(score);
+        if (item) {
+            addAlbumItem(*item);
+        }
     }
 }
 
@@ -630,7 +633,10 @@ void AlbumManager::addNewClicked(bool checked)
     if (!score) {
         return;
     }
-    addAlbumItem(*m_album->addScore(score));
+    AlbumItem* item = m_album->addScore(score);
+    if (item) {
+        addAlbumItem(*item);
+    }
 }
 
 //---------------------------------------------------------
