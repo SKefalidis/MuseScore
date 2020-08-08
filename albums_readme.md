@@ -5,9 +5,12 @@ Week 1:
     - paint event called constantly (after investigating I was probably mistaken, it's okay)
     - Parts front cover not updated when changing in the temporary album score, crash when selecting title (also in master)
     - load parts from .msca (done)
-    - remove/add score should update the parts
+    - remove/add score should update the parts (done)
+    - warning when adding a movement that will break parts (done)
+    - tests
     General:
     - Autosave for albums (disabled, can I do something better?)
+    - tour
     - Comments
 
 Week 2 - 3:
@@ -60,3 +63,4 @@ Bugs:
  - Fix all the places where inActiveAlbum should be inActiveAlbum and the dominantScore is the one in the scoreview (e.g. the teleporting stuff, sequencer setScoreView)
  - Crush when editing title of part
  - james' list
+ - crashes related to text (are this all on master?)
