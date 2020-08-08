@@ -962,6 +962,7 @@ void MuseScore::showAlbumManager(bool visible)
 
     if (albumManager == 0) {
         albumManager = new AlbumManager(this);
+        albumManager->setObjectName("albummanager");
     }
 
     reDisplayDockWidget(albumManager, visible);
