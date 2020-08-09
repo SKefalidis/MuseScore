@@ -571,5 +571,27 @@ void MuseScore::editInstrList()
     masterScore->endCmd(true); // otherwise the inspector is updated and it crashes
     masterScore->rebuildAndUpdateExpressive(MuseScore::synthesizer("Fluid"));
     seq->initInstruments();
+
+    if (Album::activeAlbum->getDominant() && Album::activeAlbum->getDominant()->excerpts().size() && masterScore->partOfActiveAlbum()) {
+        int partCount = Album::activeAlbum->getDominant()->parts().size();
+        for (int i = 0; i < partCount; i++) {
+            for (auto x : *Album::activeAlbum->getDominant()->movements()) {
+                if (x->score()->parts().at(i)->partName().compare(Album::activeAlbum->getDominant()->parts().at(i)->partName(), Qt::CaseSensitivity::CaseInsensitive)) {
+                    std::cout << "Parts not matching..." << std::endl;
+                    QMessageBox msgBox;
+                    msgBox.setWindowTitle(QObject::tr("Incompatible parts after instrument changes :-("));
+                    msgBox.setText(QString("The scores in your album have incompatible parts/instrumentation."));
+                    msgBox.setDetailedText(QString("Removing all Parts from your album-mode score."));
+                    msgBox.setTextFormat(Qt::RichText);
+                    msgBox.setIcon(QMessageBox::Critical);
+                    msgBox.setStandardButtons(QMessageBox::Close);
+                    msgBox.exec();
+                    while (Album::activeAlbum->getDominant()->excerpts().size()) {
+                        Album::activeAlbum->getDominant()->removeExcerpt(Album::activeAlbum->getDominant()->excerpts().first());
+                    }
+                }
+            }
+        }
+    }
 }
 }
