@@ -24,6 +24,8 @@
 #include "xml.h"
 #include "musescoreCore.h"
 #include "measure.h"
+#include "thirdparty/qzip/qzipreader_p.h"
+#include "thirdparty/qzip/qzipwriter_p.h"
 
 namespace Ms {
 //---------------------------------------------------------
@@ -622,6 +624,16 @@ bool Album::saveToFile(const QString& path)
     return true;
 }
 
+bool Album::saveToFile(QIODevice* f)
+{
+    XmlWriter writer(nullptr, f);
+    writer.header();
+    writer.stag(QStringLiteral("museScore version=\"" MSC_VERSION "\""));
+    writeAlbum(writer);
+    writer.etag();
+    return true;
+}
+
 //---------------------------------------------------------
 //   writeAlbum
 //---------------------------------------------------------
@@ -649,6 +661,48 @@ void Album::writeAlbum(XmlWriter& writer) const
         }
     }
     writer.etag();
+}
+
+//---------------------------------------------------------
+//   exportAlbum
+//---------------------------------------------------------
+
+bool Album::exportAlbum(QIODevice* f, const QFileInfo& info)
+{
+    MQZipWriter uz(f);
+
+    QString fn = info.completeBaseName() + ".mscaz";
+    QBuffer cbuf;
+    cbuf.open(QIODevice::ReadWrite);
+    XmlWriter xml(nullptr, &cbuf);
+    xml << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    writeAlbum(xml);
+
+    QBuffer dbuf;
+    dbuf.open(QIODevice::ReadWrite);
+    saveToFile(&dbuf);
+    dbuf.seek(0);
+    uz.addFile(fn, dbuf.data());
+
+    cbuf.seek(0);
+    uz.addFile("META-INF/container.xml", cbuf.data());
+
+    QFileDevice* fd = dynamic_cast<QFileDevice*>(f);
+    if (fd) { // if is file (may be buffer)
+        fd->flush();     // flush to preserve score data in case of
+    }
+    // any failures on the further operations.
+
+    for (auto x : albumItems()) {
+        QString path = QString("Scores/") + x->score->realTitle();
+        QBuffer dbuf;
+        dbuf.open(QIODevice::ReadWrite);
+        x->score->Score::saveFile(&dbuf, false);
+        dbuf.seek(0);
+        uz.addFile(path, dbuf.data());
+    }
+    uz.close();
+    return true;
 }
 
 //---------------------------------------------------------

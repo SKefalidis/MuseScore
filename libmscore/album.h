@@ -111,7 +111,9 @@ public:
     void readAlbum(XmlReader& reader);
     void readExcerpts(XmlReader& reader);
     bool saveToFile(const QString& path);
+    bool saveToFile(QIODevice* f);
     void writeAlbum(XmlWriter& writer) const;
+    bool exportAlbum(QIODevice* f, const QFileInfo& info);
 
     MasterScore* getDominant() const;
     void setDominant(MasterScore* ms); // I don't like this function.

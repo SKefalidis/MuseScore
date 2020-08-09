@@ -397,6 +397,9 @@ bool MuseScore::saveAlbum()
     }
 
     albumManager->album().saveToFile(fileBaseName);
+    QFileInfo fi(fileBaseName + "export");
+    QFile fp(fi.filePath());
+    albumManager->album().exportAlbum(&fp, fi);
     mscore->lastSaveDirectory = albumManager->album().fileInfo().absolutePath();
     addRecentAlbum(&albumManager->album());
     writeSessionFile(false);
