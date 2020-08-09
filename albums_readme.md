@@ -10,7 +10,7 @@ Week 1:
     - tests
     General:
     - Autosave for albums (disabled, can I do something better?)
-    - tour
+    - tour (done)
     - Comments
 
 Week 2 - 3:
