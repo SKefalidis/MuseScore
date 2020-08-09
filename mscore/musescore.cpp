@@ -1420,6 +1420,7 @@ MuseScore::MuseScore()
             "file-save-selection",
             saveOnlineMenuItem,
             "album-save",
+            "album-export",
             "file-export",
             "file-part-export",
             "file-import-pdf",
@@ -6690,6 +6691,8 @@ void MuseScore::cmd(QAction* a, const QString& cmd)
         saveFile();
     } else if (cmd == "album-save") {
         saveAlbum();
+    } else if (cmd == "album-export") {
+        exportAlbum();
     } else if (cmd == saveOnlineMenuItem) {
         showUploadScoreDialog();
     } else if (cmd == "file-export") {

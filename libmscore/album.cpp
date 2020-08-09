@@ -223,9 +223,13 @@ void AlbumItem::writeAlbumItem(XmlWriter& writer) const
     if (album.includeAbsolutePaths()) {
         writer.tag("path", fileInfo.absoluteFilePath());
     }
-    QDir dir(album.fileInfo().dir());
-    QString relativePath = dir.relativeFilePath(fileInfo.absoluteFilePath());
-    writer.tag("relativePath", relativePath);
+    if (!album.exporting()) {
+        QDir dir(album.fileInfo().dir());
+        QString relativePath = dir.relativeFilePath(fileInfo.absoluteFilePath());
+        writer.tag("relativePath", relativePath);
+    } else {
+        writer.tag("relativePath", album.exportedScoreFolder() + score->title());
+    }
     writer.tag("enabled", m_enabled);
     writer.etag();
 }
@@ -620,13 +624,21 @@ bool Album::saveToFile(const QString& path)
     return true;
 }
 
+// used for exporting
 bool Album::saveToFile(QIODevice* f)
 {
+    bool b = m_includeAbsolutePaths;
+    m_includeAbsolutePaths = false;
+    m_exporting = true;
+
     XmlWriter writer(nullptr, f);
     writer.header();
     writer.stag(QStringLiteral("museScore version=\"" MSC_VERSION "\""));
     writeAlbum(writer);
     writer.etag();
+
+    m_includeAbsolutePaths = b;
+    m_exporting = false;
     return true;
 }
 
@@ -660,6 +672,59 @@ void Album::writeAlbum(XmlWriter& writer) const
 }
 
 //---------------------------------------------------------
+//   readRootFile
+//---------------------------------------------------------
+
+QString readRootFile(MQZipReader* uz)
+{
+    QString rootfile;
+
+    QByteArray cbuf = uz->fileData("META-INF/container.xml");
+    if (cbuf.isEmpty()) {
+        qDebug("can't find container.xml");
+        return rootfile;
+    }
+
+    XmlReader e(cbuf);
+
+    while (e.readNextStartElement()) {
+        if (e.name() != "container") {
+            e.unknown();
+            continue;
+        }
+        while (e.readNextStartElement()) {
+            if (e.name() != "rootfiles") {
+                e.unknown();
+                continue;
+            }
+            while (e.readNextStartElement()) {
+                const QStringRef& tag(e.name());
+
+                if (tag == "rootfile") {
+                    if (rootfile.isEmpty()) {
+                        rootfile = e.attribute("full-path");
+                        e.skipCurrentElement();
+                    }
+                } else {
+                    e.unknown();
+                }
+            }
+        }
+    }
+    return rootfile;
+}
+
+//---------------------------------------------------------
+//   importAlbum
+//---------------------------------------------------------
+
+void Album::importAlbum(const QString& fn)
+{
+    MQZipReader uz(fn, QIODevice::ReadWrite);
+    uz.extractAll("/home/sergios/Documents/Extracted");
+}
+
+//---------------------------------------------------------
 //   exportAlbum
 //---------------------------------------------------------
 
@@ -667,7 +732,7 @@ bool Album::exportAlbum(QIODevice* f, const QFileInfo& info)
 {
     MQZipWriter uz(f);
 
-    QString fn = info.completeBaseName() + ".mscaz";
+    QString fn = info.completeBaseName() + ".msca";
     QBuffer cbuf;
     cbuf.open(QIODevice::ReadWrite);
     XmlWriter xml(nullptr, &cbuf);
@@ -690,7 +755,7 @@ bool Album::exportAlbum(QIODevice* f, const QFileInfo& info)
     // any failures on the further operations.
 
     for (auto x : albumItems()) {
-        QString path = QString("Scores/") + x->score->realTitle();
+        QString path = QString(m_exportedScoreFolder) + x->score->title();
         QBuffer dbuf;
         dbuf.open(QIODevice::ReadWrite);
         x->score->Score::saveFile(&dbuf, false);
@@ -865,5 +930,23 @@ int Album::defaultPlaybackDelay() const
 void Album::setDefaultPlaybackDelay(int ms)
 {
     m_defaultPlaybackDelay = ms;
+}
+
+//---------------------------------------------------------
+//   exportedScoreFolder
+//---------------------------------------------------------
+
+const QString& Album::exportedScoreFolder() const
+{
+    return m_exportedScoreFolder;
+}
+
+//---------------------------------------------------------
+//   exporting
+//---------------------------------------------------------
+
+bool Album::exporting() const
+{
+    return m_exporting;
 }
 }     // namespace Ms

@@ -675,7 +675,9 @@ public:
     virtual MasterScore* openScore(const QString& fn, bool switchTab = true);
     virtual MasterScore* openScoreWithoutAppending(const QString& fn);
     void openAlbum(const QString& fn);
+    void importAlbum(const QString& fn);
     bool saveAlbum();
+    bool exportAlbum();
     bool hasToCheckForUpdate();
     bool hasToCheckForExtensionsUpdate();
     static bool unstable();

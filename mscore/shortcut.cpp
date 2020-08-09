@@ -2963,6 +2963,16 @@ Shortcut Shortcut::_sc[] = {
     },
     {
         MsWidget::MAIN_WINDOW,
+        STATE_NORMAL | STATE_NOTE_ENTRY | STATE_EDIT | STATE_TEXT_EDIT | STATE_LYRICS_EDIT
+        | STATE_HARMONY_FIGBASS_EDIT | STATE_PLAY,
+        "album-export",
+        QT_TRANSLATE_NOOP("action","Export Album"),
+        QT_TRANSLATE_NOOP("action","File > Export Album"),
+        QT_TRANSLATE_NOOP("action","Export album and scores to file"),
+        Icons::fileSave_ICON
+    },
+    {
+        MsWidget::MAIN_WINDOW,
         STATE_NORMAL,
         "layer",
         QT_TRANSLATE_NOOP("action","Layers…"),
