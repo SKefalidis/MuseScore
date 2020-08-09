@@ -22,6 +22,7 @@
 #include "preferences.h"
 #include "scoreview.h"
 #include "seq.h"
+#include "libmscore/album.h"
 #include "libmscore/barline.h"
 #include "libmscore/clef.h"
 #include "libmscore/excerpt.h"
@@ -221,6 +222,23 @@ void MuseScore::editInstrList()
     instrList->init();
     MasterScore* masterScore = currentScoreView() ? static_cast<MasterScore*>(currentScoreView()->score()) : cs->masterScore();
     instrList->genPartList(masterScore);
+    if (Album::activeAlbum->getDominant() && Album::activeAlbum->getDominant()->excerpts().size() && masterScore->partOfActiveAlbum()) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(QObject::tr("Parts compatibility warning"));
+        msgBox.setText(QString("Changing instrumentation for one of your scores can break Parts for your Album."));
+        msgBox.setDetailedText(QString("You can use Parts in album-mode as long as the scores in your Album have the exact same instrumentation. If you add/remove instruments for one of your scores"
+                                       " you will lose your Parts for album-mode."));
+        msgBox.setTextFormat(Qt::RichText);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(
+            QMessageBox::Cancel | QMessageBox::Ignore
+            );
+        auto response = msgBox.exec();
+        if (response == QMessageBox::Cancel) {
+            instrList->done(0);
+            return;
+        }
+    }
     masterScore->startCmd();
 //    masterScore->deselectAll();
     int rv = instrList->exec();
