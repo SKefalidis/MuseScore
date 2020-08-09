@@ -615,11 +615,7 @@ bool Album::saveToFile(const QString& path)
     }
 
     m_fileInfo.setFile(path);
-    XmlWriter writer(nullptr, &f);
-    writer.header();
-    writer.stag(QStringLiteral("museScore version=\"" MSC_VERSION "\""));
-    writeAlbum(writer);
-    writer.etag();
+    saveToFile(&f);
     f.close();
     return true;
 }
