@@ -57,7 +57,7 @@
            <string notr="true"/>
           </property>
           <property name="icon">
-           <iconset resource="musescore.qrc">
+           <iconset resource="../../../../../tmp/QtCreator-pEZzny/qtc-cmake-eySjOQgT/mscore/musescore_qmlcache.qrc">
             <normaloff>:/data/icons/arrow_up.svg</normaloff>:/data/icons/arrow_up.svg</iconset>
           </property>
          </widget>
@@ -77,7 +77,7 @@
            <string notr="true"/>
           </property>
           <property name="icon">
-           <iconset resource="musescore.qrc">
+           <iconset resource="../../../../../tmp/QtCreator-pEZzny/qtc-cmake-eySjOQgT/mscore/musescore_qmlcache.qrc">
             <normaloff>:/data/icons/arrow_down.svg</normaloff>:/data/icons/arrow_down.svg</iconset>
           </property>
          </widget>
@@ -161,9 +161,9 @@
        </widget>
       </item>
       <item row="14" column="1">
-       <widget class="QPushButton" name="deleteButton">
+       <widget class="QPushButton" name="closeAlbumButton">
         <property name="text">
-         <string>Delete Score</string>
+         <string>Close Album</string>
         </property>
        </widget>
       </item>
@@ -256,8 +256,8 @@
   </widget>
  </widget>
  <resources>
-  <include location="musescore.qrc"/>
-  <include location="musescore.qrc"/>
+  <include location="../../../../../tmp/QtCreator-pEZzny/qtc-cmake-eySjOQgT/mscore/musescore_qmlcache.qrc"/>
+  <include location="../../../../../tmp/QtCreator-pEZzny/qtc-cmake-eySjOQgT/mscore/musescore_qmlcache.qrc"/>
  </resources>
  <connections/>
 </ui>

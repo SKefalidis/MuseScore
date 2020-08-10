@@ -5489,7 +5489,7 @@ void MuseScore::writeSessionFile(bool cleanExit)
     xml.tagE(cleanExit ? "clean" : "dirty");
 
     for (MasterScore* score : scoreList) {
-        if (score == Album::activeAlbum->getDominant()) {
+        if (Album::activeAlbum && score == Album::activeAlbum->getDominant()) {
             continue;
         }
         xml.stag("Score");

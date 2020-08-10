@@ -81,7 +81,7 @@ private slots:
     void addClicked(bool checked = false);
     void addNewClicked(bool checked = false);
     void removeClicked(bool checked = false);
-    void deleteClicked(bool checked = false);
+    void closeAlbumClicked(bool checked = false);
     void upClicked(bool checked = false);
     void downClicked(bool checked = false);
     void swap(int indexA, int indexB);

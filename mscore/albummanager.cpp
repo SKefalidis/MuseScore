@@ -65,7 +65,7 @@ AlbumManager::AlbumManager(QWidget* parent)
     connect(up,                 &QPushButton::clicked,      this, &AlbumManager::upClicked);
     connect(down,               &QPushButton::clicked,      this, &AlbumManager::downClicked);
     connect(remove,             &QPushButton::clicked,      this, &AlbumManager::removeClicked);
-    connect(deleteButton,       &QPushButton::clicked,      this, &AlbumManager::deleteClicked);
+    connect(closeAlbumButton,   &QPushButton::clicked,      this, &AlbumManager::closeAlbumClicked);
     connect(albumModeButton,    &QRadioButton::toggled,     this, &AlbumManager::changeMode);
     connect(scoreModeButton,    &QRadioButton::toggled,     this, &AlbumManager::changeMode);
     connect(settingsButton,     &QPushButton::clicked,      this, &AlbumManager::openSettingsDialog);
@@ -87,7 +87,6 @@ AlbumManager::AlbumManager(QWidget* parent)
     // the rest
     updateDurations();
     mscore->restoreGeometry(this);
-    setAlbum(std::unique_ptr<Album>(new Album()));
 
     connect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
     connect(mscore->getTab1(), &ScoreTab::tabRemoved, this, &AlbumManager::tabRemoved);
@@ -612,6 +611,9 @@ void AlbumManager::addClicked(bool checked)
         tr("MuseScore Files") + " (*.mscz *.mscx);;", tr("Load Score")
         );
     for (const QString& fn : files) {
+        if (!m_album) {
+            setAlbum(std::unique_ptr<Album>(new Album()));
+        }
         MasterScore* score = mscore->readScore(fn);
         AlbumItem* item = m_album->addScore(score);
         if (item) {
@@ -632,6 +634,9 @@ void AlbumManager::addNewClicked(bool checked)
     MasterScore* score = mscore->getNewFile();
     if (!score) {
         return;
+    }
+    if (!m_album) {
+        setAlbum(std::unique_ptr<Album>(new Album()));
     }
     AlbumItem* item = m_album->addScore(score);
     if (item) {
@@ -863,9 +868,10 @@ void AlbumManager::removeClicked(bool checked)
 //   deleteClicked
 //---------------------------------------------------------
 
-void AlbumManager::deleteClicked(bool checked)
+void AlbumManager::closeAlbumClicked(bool checked)
 {
     Q_UNUSED(checked);
+    setAlbum(nullptr);
 }
 
 //---------------------------------------------------------
@@ -875,14 +881,18 @@ void AlbumManager::deleteClicked(bool checked)
 void AlbumManager::setAlbum(std::unique_ptr<Album> a)
 {
     std::cout << "setting album" << std::endl;
+    Album::activeAlbum = nullptr; // this allows mscore to delete the dominantScore
     scoreList->setRowCount(0);
     m_items.clear(); // TODO_SK: also free all
     if (m_album) {
         for (auto x : m_album->albumItems()) {
             m_album->removeScore(x->score);
         }
+        if (m_album->getDominant()) {
+            mscore->closeScore(m_album->getDominant());
+        }
+        m_album.release();
     }
-    Album::activeAlbum = nullptr;
     if (!a) {
         return;
     }
