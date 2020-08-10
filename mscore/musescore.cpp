@@ -5488,7 +5488,10 @@ void MuseScore::writeSessionFile(bool cleanExit)
     xml.stag(QStringLiteral("museScore version=\"" MSC_VERSION "\" full-version=\"%1\"").arg(fullVersion()));
     xml.tagE(cleanExit ? "clean" : "dirty");
 
-    foreach (MasterScore* score, scoreList) {
+    for (MasterScore* score : scoreList) {
+        if (score == Album::activeAlbum->getDominant()) {
+            continue;
+        }
         xml.stag("Score");
         xml.tag("created", score->created());
         xml.tag("dirty", score->dirty());
@@ -5557,7 +5560,15 @@ void MuseScore::writeSessionFile(bool cleanExit)
     }
     xml.tag("tab", tab);
     xml.tag("idx", idx);
+
+    if (Album::activeAlbum && Album::activeAlbum->fileInfo().exists()) {
+        xml.stag("Album");
+        xml.tag("path", Album::activeAlbum->fileInfo().absoluteFilePath());
+        xml.tag("albumModeActive", Album::activeAlbum->albumModeActive());
+        xml.etag();
+    }
     xml.etag();
+
     f.close();
     if (cleanExit) {
         // TODO: remove all temporary session backup files
@@ -5761,6 +5772,21 @@ bool MuseScore::restoreSession(bool always)
                     tab = e.readInt();
                 } else if (tag == "idx") {
                     idx = e.readInt();
+                } else if (tag == "Album") {
+                    while (e.readNextStartElement()) {
+                        const QStringRef& t(e.name());
+                        if (t == "path") {
+                            openAlbum(e.readElementText());
+                        } else if (t == "albumModeActive") {
+                            if (Album::activeAlbum && !Album::activeAlbum->albumModeActive() && albumManager && e.readBool()) {
+                                albumManager->albumModeButton->setChecked(true);
+                            } else {
+                                auto b1 = Album::activeAlbum;
+                                auto b2 = !Album::activeAlbum->albumModeActive();
+                                auto b3 = albumManager;
+                            }
+                        }
+                    }
                 } else {
                     e.unknown();
                     return false;

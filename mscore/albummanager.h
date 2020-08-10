@@ -59,6 +59,7 @@ public:
 
     Album& album() const;
     void setAlbum(std::unique_ptr<Album> album);
+    void changeMode(bool checked = false);
 
 protected:
     virtual void retranslate();
@@ -77,7 +78,6 @@ private slots:
     // The unused 'checked' parameters exist because Qt 5 style signals/slots don't
     // accept default values.
     void openSettingsDialog(bool checked = false);
-    void changeMode(bool checked = false);
     void addClicked(bool checked = false);
     void addNewClicked(bool checked = false);
     void removeClicked(bool checked = false);
