@@ -408,6 +408,20 @@ void MuseScore::importAlbum(const QString& fn)
 
 bool MuseScore::saveAlbum()
 {
+    Album& a = albumManager->album();
+    if (a.fileInfo().exists()) {
+        return a.saveToFile();
+    } else {
+        return saveAlbumAs();
+    }
+}
+
+//---------------------------------------------------------
+//   saveAlbumAs
+//---------------------------------------------------------
+
+bool MuseScore::saveAlbumAs()
+{
     QString fileBaseName = albumManager->albumTitleEdit->text();
     QString fileName = albumManager->albumTitleEdit->text();
     QString name = createDefaultFileName(fileBaseName);
@@ -444,7 +458,7 @@ bool MuseScore::saveAlbum()
 }
 
 //---------------------------------------------------------
-//   saveAlbum
+//   exportAlbum
 //---------------------------------------------------------
 
 bool MuseScore::exportAlbum()

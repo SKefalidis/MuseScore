@@ -612,6 +612,11 @@ void Album::readExcerpts(XmlReader& reader)
 //   saveToFile
 //---------------------------------------------------------
 
+bool Album::saveToFile()
+{
+    return saveToFile(m_fileInfo.absolutePath());
+}
+
 bool Album::saveToFile(const QString& path)
 {
     std::cout << "Saving album to file..." << std::endl;
@@ -620,9 +625,14 @@ bool Album::saveToFile(const QString& path)
         qDebug() << "Could not open filestream to save album: " << path << endl;
         return false;
     }
-
     m_fileInfo.setFile(path);
-    saveToFile(&f);
+
+    XmlWriter writer(nullptr, &f);
+    writer.header();
+    writer.stag(QStringLiteral("museScore version=\"" MSC_VERSION "\""));
+    writeAlbum(writer);
+    writer.etag();
+
     f.close();
     return true;
 }

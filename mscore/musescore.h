@@ -677,6 +677,7 @@ public:
     void openAlbum(const QString& fn);
     void importAlbum(const QString& fn);
     bool saveAlbum();
+    bool saveAlbumAs();
     bool exportAlbum();
     bool hasToCheckForUpdate();
     bool hasToCheckForExtensionsUpdate();

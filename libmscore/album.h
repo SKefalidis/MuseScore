@@ -110,6 +110,7 @@ public:
     bool loadFromFile(const QString& path);
     void readAlbum(XmlReader& reader);
     void readExcerpts(XmlReader& reader);
+    bool saveToFile();
     bool saveToFile(const QString& path);
     bool saveToFile(QIODevice* f);
     void writeAlbum(XmlWriter& writer) const;
