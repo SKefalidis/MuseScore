@@ -476,6 +476,9 @@ bool Album::scoreInActiveAlbum(MasterScore* score)
             return true;
         }
     }
+    if (score == activeAlbum->m_dominantScore) {
+        return true;
+    }
     return false;
 }
 
