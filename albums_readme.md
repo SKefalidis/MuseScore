@@ -7,11 +7,14 @@ Week 1:
     - load parts from .msca (done)
     - remove/add score should update the parts (done)
     - warning when adding a movement that will break parts (done)
+    - improved instruments handling
     - tests
     General:
     - Autosave for albums (disabled, can I do something better?)
     - tour (done)
+    - improved export album
     - Comments
+    - Restore session
 
 Week 2 - 3:
     Bugfixes and refactoring.
@@ -54,6 +57,8 @@ Week 5+ (further improvements):
  - AlbumItems from Xml should have a condition that says whether the scores have been loaded or not. If not no action should be able to happen.
  - Skip first movement in doLayout if you don't want a front cover
  - MuseScore cs vs scoreView->score and drawingScore
+ - function that checks if the parts of the album are incompatible (+ we should not check the dominant score for incompatible parts, it does not have any measures)
+ - function that deletes all parts from the album
 
 Investigate:
  - Disabled score->doLayout in ScoreView::paintEvent, did I break something???
