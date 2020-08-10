@@ -685,49 +685,6 @@ void Album::writeAlbum(XmlWriter& writer) const
 }
 
 //---------------------------------------------------------
-//   readRootFile
-//---------------------------------------------------------
-
-QString readRootFile(MQZipReader* uz)
-{
-    QString rootfile;
-
-    QByteArray cbuf = uz->fileData("META-INF/container.xml");
-    if (cbuf.isEmpty()) {
-        qDebug("can't find container.xml");
-        return rootfile;
-    }
-
-    XmlReader e(cbuf);
-
-    while (e.readNextStartElement()) {
-        if (e.name() != "container") {
-            e.unknown();
-            continue;
-        }
-        while (e.readNextStartElement()) {
-            if (e.name() != "rootfiles") {
-                e.unknown();
-                continue;
-            }
-            while (e.readNextStartElement()) {
-                const QStringRef& tag(e.name());
-
-                if (tag == "rootfile") {
-                    if (rootfile.isEmpty()) {
-                        rootfile = e.attribute("full-path");
-                        e.skipCurrentElement();
-                    }
-                } else {
-                    e.unknown();
-                }
-            }
-        }
-    }
-    return rootfile;
-}
-
-//---------------------------------------------------------
 //   importAlbum
 //---------------------------------------------------------
 
