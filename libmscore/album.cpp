@@ -228,7 +228,7 @@ void AlbumItem::writeAlbumItem(XmlWriter& writer) const
         QString relativePath = dir.relativeFilePath(fileInfo.absoluteFilePath());
         writer.tag("relativePath", relativePath);
     } else {
-        writer.tag("relativePath", album.exportedScoreFolder() + score->title());
+        writer.tag("relativePath", album.exportedScoreFolder() + QDir::separator() + score->title() + ".mscx");
     }
     writer.tag("enabled", m_enabled);
     writer.etag();
@@ -718,10 +718,11 @@ QString readRootFile(MQZipReader* uz)
 //   importAlbum
 //---------------------------------------------------------
 
-void Album::importAlbum(const QString& fn)
+void Album::importAlbum(const QString& compressedFilePath, QDir destinationFolder)
 {
-    MQZipReader uz(fn, QIODevice::ReadWrite);
-    uz.extractAll("/home/sergios/Documents/Extracted");
+    destinationFolder.mkdir("Scores");
+    MQZipReader uz(compressedFilePath, QIODevice::ReadWrite);
+    uz.extractAll(destinationFolder.path());
 }
 
 //---------------------------------------------------------
@@ -731,22 +732,14 @@ void Album::importAlbum(const QString& fn)
 bool Album::exportAlbum(QIODevice* f, const QFileInfo& info)
 {
     MQZipWriter uz(f);
+    QBuffer dbuf;
 
     QString fn = info.completeBaseName() + ".msca";
-    QBuffer cbuf;
-    cbuf.open(QIODevice::ReadWrite);
-    XmlWriter xml(nullptr, &cbuf);
-    xml << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-    writeAlbum(xml);
-
-    QBuffer dbuf;
     dbuf.open(QIODevice::ReadWrite);
     saveToFile(&dbuf);
     dbuf.seek(0);
     uz.addFile(fn, dbuf.data());
-
-    cbuf.seek(0);
-    uz.addFile("META-INF/container.xml", cbuf.data());
+    dbuf.close();
 
     QFileDevice* fd = dynamic_cast<QFileDevice*>(f);
     if (fd) { // if is file (may be buffer)
@@ -755,13 +748,16 @@ bool Album::exportAlbum(QIODevice* f, const QFileInfo& info)
     // any failures on the further operations.
 
     for (auto x : albumItems()) {
-        QString path = QString(m_exportedScoreFolder) + x->score->title();
-        QBuffer dbuf;
+        QString path = m_exportedScoreFolder + QDir::separator() + x->score->title() + ".mscx";
         dbuf.open(QIODevice::ReadWrite);
         x->score->Score::saveFile(&dbuf, false);
         dbuf.seek(0);
         uz.addFile(path, dbuf.data());
+        dbuf.close();
+        fd->flush();
     }
+
+    fd->flush();
     uz.close();
     return true;
 }

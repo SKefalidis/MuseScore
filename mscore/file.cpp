@@ -371,12 +371,35 @@ void MuseScore::openAlbum(const QString& fn)
 
 void MuseScore::importAlbum(const QString& fn)
 {
-    showAlbumManager(true);
-    auto newAlbum = std::unique_ptr<Album>(new Album());
-    newAlbum->importAlbum(fn);
-//    albumManager->setAlbum(std::move(newAlbum));
-//    addRecentAlbum(&albumManager->album());
-//    writeSessionFile(false);
+    QString fileBaseName = albumManager->albumTitleEdit->text();
+    QString name = createDefaultFileName(fileBaseName);
+    QString albumType = tr("AlbumFile") + " (*.mscaz)";
+
+    QSettings set;
+    if (mscore->lastSaveDirectory.isEmpty()) {
+        mscore->lastSaveDirectory
+            = set.value("lastSaveDirectory", preferences.getString(PREF_APP_PATHS_MYSCORES)).toString();
+    }
+    QString saveDirectory = mscore->lastSaveDirectory;
+
+    if (saveDirectory.isEmpty()) {
+        saveDirectory = preferences.getString(PREF_APP_PATHS_MYSCORES);
+    }
+
+    QString fname = QString("%1/%2").arg(saveDirectory).arg(name);
+    QString filter;
+    filter = albumType;
+
+    fileBaseName = mscore->getSaveScoreName(tr("Import Album"), fname, filter, true);
+    if (fileBaseName.isEmpty()) {
+        return;
+    }
+
+    Album::importAlbum(fn, QDir(fileBaseName));
+    QString path = fn;
+    path.chop(1);
+    openAlbum(fileBaseName + QDir::separator() + path.split(QDir::separator()).last());
+
 }
 
 //---------------------------------------------------------

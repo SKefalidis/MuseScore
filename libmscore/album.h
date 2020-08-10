@@ -113,7 +113,7 @@ public:
     bool saveToFile(const QString& path);
     bool saveToFile(QIODevice* f);
     void writeAlbum(XmlWriter& writer) const;
-    void importAlbum(const QString& fn);
+    static void importAlbum(const QString& compressedFilePath, QDir destinationFolder);
     bool exportAlbum(QIODevice* f, const QFileInfo& info);
 
     MasterScore* getDominant() const;
@@ -162,7 +162,7 @@ private:
     bool m_includeAbsolutePaths                     { false };
     int m_defaultPlaybackDelay                      { 3000 };
 
-    const QString m_exportedScoreFolder             { "./Scores/" };
+    const QString m_exportedScoreFolder             { "Scores" };
     bool m_exporting                                { false };
 };
 }     // namespace Ms
