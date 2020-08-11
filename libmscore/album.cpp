@@ -491,6 +491,56 @@ MasterScore* Album::getDominant() const
     return m_dominantScore;
 }
 
+
+//---------------------------------------------------------
+//   prepareMovementExcerpt
+//---------------------------------------------------------
+
+Excerpt* Album::prepareMovementExcerpt(Excerpt* masterExcerpt, MasterScore* score)
+{
+    Excerpt* e = new Excerpt(score);
+    for (auto part : masterExcerpt->parts()) {
+        int index = masterExcerpt->oscore()->parts().indexOf(part);
+        e->parts().append(score->parts().at(index));
+    }
+    e->tracks() = masterExcerpt->tracks();
+    e->setTitle(masterExcerpt->title());
+    return e;
+}
+
+//---------------------------------------------------------
+//   createMovementExcerpt
+//---------------------------------------------------------
+
+Excerpt* Album::createMovementExcerpt(Excerpt* e)
+{
+    if (e->partScore()) {
+        return e;
+    }
+    if (e->parts().isEmpty()) {
+        qDebug("no parts");
+        return e;
+    }
+
+    MasterScore* nscore = new MasterScore(e->oscore());
+    e->setPartScore(nscore);
+    nscore->setName(e->oscore()->title() + "_albumPart_" + e->oscore()->excerpts().size());
+    qDebug() << " + Add part : " << e->title();
+    e->oscore()->addAlbumExcerpt(e);
+    Excerpt::createExcerpt(e);
+
+    // a new excerpt is created in AddExcerpt, make sure the parts are filed
+    for (Excerpt* ee : e->oscore()->albumExcerpts()) {
+        if (ee->partScore() == nscore && ee != e) {
+            ee->parts().clear();
+            ee->parts().append(e->parts());
+        }
+    }
+    nscore->undoChangeStyleVal(MSQE_Sid::Sid::spatium, 25.016); // hack: normally it's 25 but it draws crazy stuff with that
+    nscore->doLayout();
+    return e;
+}
+
 //---------------------------------------------------------
 //   setDominant
 //---------------------------------------------------------
