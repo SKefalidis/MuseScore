@@ -183,6 +183,7 @@ void AlbumItem::addSectionBreak()
 bool AlbumItem::removeSectionBreak()
 {
     if (m_extraSectionBreak && score && score->lastMeasure()) {
+        m_pauseDuration = getSectionBreak()->pause();
         score->lastMeasure()->remove(getSectionBreak());
         m_extraSectionBreak = false;
         return true;

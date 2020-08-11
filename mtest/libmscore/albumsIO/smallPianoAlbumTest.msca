@@ -10,16 +10,19 @@
       <alias></alias>
       <relativePath>Piano1.mscx</relativePath>
       <enabled>1</enabled>
+      <pauseDuration>1</pauseDuration>
       </Score>
     <Score>
       <alias></alias>
       <relativePath>Piano2.mscx</relativePath>
       <enabled>0</enabled>
+      <pauseDuration>3</pauseDuration>
       </Score>
     <Score>
       <alias></alias>
       <relativePath>testFolder/Piano3.mscx</relativePath>
       <enabled>1</enabled>
+      <pauseDuration>4</pauseDuration>
       </Score>
     </Album>
   <Excerpts>
