@@ -25,6 +25,32 @@
 #include "measure.h"
 
 namespace Ms {
+
+//---------------------------------------------------------
+//---------------------------------------------------------
+//
+//   AlbumExcerpt
+//
+//---------------------------------------------------------
+//---------------------------------------------------------
+
+AlbumExcerpt::AlbumExcerpt(XmlReader& reader)
+{
+    while (reader.readNextStartElement()) {
+        const QStringRef& tag(reader.name());
+        if (tag == "partIndex") {
+            partIndices.push_back(reader.readInt());
+        } else if (tag == "key") {
+            int k = reader.readInt();
+            reader.readNextStartElement();
+            int v = reader.readInt();
+            tracks.insert(k, v);
+        } else if (tag == "title") {
+            title = reader.readElementText();
+        }
+    }
+}
+
 //---------------------------------------------------------
 //---------------------------------------------------------
 //
@@ -403,6 +429,9 @@ void Album::setDominant(MasterScore* ms)
     }
     ms->setPartOfActiveAlbum(true);
     m_dominantScore = ms;
+    // set Parts
+    if (m_dominantScore->excerpts().isEmpty()) {
+    }
 }
 
 //---------------------------------------------------------
@@ -458,28 +487,6 @@ void Album::readAlbum(XmlReader& reader)
 void Album::readExcerpts(XmlReader& reader)
 {
     while (reader.readNextStartElement()) {
-        const QStringRef& tag(reader.name());
-        if (tag == "Excerpt") {
-            readExcerpt(reader);
-        }
-    }
-}
-
-//---------------------------------------------------------
-//   readExcerpt
-//---------------------------------------------------------
-
-void Album::readExcerpt(XmlReader& reader)
-{
-    while (reader.readNextStartElement()) {
-        const QStringRef& tag(reader.name());
-        if (tag == "partIndex") {
-
-        } else if (tag == "key") {
-
-        } else if (tag == "title") {
-
-        }
     }
 }
 
@@ -694,4 +701,5 @@ void Album::setDefaultPlaybackDelay(int ms)
 {
     m_defaultPlaybackDelay = ms;
 }
+
 }     // namespace Ms

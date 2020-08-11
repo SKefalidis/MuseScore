@@ -31,6 +31,19 @@ enum class LayoutMode : char;
 using std::unique_ptr;
 
 //---------------------------------------------------------
+//   AlbumExcerpt
+//---------------------------------------------------------
+
+struct AlbumExcerpt
+{
+    AlbumExcerpt(XmlReader& reader);
+
+    QString title;
+    QList<int> partIndices;
+    QMultiMap<int, int> tracks;
+};
+
+//---------------------------------------------------------
 //   AlbumItem
 //---------------------------------------------------------
 
@@ -96,7 +109,6 @@ public:
     bool loadFromFile(const QString& path);
     void readAlbum(XmlReader& reader);
     void readExcerpts(XmlReader& reader);
-    void readExcerpt(XmlReader& reader);
     bool saveToFile(const QString& path);
     void writeAlbum(XmlWriter& writer) const;
 
