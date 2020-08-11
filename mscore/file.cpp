@@ -458,6 +458,29 @@ bool MuseScore::saveAlbumAs()
 }
 
 //---------------------------------------------------------
+//   saveAlbumAndScores
+//---------------------------------------------------------
+
+bool MuseScore::saveAlbumAndScores()
+{
+    for (auto item : Album::activeAlbum->albumItems()) {
+        bool pb = item->removePageBreak();
+        bool sb = item->removeSectionBreak();
+        bool success = saveFile(item->score);
+        if (pb) {
+            item->addPageBreak();
+        }
+        if (sb) {
+            item->addSectionBreak();
+        }
+        if (!success) {
+            return false;
+        }
+    }
+    return saveAlbum();
+}
+
+//---------------------------------------------------------
 //   exportAlbum
 //---------------------------------------------------------
 
@@ -664,21 +687,7 @@ bool MuseScore::saveFile(MasterScore* score)
         return false;
     }  else if (score->movements()->size() > 1 && Album::scoreInActiveAlbum(score)
                 && Album::activeAlbum->albumModeActive()) {
-         for (auto item : Album::activeAlbum->albumItems()) {
-             bool pb = item->removePageBreak();
-             bool sb = item->removeSectionBreak();
-             bool success = saveFile(item->score);
-             if (pb) {
-                 item->addPageBreak();
-             }
-             if (sb) {
-                 item->addSectionBreak();
-             }
-             if (!success) {
-                 return false;
-             }
-         }
-         return saveAlbum();
+        saveAlbumAndScores();
      }
 
     if (score->created()) {

@@ -2975,6 +2975,16 @@ Shortcut Shortcut::_sc[] = {
         MsWidget::MAIN_WINDOW,
         STATE_NORMAL | STATE_NOTE_ENTRY | STATE_EDIT | STATE_TEXT_EDIT | STATE_LYRICS_EDIT
         | STATE_HARMONY_FIGBASS_EDIT | STATE_PLAY,
+        "album-scores-save",
+        QT_TRANSLATE_NOOP("action","Save Album + Scores"),
+        QT_TRANSLATE_NOOP("action","File > Save Album + Scores"),
+        QT_TRANSLATE_NOOP("action","Save album and related scores"),
+        Icons::fileSave_ICON
+    },
+    {
+        MsWidget::MAIN_WINDOW,
+        STATE_NORMAL | STATE_NOTE_ENTRY | STATE_EDIT | STATE_TEXT_EDIT | STATE_LYRICS_EDIT
+        | STATE_HARMONY_FIGBASS_EDIT | STATE_PLAY,
         "album-export",
         QT_TRANSLATE_NOOP("action","Export Album"),
         QT_TRANSLATE_NOOP("action","File > Export Album"),
