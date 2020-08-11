@@ -664,7 +664,7 @@ void Album::readExcerpts(XmlReader& reader)
 
 bool Album::saveToFile()
 {
-    return saveToFile(m_fileInfo.absolutePath());
+    return saveToFile(m_fileInfo.absoluteFilePath());
 }
 
 bool Album::saveToFile(const QString& path)
