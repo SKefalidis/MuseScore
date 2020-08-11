@@ -111,6 +111,7 @@ void Excerpt::read(XmlReader& e)
 void Excerpt::writeForAlbum(XmlWriter& writer)
 {
     writer.stag("Excerpt");
+    writer.tag("title", title());
     for (auto part : parts()) {
         int index = oscore()->parts().indexOf(part);
         writer.tag("partIndex", index);
@@ -121,7 +122,6 @@ void Excerpt::writeForAlbum(XmlWriter& writer)
             writer.tag("track", v);
         }
     }
-    writer.tag("title", title());
     writer.etag();
 }
 

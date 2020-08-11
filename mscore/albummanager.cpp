@@ -217,8 +217,6 @@ void AlbumManager::changeMode(bool checked)
                 m_tempScore->setfirstRealMovement(1);
             }
 
-            m_album->setDominant(m_tempScore);
-
             mscore->setCurrentScoreView(mscore->appendScore(m_tempScore));
             mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
             m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
@@ -229,6 +227,7 @@ void AlbumManager::changeMode(bool checked)
             }
             m_tempScore->setLayoutAll();
             m_tempScore->update();
+            m_album->setDominant(m_tempScore);
         } else {
             if (m_tempScoreTabIndex != -1) {
                 // there is a tab for the Temporary Album Score
