@@ -12,7 +12,8 @@ Week 1:
     General:
     - Autosave for albums (disabled, can I do something better?)
     - tour (done)
-    - improved export album
+    - improved export album (done)
+    - save album as (done)
     - Comments
     - Restore session
 
@@ -28,6 +29,8 @@ Week 2 - 3:
     - Export options (front cover, add page breaks for printing).
     - Drawing options (front cover).
     - Improved page breaks and section breaks handling (add them only in album mode).
+    - Create new Album
+    - Close Album
 
 Week 4:
     Shortcuts.
