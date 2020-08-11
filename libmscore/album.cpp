@@ -20,6 +20,7 @@
 #include "album.h"
 #include "part.h"
 #include "excerpt.h"
+#include "layoutbreak.h"
 #include "score.h"
 #include "xml.h"
 #include "musescoreCore.h"
@@ -165,8 +166,28 @@ void AlbumItem::addSectionBreak()
         LayoutBreak* lb = new LayoutBreak(score);
         lb->setLayoutBreakType(LayoutBreak::Type::SECTION);
         score->lastMeasure()->add(lb);
+        if (m_pauseDuration >= 0) {
+            lb->setPause(m_pauseDuration);
+        } else {
+            m_pauseDuration = lb->pause();
+        }
+        m_extraSectionBreak = true;
         score->update();
     }
+}
+
+//---------------------------------------------------------
+//   removeSectionBreak
+//---------------------------------------------------------
+
+bool AlbumItem::removeSectionBreak()
+{
+    if (m_extraSectionBreak && score && score->lastMeasure()) {
+        score->lastMeasure()->remove(getSectionBreak());
+        m_extraSectionBreak = false;
+        return true;
+    }
+    return false;
 }
 
 //---------------------------------------------------------
@@ -179,8 +200,27 @@ void AlbumItem::addPageBreak()
         LayoutBreak* lb = new LayoutBreak(score);
         lb->setLayoutBreakType(LayoutBreak::Type::PAGE);
         score->lastMeasure()->add(lb);
+        m_extraPageBreak = true;
         score->update();
     }
+}
+
+//---------------------------------------------------------
+//   removePageBreak
+//---------------------------------------------------------
+
+bool AlbumItem::removePageBreak()
+{
+    if (m_extraPageBreak && score && score->lastMeasure()) {
+        for (auto& e : score->lastMeasure()->takeElements()) {
+            if (e->isLayoutBreak() && toLayoutBreak(e) ) {
+                score->lastMeasure()->remove(e);
+                m_extraPageBreak = true;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 //---------------------------------------------------------
@@ -206,6 +246,8 @@ void AlbumItem::readAlbumItem(XmlReader& reader)
             }
         } else if (tag == "enabled") {
             m_enabled = reader.readBool();
+        } else if (tag == "pauseDuration") {
+            m_pauseDuration = reader.readDouble();
         } else {
             reader.skipCurrentElement();
         }
@@ -216,7 +258,7 @@ void AlbumItem::readAlbumItem(XmlReader& reader)
 //   saveAlbumItem
 //---------------------------------------------------------
 
-void AlbumItem::writeAlbumItem(XmlWriter& writer) const
+void AlbumItem::writeAlbumItem(XmlWriter& writer)
 {
     writer.stag("Score");
     writer.tag("alias", "");
@@ -231,6 +273,10 @@ void AlbumItem::writeAlbumItem(XmlWriter& writer) const
         writer.tag("relativePath", album.exportedScoreFolder() + QDir::separator() + score->title() + ".mscx");
     }
     writer.tag("enabled", m_enabled);
+    if (score->lastMeasure()->sectionBreak()) {
+        m_pauseDuration = getSectionBreak()->pause();
+    }
+    writer.tag("pauseDuration", m_pauseDuration);
     writer.etag();
 }
 
@@ -251,6 +297,24 @@ void AlbumItem::updateDuration()
 {
     m_duration = score->duration();
     emit durationChanged();
+}
+
+//---------------------------------------------------------
+//   getSectionBreak
+//---------------------------------------------------------
+
+LayoutBreak* AlbumItem::getSectionBreak() const
+{
+    if (!score->lastMeasure()->sectionBreak()) {
+        return nullptr;
+    }
+
+    for (auto& e : score->lastMeasure()->el()) {
+        if (e->isLayoutBreak() && toLayoutBreak(e)->isSectionBreak()) {
+            return toLayoutBreak(e);
+        }
+    }
+    return nullptr;
 }
 
 //---------------------------------------------------------
@@ -403,6 +467,18 @@ void Album::addPageBreaks()
 {
     for (auto& aItem : m_albumItems) {
         aItem->addPageBreak();
+    }
+}
+
+//---------------------------------------------------------
+//   removeBreaks
+//---------------------------------------------------------
+
+void Album::removeBreaks()
+{
+    for (auto& item : m_albumItems) {
+        item->removePageBreak();
+        item->removeSectionBreak();
     }
 }
 

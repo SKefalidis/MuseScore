@@ -26,6 +26,7 @@ class MasterScore;
 class XmlReader;
 class XmlWriter;
 class Excerpt;
+class LayoutBreak;
 enum class LayoutMode : char;
 
 using std::unique_ptr;
@@ -62,9 +63,11 @@ public:
     bool enabled() const;
     int setScore(MasterScore* score);
     void addSectionBreak();
+    bool removeSectionBreak();
     void addPageBreak();
+    bool removePageBreak();
     void readAlbumItem(XmlReader& reader);
-    void writeAlbumItem(XmlWriter& writer) const;
+    void writeAlbumItem(XmlWriter& writer);
 
     int duration() const;
 
@@ -79,7 +82,12 @@ private slots:
     void updateDuration();
 
 private:
+    LayoutBreak* getSectionBreak() const;
+
     bool m_enabled { true };
+    bool m_extraPageBreak { false };
+    bool m_extraSectionBreak { false };
+    qreal m_pauseDuration { -1 };
     int m_duration { -1 };
 };
 
@@ -102,6 +110,7 @@ public:
 
     void addSectionBreaks();
     void addPageBreaks();
+    void removeBreaks();
 
     QStringList composers() const;
     QStringList lyricists() const;

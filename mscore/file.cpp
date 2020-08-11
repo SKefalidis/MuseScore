@@ -665,7 +665,16 @@ bool MuseScore::saveFile(MasterScore* score)
     }  else if (score->movements()->size() > 1 && Album::scoreInActiveAlbum(score)
                 && Album::activeAlbum->albumModeActive()) {
          for (auto item : Album::activeAlbum->albumItems()) {
-             if (!saveFile(item->score)) {
+             bool pb = item->removePageBreak();
+             bool sb = item->removeSectionBreak();
+             bool success = saveFile(item->score);
+             if (pb) {
+                 item->addPageBreak();
+             }
+             if (sb) {
+                 item->addSectionBreak();
+             }
+             if (!success) {
                  return false;
              }
          }
