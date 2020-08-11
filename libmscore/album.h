@@ -22,6 +22,7 @@
 
 namespace Ms {
 class Album;
+class Excerpt;
 class MasterScore;
 class XmlReader;
 class XmlWriter;
@@ -98,6 +99,9 @@ public:
     void readExcerpt(XmlReader& reader);
     bool saveToFile(const QString& path);
     void writeAlbum(XmlWriter& writer) const;
+
+    static Excerpt* prepareMovementExcerpt(Excerpt* masterExcerpt, MasterScore* score);
+    static Excerpt* createMovementExcerpt(Excerpt*);
 
     MasterScore* getDominant() const;
     void setDominant(MasterScore* ms); // I don't like this function.

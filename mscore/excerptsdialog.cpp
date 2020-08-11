@@ -577,7 +577,7 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
             if (m == score) {
                 continue;
             }
-            Excerpt* ee = createMovementExcerpt(prepareMovementExcerpt(e, m));
+            Excerpt* ee = Album::createMovementExcerpt(Album::prepareMovementExcerpt(e, m));
             nscore->addMovement(static_cast<MasterScore*>(ee->partScore()));
         }
         nscore->setLayoutAll();
@@ -605,7 +605,11 @@ void ExcerptsDialog::createExcerptClicked(QListWidgetItem* cur)
     title->setEnabled(false);
 }
 
-Excerpt* ExcerptsDialog::prepareMovementExcerpt(Excerpt* masterExcerpt, MasterScore* score)
+//---------------------------------------------------------
+//   prepareMovementExcerpt
+//---------------------------------------------------------
+
+Excerpt* Album::prepareMovementExcerpt(Excerpt* masterExcerpt, MasterScore* score)
 {
     Excerpt* e = new Excerpt(score);
     for (auto part : masterExcerpt->parts()) {
@@ -617,7 +621,11 @@ Excerpt* ExcerptsDialog::prepareMovementExcerpt(Excerpt* masterExcerpt, MasterSc
     return e;
 }
 
-Excerpt* ExcerptsDialog::createMovementExcerpt(Excerpt* e)
+//---------------------------------------------------------
+//   createMovementExcerpt
+//---------------------------------------------------------
+
+Excerpt* Album::createMovementExcerpt(Excerpt* e)
 {
     if (e->partScore()) {
         return e;
