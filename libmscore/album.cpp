@@ -214,7 +214,7 @@ bool AlbumItem::removePageBreak()
 {
     if (m_extraPageBreak && score && score->lastMeasure()) {
         for (auto& e : score->lastMeasure()->takeElements()) {
-            if (e->isLayoutBreak() && toLayoutBreak(e) ) {
+            if (e->isLayoutBreak() && toLayoutBreak(e)) {
                 score->lastMeasure()->remove(e);
                 m_extraPageBreak = true;
                 return true;
@@ -567,7 +567,6 @@ MasterScore* Album::getDominant() const
 {
     return m_dominantScore;
 }
-
 
 //---------------------------------------------------------
 //   prepareMovementExcerpt

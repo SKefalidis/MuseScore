@@ -399,7 +399,6 @@ void MuseScore::importAlbum(const QString& fn)
     QString path = fn;
     path.chop(1);
     openAlbum(fileBaseName + QDir::separator() + path.split(QDir::separator()).last());
-
 }
 
 //---------------------------------------------------------
@@ -685,10 +684,10 @@ bool MuseScore::saveFile(MasterScore* score)
 {
     if (score == nullptr) {
         return false;
-    }  else if (score->movements()->size() > 1 && Album::scoreInActiveAlbum(score)
-                && Album::activeAlbum->albumModeActive()) {
+    } else if (score->movements()->size() > 1 && Album::scoreInActiveAlbum(score)
+               && Album::activeAlbum->albumModeActive()) {
         saveAlbumAndScores();
-     }
+    }
 
     if (score->created()) {
         QString fileBaseName = score->masterScore()->fileInfo()->completeBaseName();

@@ -226,8 +226,9 @@ void MuseScore::editInstrList()
         QMessageBox msgBox;
         msgBox.setWindowTitle(QObject::tr("Parts compatibility warning"));
         msgBox.setText(QString("Changing instrumentation for one of your scores can break Parts for your Album."));
-        msgBox.setDetailedText(QString("You can use Parts in album-mode as long as the scores in your Album have the exact same instrumentation. If you add/remove instruments for one of your scores"
-                                       " you will lose your Parts for album-mode."));
+        msgBox.setDetailedText(QString(
+                                   "You can use Parts in album-mode as long as the scores in your Album have the exact same instrumentation. If you add/remove instruments for one of your scores"
+                                   " you will lose your Parts for album-mode."));
         msgBox.setTextFormat(Qt::RichText);
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(
@@ -576,7 +577,8 @@ void MuseScore::editInstrList()
         int partCount = Album::activeAlbum->getDominant()->parts().size();
         for (int i = 0; i < partCount; i++) {
             for (auto x : *Album::activeAlbum->getDominant()->movements()) {
-                if (x->score()->parts().at(i)->partName().compare(Album::activeAlbum->getDominant()->parts().at(i)->partName(), Qt::CaseSensitivity::CaseInsensitive)) {
+                if (x->score()->parts().at(i)->partName().compare(Album::activeAlbum->getDominant()->parts().at(i)->partName(),
+                                                                  Qt::CaseSensitivity::CaseInsensitive)) {
                     std::cout << "Parts not matching..." << std::endl;
                     QMessageBox msgBox;
                     msgBox.setWindowTitle(QObject::tr("Incompatible parts after instrument changes :-("));
