@@ -463,14 +463,14 @@ bool MuseScore::saveAlbumAs()
 bool MuseScore::saveAlbumAndScores()
 {
     for (auto item : Album::activeAlbum->albumItems()) {
-        bool pb = item->removePageBreak();
-        bool sb = item->removeSectionBreak();
+        bool pb = item->removeAlbumPageBreak();
+        bool sb = item->removeAlbumSectionBreak();
         bool success = saveFile(item->score);
         if (pb) {
-            item->addPageBreak();
+            item->addAlbumPageBreak();
         }
         if (sb) {
-            item->addSectionBreak();
+            item->addAlbumSectionBreak();
         }
         if (!success) {
             return false;

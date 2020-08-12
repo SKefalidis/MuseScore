@@ -144,11 +144,13 @@ int AlbumItem::setScore(MasterScore* score)
     this->score = score;
     setEnabled(m_enabled);
     score->setPartOfActiveAlbum(true);
-    fileInfo.setFile(score->importedFilePath());
+    if (!score->importedFilePath().isEmpty()) {
+        fileInfo.setFile(score->importedFilePath());
+    }
 
-    addSectionBreak();
+    addAlbumSectionBreak();
     if (album.addPageBreaksEnabled()) {
-        addPageBreak();
+        addAlbumPageBreak();
     }
 
     updateDuration();
@@ -157,10 +159,10 @@ int AlbumItem::setScore(MasterScore* score)
 }
 
 //---------------------------------------------------------
-//   addSectionBreak
+//   addAlbumSectionBreak
 //---------------------------------------------------------
 
-void AlbumItem::addSectionBreak()
+void AlbumItem::addAlbumSectionBreak()
 {
     if (!score->lastMeasure()->sectionBreak()) { // add only if there isn't one
         LayoutBreak* lb = new LayoutBreak(score);
@@ -177,10 +179,10 @@ void AlbumItem::addSectionBreak()
 }
 
 //---------------------------------------------------------
-//   removeSectionBreak
+//   removeAlbumSectionBreak
 //---------------------------------------------------------
 
-bool AlbumItem::removeSectionBreak()
+bool AlbumItem::removeAlbumSectionBreak()
 {
     if (m_extraSectionBreak && score && score->lastMeasure()) {
         m_pauseDuration = getSectionBreak()->pause();
@@ -192,10 +194,10 @@ bool AlbumItem::removeSectionBreak()
 }
 
 //---------------------------------------------------------
-//   addPageBreak
+//   addAlbumPageBreak
 //---------------------------------------------------------
 
-void AlbumItem::addPageBreak()
+void AlbumItem::addAlbumPageBreak()
 {
     if (!score->lastMeasure()->pageBreak()) { // add only if there isn't one
         LayoutBreak* lb = new LayoutBreak(score);
@@ -207,14 +209,14 @@ void AlbumItem::addPageBreak()
 }
 
 //---------------------------------------------------------
-//   removePageBreak
+//   removeAlbumPageBreak
 //---------------------------------------------------------
 
-bool AlbumItem::removePageBreak()
+bool AlbumItem::removeAlbumPageBreak()
 {
     if (m_extraPageBreak && score && score->lastMeasure()) {
         for (auto& e : score->lastMeasure()->takeElements()) {
-            if (e->isLayoutBreak() && toLayoutBreak(e)) {
+            if (e->isLayoutBreak() && toLayoutBreak(e)->isPageBreak()) {
                 score->lastMeasure()->remove(e);
                 m_extraPageBreak = true;
                 return true;
@@ -450,36 +452,36 @@ void Album::swap(int indexA, int indexB)
 }
 
 //---------------------------------------------------------
-//   addSectionBreaks
+//   addAlbumSectionBreaks
 //---------------------------------------------------------
 
-void Album::addSectionBreaks()
+void Album::addAlbumSectionBreaks()
 {
     for (auto& aItem : m_albumItems) {
-        aItem->addSectionBreak();
+        aItem->addAlbumSectionBreak();
     }
 }
 
 //---------------------------------------------------------
-//   addPageBreaks
+//   addAlbumPageBreaks
 //---------------------------------------------------------
 
-void Album::addPageBreaks()
+void Album::addAlbumPageBreaks()
 {
     for (auto& aItem : m_albumItems) {
-        aItem->addPageBreak();
+        aItem->addAlbumPageBreak();
     }
 }
 
 //---------------------------------------------------------
-//   removeBreaks
+//   removeAlbumBreaks
 //---------------------------------------------------------
 
-void Album::removeBreaks()
+void Album::removeAlbumBreaks()
 {
     for (auto& item : m_albumItems) {
-        item->removePageBreak();
-        item->removeSectionBreak();
+        item->removeAlbumPageBreak();
+        item->removeAlbumSectionBreak();
     }
 }
 

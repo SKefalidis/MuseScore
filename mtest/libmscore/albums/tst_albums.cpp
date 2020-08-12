@@ -20,8 +20,8 @@
 #include <QtTest/QtTest>
 #include "mtest/testutils.h"
 #include "mscore/musescore.h"
-#include "libmscore/album.h"
 #include "mscore/preferences.h"
+#include "libmscore/measure.h"
 
 #define DIR QString("libmscore/albums/")
 
@@ -36,12 +36,21 @@ class TestAlbums : public QObject, public MTest
     Q_OBJECT
 
     void albumAddScore();
+    void albumItemDuration();
+    void albumItemEnable();
+    void albumItemBreaks();
 
 private slots:
     void initTestCase();
 
     void albumAddScoreTest() { albumAddScore(); }
+    void albumItemDurationTest() { albumItemDuration(); }
+    void albumItemEnableTest() { albumItemEnable(); }
+    void albumItemBreaksTest() { albumItemBreaks(); }
 };
+
+#define private public
+#include "libmscore/album.h"
 
 //---------------------------------------------------------
 //   initTestCase
@@ -68,22 +77,85 @@ void TestAlbums::albumAddScore()
 
     QVERIFY(aScore->partOfActiveAlbum());
 
+    QCOMPARE(aItem->setScore(bScore), -1);
+
+    delete bScore;
+}
+
+//---------------------------------------------------------
+//   albumItemDuration
+//---------------------------------------------------------
+
+void TestAlbums::albumItemDuration()
+{
+    Album myAlbum;
+    MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
+    AlbumItem* aItem = myAlbum.addScore(aScore, true);
+
     QCOMPARE(aItem->duration(), aScore->duration());
     int scoreDuration1 = aScore->duration();
     aScore->appendMeasures(2);
     int scoreDuration2 = aScore->duration();
     QVERIFY(scoreDuration1 < scoreDuration2);
     QCOMPARE(aItem->duration(), aScore->duration());
+}
+
+//---------------------------------------------------------
+//   albumItemEnable
+//---------------------------------------------------------
+
+void TestAlbums::albumItemEnable()
+{
+    Album myAlbum;
+    MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
+    AlbumItem* aItem = myAlbum.addScore(aScore, true);
 
     QVERIFY(aItem->enabled());
     QCOMPARE(aItem->enabled(), aScore->enabled()); // true
     aItem->setEnabled(false);
     QVERIFY(!aItem->enabled());
     QCOMPARE(aItem->enabled(), aScore->enabled()); // false
+}
 
-    QCOMPARE(aItem->setScore(bScore), -1);
+//---------------------------------------------------------
+//   albumItemBreaks
+//---------------------------------------------------------
 
-    delete bScore;
+void TestAlbums::albumItemBreaks()
+{
+    Album myAlbum;
+    MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
+
+    // addSectionBreak
+    QCOMPARE(aScore->lastMeasure()->sectionBreak(), false);
+    AlbumItem* aItem = myAlbum.addScore(aScore, true); // AlbumItem::addAlbumSectionBreak() gets called by Album::addScore
+    QCOMPARE(aScore->lastMeasure()->sectionBreak(), true);
+
+    // getSectionBreak
+    QCOMPARE(aItem->getSectionBreak(), aScore->lastMeasure()->el().back());
+
+    // m_pauseDuration part 1
+    QCOMPARE(aItem->getSectionBreak()->pause(), aItem->m_pauseDuration);
+    int newPauseDuration = aItem->m_pauseDuration * 2;
+    aItem->getSectionBreak()->setPause(newPauseDuration);
+    QCOMPARE(aItem->getSectionBreak()->pause(), newPauseDuration);
+
+    // removeSectionBreak
+    aItem->removeAlbumSectionBreak();
+    QCOMPARE(aScore->lastMeasure()->sectionBreak(), false);
+
+    // m_pauseDuration part 2
+    aItem->addAlbumSectionBreak();
+    QCOMPARE(aItem->getSectionBreak()->pause(), aItem->m_pauseDuration);
+
+    // addPageBreak
+    QCOMPARE(aScore->lastMeasure()->pageBreak(), false);
+    aItem->addAlbumPageBreak();
+    QCOMPARE(aScore->lastMeasure()->pageBreak(), true);
+
+    // removePageBreak
+    aItem->removeAlbumPageBreak();
+    QCOMPARE(aScore->lastMeasure()->pageBreak(), false);
 }
 
 QTEST_MAIN(TestAlbums)

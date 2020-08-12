@@ -35,17 +35,27 @@ class TestAlbumsIO : public QObject, public MTest
 {
     Q_OBJECT
 
-    void saveAlbumTest(const char* file);
+    void saveAlbumUnloadedTest(const char* file);
+    void saveAlbumLoadedTest(const char* file);
+    void exportCompressedAlbumTest(const char* file);
     void stringsTest(const char* file);
     void addRemoveTest(const char* file);
+
+    void loadScores(Album* album);
 
 private slots:
     void initTestCase();
 
-    void albumsSimple() { saveAlbumTest("smallPianoAlbumTest"); }
-    void albumsParts() { saveAlbumTest("albumPartsTest"); }
-    void albumsStrings() { stringsTest("smallPianoAlbumTest"); }
-    void albumsAddRemove() { addRemoveTest("smallPianoAlbumTest"); }
+    void albumsUnloadedSimple() { saveAlbumUnloadedTest("smallPianoAlbum"); }
+    void albumsUnloadedParts() { saveAlbumUnloadedTest("albumWithParts"); }
+
+    void albumsLoadedSimple() { saveAlbumLoadedTest("smallPianoAlbum"); }
+    void albumsLoadedParts() { saveAlbumLoadedTest("albumWithParts"); }
+
+    void exportCompressedAlbum() { exportCompressedAlbumTest("smallPianoAlbum"); }
+
+    void albumsStrings() { stringsTest("smallPianoAlbum"); }
+    void albumsAddRemove() { addRemoveTest("smallPianoAlbum"); }
 };
 
 //---------------------------------------------------------
@@ -58,19 +68,85 @@ void TestAlbumsIO::initTestCase()
 }
 
 //---------------------------------------------------------
-//   saveAlbumTest
-//   read a .msca (Album) file, write to a new file and verify both files are identical
+//   loadScores
 //---------------------------------------------------------
 
-void TestAlbumsIO::saveAlbumTest(const char* file)
+void TestAlbumsIO::loadScores(Album* album)
+{
+    for (auto& item : album->albumItems()) {
+        QString path = item->fileInfo.canonicalFilePath();
+        MasterScore* score = readScoreAlbums(path);
+        item->setScore(score);
+    }
+}
+
+//---------------------------------------------------------
+//   saveAlbumUnloadedTest
+///     read a .msca (Album) file, write to a new file and verify both files are identical
+///     in this test, the scores of the album have NOT been loaded
+//---------------------------------------------------------
+
+void TestAlbumsIO::saveAlbumUnloadedTest(const char* file)
 {
     MScore::debugMode = true;
     Album* album = readAlbum(DIR + QString(file) + ".msca");
     QVERIFY(album);
-    QFileInfo fi(QString(file) + "_auto" + ".msca");
+    QFileInfo fi(QString(file) + "_generated" + ".msca");
     QVERIFY(saveAlbum(album, fi.absoluteFilePath()));   // wrong path, but not deleted for debugging
-    QVERIFY(saveCompareAlbum(album, DIR + QString(file) + "_auto" + ".msca", DIR + QString(file) + ".msca"));
+    QVERIFY(saveCompareAlbum(album, DIR + QString(file) + "_generated" + ".msca", DIR + QString(file) + ".msca"));
     delete album;
+}
+
+//---------------------------------------------------------
+//   saveAlbumLoadedTest
+///     read a .msca (Album) file, write to a new file and verify both files are identical
+///     in this test, the scores of the album have been loaded
+//---------------------------------------------------------
+
+void TestAlbumsIO::saveAlbumLoadedTest(const char* file)
+{
+    MScore::debugMode = true;
+    Album* album = readAlbum(DIR + QString(file) + ".msca");
+    QVERIFY(album);
+
+    // load scores
+    loadScores(album);
+
+    QFileInfo fi(QString(file) + "_generated" + ".msca");
+    QVERIFY(saveAlbum(album, fi.absoluteFilePath()));   // wrong path, but not deleted for debugging
+    std::cout << "SAVE: " << fi.absoluteFilePath().toStdString() << std::endl;
+    QVERIFY(saveCompareAlbum(album, DIR + QString(file) + "_generated" + ".msca", DIR + QString(file) + ".msca"));
+    delete album;
+}
+
+//---------------------------------------------------------
+//   exportCompressedAlbumTest
+//---------------------------------------------------------
+
+void TestAlbumsIO::exportCompressedAlbumTest(const char* file)
+{
+    MScore::debugMode = true;
+    Album* album = readAlbum(DIR + QString(file) + ".msca");
+    QVERIFY(album);
+
+    // load scores
+    loadScores(album);
+
+    QFileInfo fi(QString(file) + "_generated" + ".mscaz");
+    QFile fp(fi.filePath());
+    QVERIFY(album->exportAlbum(&fp, fi));
+
+    QDir d(fi.absolutePath());
+    d.mkdir("imported");
+
+    Album::importAlbum(fi.absoluteFilePath(), QDir(fi.absolutePath() + QDir::separator() + "imported"));
+
+//    for (auto item : album->albumItems()) {
+//        QVERIFY(compareFilesFromPaths(item->fileInfo.absoluteFilePath(),
+//                                      fi.absolutePath() + QDir::separator() + "imported" + QDir::separator() + album->exportedScoreFolder() + QDir::separator() + item->fileInfo.absoluteFilePath().split(QDir::separator()).last()));
+//    }
+    QVERIFY(compareFilesFromPaths(root + "/" + DIR + "imported" + QDir::separator() + QString(file) + ".msca",
+                                  fi.absolutePath() + QDir::separator() + "imported" + QDir::separator() + QString(file) + "_generated" + ".msca"));
 }
 
 //---------------------------------------------------------
@@ -84,11 +160,7 @@ void TestAlbumsIO::stringsTest(const char* file)
     QVERIFY(album);
 
     // load scores
-    for (auto& item : album->albumItems()) {
-        QString path = item->fileInfo.canonicalFilePath();
-        MasterScore* score = readScoreAlbums(path);
-        item->setScore(score);
-    }
+    loadScores(album);
 
     std::cout << "Loading completed..." << std::endl;
 
@@ -132,11 +204,7 @@ void TestAlbumsIO::addRemoveTest(const char* file)
     QVERIFY(album);
 
     // load scores
-    for (auto& item : album->albumItems()) {
-        QString path = item->fileInfo.canonicalFilePath();
-        MasterScore* score = readScoreAlbums(path);
-        item->setScore(score);
-    }
+    loadScores(album);
 
     QVERIFY(album->albumItems().size() == 3);
     MasterScore* ms = album->albumItems().at(1)->score;

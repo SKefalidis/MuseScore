@@ -91,6 +91,10 @@ MasterScore* MTest::readScore(const QString& name)
     return readCreatedScore(path);
 }
 
+//---------------------------------------------------------
+//   readScoreAlbums
+//---------------------------------------------------------
+
 MasterScore* MTest::readScoreAlbums(const QString& path)
 {
     return readCreatedScore(path);
@@ -103,6 +107,7 @@ MasterScore* MTest::readScoreAlbums(const QString& path)
 MasterScore* MTest::readCreatedScore(const QString& name)
 {
     MasterScore* score = new MasterScore(mscore->baseStyle());
+    score->setImportedFilePath(name);
     QFileInfo fi(name);
     score->setName(fi.completeBaseName());
     QString csl  = fi.suffix().toLower();

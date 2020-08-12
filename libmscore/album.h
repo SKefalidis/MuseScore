@@ -62,10 +62,10 @@ public:
     void setEnabled(bool b);
     bool enabled() const;
     int setScore(MasterScore* score);
-    void addSectionBreak();
-    bool removeSectionBreak();
-    void addPageBreak();
-    bool removePageBreak();
+    void addAlbumSectionBreak();
+    bool removeAlbumSectionBreak();
+    void addAlbumPageBreak();
+    bool removeAlbumPageBreak();
     void readAlbumItem(XmlReader& reader);
     void writeAlbumItem(XmlWriter& writer);
 
@@ -108,9 +108,9 @@ public:
     void removeScore(int index);
     void swap(int indexA, int indexB);
 
-    void addSectionBreaks();
-    void addPageBreaks();
-    void removeBreaks();
+    void addAlbumSectionBreaks();
+    void addAlbumPageBreaks();
+    void removeAlbumBreaks();
 
     QStringList composers() const;
     QStringList lyricists() const;
