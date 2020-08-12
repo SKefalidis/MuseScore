@@ -1,20 +1,20 @@
 Notes:
 
+Tests:
+    - compressed album file Test (almost done)
+    - change-mode simplification and test (parts are not tested fully right now)
+
 Week 2 - 3:
     Bugfixes and refactoring.
     - Check all TODOs
     - Add the new members of MasterScore/Score to clone functions and save/write?
-    - Don't save section/page breaks when saving album.
     Git cleanup.
     Preferences.
     Contents page -> pages + improved alignment.
     Polish:
-    - Export album (single file).
     - Export options (front cover, add page breaks for printing).
     - Drawing options (front cover).
-    - Improved page breaks and section breaks handling (add them only in album mode).
     - Create new Album
-    - Close Album
 
 Week 4:
     Shortcuts.

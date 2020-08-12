@@ -146,7 +146,8 @@ void TestAlbumsIO::exportCompressedAlbumTest(const char* file)
 //                                      fi.absolutePath() + QDir::separator() + "imported" + QDir::separator() + album->exportedScoreFolder() + QDir::separator() + item->fileInfo.absoluteFilePath().split(QDir::separator()).last()));
 //    }
     QVERIFY(compareFilesFromPaths(root + "/" + DIR + "imported" + QDir::separator() + QString(file) + ".msca",
-                                  fi.absolutePath() + QDir::separator() + "imported" + QDir::separator() + QString(file) + "_generated" + ".msca"));
+                                  fi.absolutePath() + QDir::separator() + "imported" + QDir::separator() + QString(file) + "_generated"
+                                  + ".msca"));
 }
 
 //---------------------------------------------------------
