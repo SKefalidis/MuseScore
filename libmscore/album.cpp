@@ -274,8 +274,8 @@ void AlbumItem::writeAlbumItem(XmlWriter& writer)
         writer.tag("relativePath", album.exportedScoreFolder() + QDir::separator() + score->title() + ".mscx");
     }
     writer.tag("enabled", m_enabled);
-    if (score->lastMeasure()->sectionBreak()) {
-        m_pauseDuration = getSectionBreak()->pause();
+    if (auto lb = getSectionBreak()) {
+        m_pauseDuration = lb->pause();
     }
     writer.tag("pauseDuration", m_pauseDuration);
     writer.etag();
@@ -306,7 +306,7 @@ void AlbumItem::updateDuration()
 
 LayoutBreak* AlbumItem::getSectionBreak() const
 {
-    if (!score->lastMeasure()->sectionBreak()) {
+    if (!score || !score->lastMeasure() || !score->lastMeasure()->sectionBreak()) {
         return nullptr;
     }
 
