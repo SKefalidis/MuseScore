@@ -136,7 +136,7 @@ void TestAlbums::albumItemBreaks()
 
     // m_pauseDuration part 1
     QCOMPARE(aItem->getSectionBreak()->pause(), aItem->m_pauseDuration);
-    int newPauseDuration = aItem->m_pauseDuration * 2;
+    qreal newPauseDuration = aItem->m_pauseDuration * 2;
     aItem->getSectionBreak()->setPause(newPauseDuration);
     QCOMPARE(aItem->getSectionBreak()->pause(), newPauseDuration);
 
