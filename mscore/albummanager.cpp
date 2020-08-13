@@ -177,15 +177,16 @@ void AlbumManager::changeMode(bool checked)
 {
     Q_UNUSED(checked);
 
-    if (m_album->albumItems().size() == 0) {
+    albumModeButton->blockSignals(true); // used to avoid buttonToggled-changeMode recursion
+    scoreModeButton->blockSignals(true); // >>
+
+    if (!m_album || m_album->albumItems().size() == 0) {
         scoreModeButton->setChecked(true);
         albumModeButton->setChecked(false);
         return;
     }
 
     disconnect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged); // used to avoid changeMode-tabChanged recursion
-    albumModeButton->blockSignals(true); // used to avoid buttonToggled-changeMode recursion
-    scoreModeButton->blockSignals(true); // >>
 
     if (scoreModeButton->isChecked()) {
         if (m_tempScoreTabIndex == mscore->getTab1()->currentIndex()) {
