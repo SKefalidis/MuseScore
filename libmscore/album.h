@@ -104,6 +104,8 @@ public:
     static Album* activeAlbum;
     static bool scoreInActiveAlbum(MasterScore* score); // I also have MasterScore::partOfActiveAlbum
 
+    Album();
+
     AlbumItem* addScore(MasterScore* score, bool enabled = true);
     void removeScore(MasterScore* score);
     void removeScore(int index);

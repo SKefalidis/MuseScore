@@ -355,7 +355,7 @@ bool AlbumItem::checkReadiness() const
 {
     if (!score) {
         qDebug() << "You need to load a score before you use an AlbumItem." << endl;
-        Q_ASSERT(false);
+//        Q_ASSERT(false);
         return false;
     }
     return true;
@@ -372,7 +372,7 @@ bool AlbumItem::checkReadiness() const
 Album* Album::activeAlbum = nullptr;
 
 //---------------------------------------------------------
-//   scoreInAlbum
+//   scoreInActiveAlbum
 //---------------------------------------------------------
 
 bool Album::scoreInActiveAlbum(MasterScore* score)
@@ -390,6 +390,15 @@ bool Album::scoreInActiveAlbum(MasterScore* score)
         return true;
     }
     return false;
+}
+
+//---------------------------------------------------------
+//   Album
+//---------------------------------------------------------
+
+Album::Album()
+{
+    Album::activeAlbum = this;
 }
 
 //---------------------------------------------------------
@@ -600,6 +609,10 @@ QStringList Album::scoreTitles() const
 
 bool Album::checkPartCompatibility() const
 {
+    if (!m_albumItems.size()) {
+        return true;
+    }
+
     MasterScore* firstMovement = m_albumItems.at(0)->score;
     int partCount = firstMovement->parts().size();
     for (int i = 0; i < partCount; i++) {
@@ -615,6 +628,10 @@ bool Album::checkPartCompatibility() const
 
 bool Album::checkPartCompatibility(MasterScore* score)
 {
+    if (!m_albumItems.size()) {
+        return true;
+    }
+
     // check if the new score breaks compatibility
     MasterScore* firstMovement = m_albumItems.at(0)->score;
     int partCount = firstMovement->parts().size();
