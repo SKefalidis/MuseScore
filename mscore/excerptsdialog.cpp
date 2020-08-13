@@ -166,26 +166,22 @@ void MuseScore::startExcerptsDialog()
         return;
     }
     MasterScore* ms = cs->masterScore();
-    if (cv->drawingScore()->title() == "Temporary Album Score") {
-        ms = static_cast<MasterScore*>(cv->drawingScore());
-        int partCount = ms->parts().size();
-        for (int i = 0; i < partCount; i++) {
-            for (auto x : *ms->movements()) {
-                if (x->score()->parts().at(i)->partName().compare(ms->parts().at(i)->partName(), Qt::CaseSensitivity::CaseInsensitive)) {
-                    std::cout << "Parts not matching..." << std::endl;
-                    QMessageBox msgBox;
-                    msgBox.setWindowTitle(QObject::tr("Incompatible parts :-("));
-                    msgBox.setText(QString("The scores in your album have incompatible parts/instrumentation."));
-                    msgBox.setDetailedText(QString("To be able to access the `Parts` feature, all your scores in your album"
-                                                   " need to have the same instrumentation."));
-                    msgBox.setTextFormat(Qt::RichText);
-                    msgBox.setIcon(QMessageBox::Critical);
-                    msgBox.setStandardButtons(QMessageBox::Close);
-                    msgBox.exec();
-                    return;
-                }
-            }
+    if (cv->drawingScore()->movements()->size() > 1) {
+        Q_ASSERT(cv->drawingScore() == Album::activeAlbum->getDominant());
+        if (!Album::activeAlbum->checkPartCompatibility()) {
+            std::cout << "Parts not matching..." << std::endl;
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(QObject::tr("Incompatible parts :-("));
+            msgBox.setText(QString("The scores in your album have incompatible parts/instrumentation."));
+            msgBox.setDetailedText(QString("To be able to access the `Parts` feature, all your scores in your album"
+                                           " need to have the same instrumentation."));
+            msgBox.setTextFormat(Qt::RichText);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Close);
+            msgBox.exec();
+            return;
         }
+        ms = static_cast<MasterScore*>(cv->drawingScore());
     }
 
     ExcerptsDialog ed(ms, 0);

@@ -101,7 +101,7 @@ class Album : public QObject
 
 public:
     static Album* activeAlbum;
-    static bool scoreInActiveAlbum(MasterScore* score);
+    static bool scoreInActiveAlbum(MasterScore* score); // I also have MasterScore::partOfActiveAlbum
 
     AlbumItem* addScore(MasterScore* score, bool enabled = true);
     void removeScore(MasterScore* score);
@@ -126,8 +126,11 @@ public:
     static void importAlbum(const QString& compressedFilePath, QDir destinationFolder);
     bool exportAlbum(QIODevice* f, const QFileInfo& info);
 
+    bool checkPartCompatibility() const;
+    bool checkPartCompatibility(MasterScore* score);
+    void removeAlbumExcerpts();
     static Excerpt* prepareMovementExcerpt(Excerpt* masterExcerpt, MasterScore* score);
-    static Excerpt* createMovementExcerpt(Excerpt*);
+    static Excerpt* createMovementExcerpt(Excerpt* e);
 
     MasterScore* createDominant();
     MasterScore* getDominant() const;
