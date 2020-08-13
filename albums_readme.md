@@ -15,6 +15,7 @@ Week 2 - 3:
     - Export options (front cover, add page breaks for printing).
     - Drawing options (front cover).
     - Create new Album
+    Decide if I allow only one active album or not. If not rename, partOfActiveAlbum to partOfAlbum or something.
 
 Week 4:
     Shortcuts.
