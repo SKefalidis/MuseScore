@@ -114,8 +114,12 @@ void TestAlbumsIO::saveAlbumLoadedTest(const char* file)
 
     QFileInfo fi(QString(file) + "_generated" + ".msca");
     QVERIFY(saveAlbum(album, fi.absoluteFilePath()));   // wrong path, but not deleted for debugging
-    std::cout << "SAVE: " << fi.absoluteFilePath().toStdString() << std::endl;
     QVERIFY(saveCompareAlbum(album, DIR + QString(file) + "_generated" + ".msca", DIR + QString(file) + ".msca"));
+
+    album->createDominant();
+    QFileInfo fi2(QString(file) + "_generated2" + ".msca");
+    QVERIFY(saveAlbum(album, fi2.absoluteFilePath()));   // wrong path, but not deleted for debugging
+    QVERIFY(saveCompareAlbum(album, DIR + QString(file) + "_generated2" + ".msca", DIR + QString(file) + ".msca"));
     delete album;
 }
 
