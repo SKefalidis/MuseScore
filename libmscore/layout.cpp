@@ -4596,6 +4596,14 @@ void Score::layoutSystemElements(System* system, LayoutContext& lc)
 
 void LayoutContext::collectPage()
 {
+    if (Album::activeAlbum && dominantScore == Album::activeAlbum->getDominant()) {
+        if (!Album::activeAlbum->drawFrontCover()) {
+            if (dominantScore == score) {
+                score = static_cast<MasterScore*>(dominantScore)->movements()->at(1);
+            }
+        }
+    }
+
     const qreal slb = score->styleP(Sid::staffLowerBorder);
     bool breakPages = score->layoutMode() != LayoutMode::SYSTEM;
     bool isEmptyMovement = score->isMaster() ? static_cast<MasterScore*>(score)->emptyMovement() : false;

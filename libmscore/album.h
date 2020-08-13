@@ -150,6 +150,8 @@ public:
     void setAlbumModeActive(bool b);
     bool titleAtTheBottom() const;
     void setTitleAtTheBottom(bool titleAtTheBottom);
+    bool drawFrontCover() const;
+    void setDrawFrontCover(bool b);
     bool generateContents() const;
     void setGenerateContents(bool enabled);
     bool addPageBreaksEnabled() const;
@@ -177,6 +179,7 @@ private:
     bool m_albumModeActive                          { false };
 
     bool m_titleAtTheBottom                         { true };
+    bool m_drawFrontCover                           { true };
     bool m_generateContents                         { false };
     bool m_addPageBreaksEnabled                     { false };
     bool m_includeAbsolutePaths                     { false };

@@ -239,7 +239,7 @@ bool AlbumItem::removeAlbumPageBreak()
         for (auto& e : score->lastMeasure()->takeElements()) {
             if (e->isLayoutBreak() && toLayoutBreak(e)->isPageBreak()) {
                 score->lastMeasure()->remove(e);
-                m_extraPageBreak = true;
+                m_extraPageBreak = false;
                 return true;
             }
         }
@@ -1234,6 +1234,24 @@ void Album::setTitleAtTheBottom(bool titleAtTheBottom)
     if (m_dominantScore) {
         m_dominantScore->setTitleAtTheBottom(titleAtTheBottom);
     }
+}
+
+//---------------------------------------------------------
+//   drawFrontCover
+//---------------------------------------------------------
+
+bool Album::drawFrontCover() const
+{
+    return m_drawFrontCover;
+}
+
+//---------------------------------------------------------
+//   setDrawFrontCover
+//---------------------------------------------------------
+
+void Album::setDrawFrontCover(bool b)
+{
+    m_drawFrontCover = b;
 }
 
 //---------------------------------------------------------
