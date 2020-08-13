@@ -570,7 +570,6 @@ void AlbumManager::updateTotalDuration()
     scoreList->blockSignals(false);
 }
 
-
 //---------------------------------------------------------
 //   upClicked
 ///     Up arrow clicked.

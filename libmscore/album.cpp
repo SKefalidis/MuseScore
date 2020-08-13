@@ -567,7 +567,7 @@ bool Album::checkPartCompatibility() const
     for (int i = 0; i < partCount; i++) {
         for (auto& x : m_albumItems) {
             if (x->score->parts().at(i)->partName().compare(firstMovement->parts().at(i)->partName(),
-                                                              Qt::CaseSensitivity::CaseInsensitive)) {
+                                                            Qt::CaseSensitivity::CaseInsensitive)) {
                 return false;
             }
         }
@@ -582,7 +582,7 @@ bool Album::checkPartCompatibility(MasterScore* score)
     int partCount = firstMovement->parts().size();
     for (int i = 0; i < partCount; i++) {
         if (score->parts().at(i)->partName().compare(firstMovement->parts().at(i)->partName(),
-                                                          Qt::CaseSensitivity::CaseInsensitive)) {
+                                                     Qt::CaseSensitivity::CaseInsensitive)) {
             return false;
         }
     }
@@ -1102,7 +1102,6 @@ void Album::updateContents()
     }
     ms->doLayout();
 }
-
 
 //---------------------------------------------------------
 //   albumTitle
