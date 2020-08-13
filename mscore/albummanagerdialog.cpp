@@ -71,6 +71,8 @@ void AlbumManagerDialog::apply()
     albumManager->album().setAddPageBreaksEnabled(checkAddPageBreak->isChecked());
     if (checkAddPageBreak->isChecked()) {
         albumManager->album().addAlbumPageBreaks();
+    } else {
+        albumManager->album().removeAlbumPageBreaks();
     }
     albumManager->album().setTitleAtTheBottom(checkTitleLayout->isChecked());
     albumManager->album().setIncludeAbsolutePaths(checkAbsolutePathsEnabled->isChecked());

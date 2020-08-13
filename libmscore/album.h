@@ -113,7 +113,8 @@ public:
 
     void addAlbumSectionBreaks();
     void addAlbumPageBreaks();
-    void removeAlbumBreaks();
+    void removeAlbumSectionBreaks();
+    void removeAlbumPageBreaks();
 
     QStringList composers() const;
     QStringList lyricists() const;

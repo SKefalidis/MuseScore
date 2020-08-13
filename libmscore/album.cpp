@@ -355,7 +355,7 @@ bool AlbumItem::checkReadiness() const
 {
     if (!score) {
         qDebug() << "You need to load a score before you use an AlbumItem." << endl;
-//        Q_ASSERT(false);
+        Q_ASSERT(false);
         return false;
     }
     return true;
@@ -537,14 +537,25 @@ void Album::addAlbumPageBreaks()
 }
 
 //---------------------------------------------------------
-//   removeAlbumBreaks
+//   removeAlbumSectionBreaks
 //---------------------------------------------------------
 
-void Album::removeAlbumBreaks()
+
+void Album::removeAlbumSectionBreaks()
+{
+    for (auto& item : m_albumItems) {
+        item->removeAlbumSectionBreak();
+    }
+}
+
+//---------------------------------------------------------
+//   removeAlbumPageBreaks
+//---------------------------------------------------------
+
+void Album::removeAlbumPageBreaks()
 {
     for (auto& item : m_albumItems) {
         item->removeAlbumPageBreak();
-        item->removeAlbumSectionBreak();
     }
 }
 
