@@ -619,51 +619,44 @@ Excerpt* Album::createMovementExcerpt(Excerpt* e)
 
 MasterScore* Album::createDominant()
 {
+    if (m_dominantScore) {
+        qDebug() << "There is a dominant score already..." << endl;
+        return m_dominantScore;
+    }
+
     //
     // clone the first score and use the clone as the main/dominant score and as the front cover.
     //
-    MasterScore* m_tempScore = m_albumItems.at(0)->score->clone();
-    m_tempScore->setMasterScore(m_tempScore);
-    m_tempScore->setName("Temporary Album Score");
-    m_tempScore->style().reset(m_tempScore);
+    m_dominantScore = m_albumItems.at(0)->score->clone();
+    m_dominantScore->setMasterScore(m_dominantScore);
+    m_dominantScore->setName("Temporary Album Score");
+    m_dominantScore->style().reset(m_dominantScore);
     // remove all systems/measures other than the first one (that is used for the front cover).
-    while (m_tempScore->systems().size() > 1) {
-        for (auto x : m_tempScore->systems().last()->measures()) {
-            m_tempScore->removeElement(x);
+    while (m_dominantScore->systems().size() > 1) {
+        for (auto x : m_dominantScore->systems().last()->measures()) {
+            m_dominantScore->removeElement(x);
         }
-        m_tempScore->systems().removeLast();
+        m_dominantScore->systems().removeLast();
     }
-    m_tempScore->setEmptyMovement(true); // TODO_SK: rename emptyMovement (it's not really empty)
+    m_dominantScore->setEmptyMovement(true); // TODO_SK: rename emptyMovement (it's not really empty)
+    m_dominantScore->setPartOfActiveAlbum(true);
 
     if (generateContents()) {
-        m_tempScore->setfirstRealMovement(2);
+        m_dominantScore->setfirstRealMovement(2);
     } else {
-        m_tempScore->setfirstRealMovement(1);
+        m_dominantScore->setfirstRealMovement(1);
     }
 
     // add the album's scores as movements and layout the combined score
     for (auto& item : m_albumItems) {
-        m_tempScore->addMovement(item->score);
+        m_dominantScore->addMovement(item->score);
     }
-    m_tempScore->setLayoutAll();
-    m_tempScore->update();
-    setDominant(m_tempScore);
-    return m_tempScore;
-}
+    m_dominantScore->setLayoutAll();
+    m_dominantScore->update();
 
-//---------------------------------------------------------
-//   setDominant
-//---------------------------------------------------------
-
-void Album::setDominant(MasterScore* ms)
-{
-    if (m_dominantScore) {
-        m_dominantScore->setPartOfActiveAlbum(false);
-        // TODO_SK: remove the score from the scoreList and delete it
-    }
-    ms->setPartOfActiveAlbum(true);
-    m_dominantScore = ms;
-    // set Parts
+    //
+    // parts - excerpts
+    //
     if (m_dominantScore->excerpts().isEmpty()) {
         for (auto& e : m_albumExcerpts) {
             //
@@ -706,6 +699,8 @@ void Album::setDominant(MasterScore* ms)
             nscore->update();
         }
     }
+
+    return m_dominantScore;
 }
 
 //---------------------------------------------------------

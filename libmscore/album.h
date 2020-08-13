@@ -130,11 +130,9 @@ public:
     static Excerpt* createMovementExcerpt(Excerpt*);
 
     MasterScore* createDominant();
-    void setDominant(MasterScore* ms); // I don't like this function.
     MasterScore* getDominant() const;
     std::vector<AlbumItem*> albumItems() const;
 
-    void updateAlbumTitle(const QString& text); // delete, we already have setAlbumTitle
     void updateFrontCover();
     void updateContents();
 
@@ -168,7 +166,7 @@ private:
     std::vector<unique_ptr<AlbumExcerpt> > m_albumExcerpts {};
     QString m_albumTitle                            { "" };
     QFileInfo m_fileInfo                            {};
-    MasterScore* m_dominantScore                    { nullptr };
+    MasterScore* m_dominantScore                    { nullptr }; // unique ptr?
     bool m_albumModeActive                          { false };
 
     bool m_titleAtTheBottom                         { true };

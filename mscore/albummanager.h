@@ -66,7 +66,7 @@ protected:
     bool eventFilter(QObject* obj, QEvent* ev) override;
 
 private slots:
-    friend class AlbumManagerItem;
+    friend struct AlbumManagerItem; // for calling AlbumManager::updateTotalDuration
     void addAlbumItem(AlbumItem& albumItem);
     void itemDoubleClicked(QTableWidgetItem* item);
     void itemChanged(QTableWidgetItem* item);     // score name in list is edited
@@ -111,8 +111,6 @@ private:
     int m_playbackIndex     { -1 };
     bool m_continuing       { false };
 };
-
-QString durationToString(int seconds);
 }
 
 #endif

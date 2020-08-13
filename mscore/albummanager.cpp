@@ -519,6 +519,23 @@ void AlbumManager::addAlbumItem(AlbumItem& albumItem)
 }
 
 //---------------------------------------------------------
+//   durationToString
+//---------------------------------------------------------
+
+QString durationToString(int seconds)
+{
+    int tempSeconds = seconds;
+    int tempMinutes = tempSeconds / 60;
+    tempSeconds -= tempMinutes * 60;
+    int tempHours = tempMinutes / 60;
+    tempMinutes -= tempHours * 60;
+
+    return QString::number(tempHours).rightJustified(2, '0') + ":"
+           + QString::number(tempMinutes).rightJustified(2, '0') + ":"
+           + QString::number(tempSeconds).rightJustified(2, '0');
+}
+
+//---------------------------------------------------------
 //   updateDurations
 ///     Calculates and updates (the labels of) the duration
 ///     of the Album and of each individual score.
@@ -553,22 +570,6 @@ void AlbumManager::updateTotalDuration()
     scoreList->blockSignals(false);
 }
 
-//---------------------------------------------------------
-//   durationToString
-//---------------------------------------------------------
-
-QString durationToString(int seconds)
-{
-    int tempSeconds = seconds;
-    int tempMinutes = tempSeconds / 60;
-    tempSeconds -= tempMinutes * 60;
-    int tempHours = tempMinutes / 60;
-    tempMinutes -= tempHours * 60;
-
-    return QString::number(tempHours).rightJustified(2, '0') + ":"
-           + QString::number(tempMinutes).rightJustified(2, '0') + ":"
-           + QString::number(tempSeconds).rightJustified(2, '0');
-}
 
 //---------------------------------------------------------
 //   upClicked
