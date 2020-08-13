@@ -94,8 +94,6 @@ private slots:
     void rewindAlbum(bool checked = false);
 
     void updateAlbumTitle(const QString& text);
-    void updateFrontCover();
-    void updateContents();
     void updateTotalDuration();
 
 private:

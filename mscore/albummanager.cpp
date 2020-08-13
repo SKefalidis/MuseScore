@@ -194,39 +194,10 @@ void AlbumManager::changeMode(bool checked)
         albumModeButton->setChecked(false);
     } else if (albumModeButton->isChecked()) {
         if (!m_album->getDominant()) {
-            //
-            // clone the first score and use the clone as the main/dominant score and as the front cover.
-            //
-            MasterScore* m_tempScore = m_items.at(0)->albumItem.score->clone();
-            m_tempScore->setMasterScore(m_tempScore);
-            m_tempScore->setName("Temporary Album Score");
-            m_tempScore->style().reset(m_tempScore);
-            // remove all systems/measures other than the first one (that is used for the front cover).
-            while (m_tempScore->systems().size() > 1) {
-                for (auto x : m_tempScore->systems().last()->measures()) {
-                    m_tempScore->removeElement(x);
-                }
-                m_tempScore->systems().removeLast();
-            }
-            m_tempScore->setEmptyMovement(true); // TODO_SK: rename emptyMovement (it's not really empty)
-
-            if (m_album->generateContents()) {
-                m_tempScore->setfirstRealMovement(2);
-            } else {
-                m_tempScore->setfirstRealMovement(1);
-            }
-
+            MasterScore* m_tempScore = m_album->createDominant();
             mscore->setCurrentScoreView(mscore->appendScore(m_tempScore));
             mscore->getTab1()->setTabText(mscore->getTab1()->currentIndex(), "Temporary Album Score");
             m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
-
-            // add the album's scores as movements and layout the combined score
-            for (auto item : m_items) {
-                m_tempScore->addMovement(item->albumItem.score);
-            }
-            m_tempScore->setLayoutAll();
-            m_tempScore->update();
-            m_album->setDominant(m_tempScore);
         } else {
             if (m_tempScoreTabIndex != -1) {
                 // there is a tab for the Temporary Album Score
@@ -310,141 +281,6 @@ void AlbumManager::tabMoved(int from, int to)
 void AlbumManager::updateAlbumTitle(const QString& text)
 {
     m_album->setAlbumTitle(text);
-    updateFrontCover();
-}
-
-//---------------------------------------------------------
-//   updateFrontCover
-//---------------------------------------------------------
-
-void AlbumManager::updateFrontCover()
-{
-    if (!m_album->getDominant()) {
-        return;
-    }
-
-    VBox* box = toVBox(m_album->getDominant()->measures()->first());
-    qreal pageHeight = m_album->getDominant()->pages().at(0)->height();
-    qreal scoreSpatium = m_album->getDominant()->spatium();
-
-    box->setOffset(0, pageHeight * 0.1);
-    box->setBoxHeight(Spatium(pageHeight * 0.8 / scoreSpatium));
-
-    // make sure that we have these 3 text fields
-    MeasureBase* measure = m_album->getDominant()->measures()->first();
-    measure->clearElements();
-    Text* s = new Text(m_album->getDominant(), Tid::TITLE);
-    s->setPlainText("");
-    measure->add(s);
-    s = new Text(m_album->getDominant(), Tid::COMPOSER);
-    s->setPlainText("");
-    measure->add(s);
-    s = new Text(m_album->getDominant(), Tid::POET);
-    s->setPlainText("");
-    measure->add(s);
-
-    for (auto x : m_album->getDominant()->measures()->first()->el()) {
-        if (x && x->isText()) {
-            Text* t = toText(x);
-
-            if (t->tid() == Tid::TITLE) {
-                t->setFontStyle(FontStyle::Bold); // I should be calling t->setBold(true) (this overwrites other styles) but it crashes
-                t->setSize(36);
-
-                t->cursor()->setRow(0);
-                t->setPlainText(m_album->albumTitle());
-            } else if (t->tid() == Tid::COMPOSER) {
-                t->setSize(16);
-                t->setPlainText(m_album->composers().join("\n"));
-            } else if (t->tid() == Tid::POET) {
-                t->setSize(16);
-                t->setPlainText(m_album->lyricists().join("\n"));
-            }
-        }
-    }
-}
-
-//---------------------------------------------------------
-//   updateContents
-//---------------------------------------------------------
-
-void AlbumManager::updateContents()
-{
-    if (!m_album->getDominant()) {
-        return;
-    }
-
-    if (!m_album->generateContents()) {
-        return;
-    }
-
-    qreal pageWidth = m_album->getDominant()->pages().at(0)->width();
-    qreal scoreSpatium = m_album->getDominant()->spatium();
-    int charWidth = pageWidth / scoreSpatium;
-
-    if (!m_album->getDominant()->movements()->at(1)->emptyMovement()) {    // there is no contents page
-        MasterScore* ms = m_items.at(0)->albumItem.score->clone();
-        ms->setName("Contents");
-        ms->setEmptyMovement(true);
-        m_album->getDominant()->insertMovement(ms, 1);
-
-        while (ms->systems().size() > 1) {
-            for (auto x : ms->systems().last()->measures()) {
-                ms->removeElement(x);
-            }
-            ms->systems().removeLast();
-        }
-
-        // make sure that we have these 2 text fields
-        MeasureBase* measure = ms->measures()->first();
-        measure->clearElements();
-        Text* s = new Text(ms, Tid::TITLE);
-        s->setPlainText("");
-        measure->add(s);
-        s = new Text(ms, Tid::SUBTITLE);
-        s->setPlainText("");
-        measure->add(s);
-    }
-
-    MasterScore* ms = m_album->getDominant()->movements()->at(1);
-    for (auto x : ms->measures()->first()->el()) {
-        if (x && x->isText()) {
-            Text* t = toText(x);
-
-            if (t->tid() == Tid::TITLE) {
-                t->setFontStyle(FontStyle::Bold); // I should be calling t->setBold(true) (this overwrites other styles) but it crashes
-                t->setSize(36);
-
-                t->cursor()->setRow(0);
-                t->setPlainText("Contents");
-            } else if (t->tid() == Tid::SUBTITLE) {
-                t->setSize(16);
-                t->setAlign(Align::LEFT | Align::BASELINE);
-
-                QString str("");
-
-                int i = 0;
-                for (auto x : m_album->scoreTitles()) {
-                    QString temp(x);
-                    temp.append(QString(".").repeated(charWidth - x.length()));
-                    temp += QString::number(m_album->albumItems().at(i)->score->pageIndexInAlbum());
-                    temp += "\n";
-                    str += temp;
-                    i++;
-                }
-
-                t->cursor()->setRow(0);
-                t->setPlainText(str);
-            } else if (t->tid() == Tid::COMPOSER) {
-                t->setSize(16);
-                t->setPlainText("");
-            } else if (t->tid() == Tid::POET) {
-                t->setSize(16);
-                t->setPlainText("");
-            }
-        }
-    }
-    ms->doLayout();
 }
 
 //---------------------------------------------------------
@@ -671,8 +507,8 @@ void AlbumManager::addAlbumItem(AlbumItem& albumItem)
     m_items.push_back(albumManagerItem);
     albumManagerItem->updateDurationLabel();
 
-    updateFrontCover();
-    updateContents();
+    m_album->updateFrontCover();
+    m_album->updateContents();
 
     // update the combined score to reflect the changes
     if (m_album->getDominant()) {
@@ -860,8 +696,8 @@ void AlbumManager::removeClicked(bool checked)
     scoreList->removeRow(scoreList->currentRow());
 
     updateDurations();
-    updateFrontCover();
-    updateContents();
+    m_album->updateFrontCover();
+    m_album->updateContents();
 }
 
 //---------------------------------------------------------

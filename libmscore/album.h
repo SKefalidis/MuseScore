@@ -126,12 +126,17 @@ public:
     static void importAlbum(const QString& compressedFilePath, QDir destinationFolder);
     bool exportAlbum(QIODevice* f, const QFileInfo& info);
 
-    MasterScore* getDominant() const;
-    void setDominant(MasterScore* ms); // I don't like this function.
-    std::vector<AlbumItem*> albumItems() const;
-
     static Excerpt* prepareMovementExcerpt(Excerpt* masterExcerpt, MasterScore* score);
     static Excerpt* createMovementExcerpt(Excerpt*);
+
+    MasterScore* createDominant();
+    void setDominant(MasterScore* ms); // I don't like this function.
+    MasterScore* getDominant() const;
+    std::vector<AlbumItem*> albumItems() const;
+
+    void updateAlbumTitle(const QString& text); // delete, we already have setAlbumTitle
+    void updateFrontCover();
+    void updateContents();
 
     const QString& albumTitle() const;
     void setAlbumTitle(const QString& newTitle);
