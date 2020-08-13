@@ -83,6 +83,7 @@ private slots:
 
 private:
     LayoutBreak* getSectionBreak() const;
+    bool checkReadiness() const;
 
     bool m_enabled { true };
     bool m_extraPageBreak { false };

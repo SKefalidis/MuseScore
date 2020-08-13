@@ -112,6 +112,9 @@ AlbumItem::~AlbumItem()
 
 void AlbumItem::setEnabled(bool b)
 {
+    if (!checkReadiness()) {
+        return;
+    }
     m_enabled = b;
     score->setEnabled(b);
     if (album.getDominant()) {
@@ -122,6 +125,9 @@ void AlbumItem::setEnabled(bool b)
 
 bool AlbumItem::enabled() const
 {
+    if (!checkReadiness()) {
+        return false;
+    }
     return m_enabled;
 }
 
@@ -167,6 +173,9 @@ int AlbumItem::setScore(MasterScore* score)
 
 void AlbumItem::addAlbumSectionBreak()
 {
+    if (!checkReadiness()) {
+        return;
+    }
     if (!score->lastMeasure()->sectionBreak()) { // add only if there isn't one
         LayoutBreak* lb = new LayoutBreak(score);
         lb->setLayoutBreakType(LayoutBreak::Type::SECTION);
@@ -187,7 +196,10 @@ void AlbumItem::addAlbumSectionBreak()
 
 bool AlbumItem::removeAlbumSectionBreak()
 {
-    if (m_extraSectionBreak && score && score->lastMeasure()) {
+    if (!checkReadiness()) {
+        return false;
+    }
+    if (m_extraSectionBreak && score->lastMeasure()) {
         m_pauseDuration = getSectionBreak()->pause();
         score->lastMeasure()->remove(getSectionBreak());
         m_extraSectionBreak = false;
@@ -202,6 +214,9 @@ bool AlbumItem::removeAlbumSectionBreak()
 
 void AlbumItem::addAlbumPageBreak()
 {
+    if (!checkReadiness()) {
+        return;
+    }
     if (!score->lastMeasure()->pageBreak()) { // add only if there isn't one
         LayoutBreak* lb = new LayoutBreak(score);
         lb->setLayoutBreakType(LayoutBreak::Type::PAGE);
@@ -217,7 +232,10 @@ void AlbumItem::addAlbumPageBreak()
 
 bool AlbumItem::removeAlbumPageBreak()
 {
-    if (m_extraPageBreak && score && score->lastMeasure()) {
+    if (!checkReadiness()) {
+        return false;
+    }
+    if (m_extraPageBreak && score->lastMeasure()) {
         for (auto& e : score->lastMeasure()->takeElements()) {
             if (e->isLayoutBreak() && toLayoutBreak(e)->isPageBreak()) {
                 score->lastMeasure()->remove(e);
@@ -292,6 +310,9 @@ void AlbumItem::writeAlbumItem(XmlWriter& writer)
 
 int AlbumItem::duration() const
 {
+    if (!checkReadiness()) {
+        return -1;
+    }
     return m_duration;
 }
 
@@ -301,6 +322,9 @@ int AlbumItem::duration() const
 
 void AlbumItem::updateDuration()
 {
+    if (!checkReadiness()) {
+        return;
+    }
     m_duration = score->duration();
     emit durationChanged();
 }
@@ -311,7 +335,11 @@ void AlbumItem::updateDuration()
 
 LayoutBreak* AlbumItem::getSectionBreak() const
 {
-    if (!score || !score->lastMeasure() || !score->lastMeasure()->sectionBreak()) {
+    if (!checkReadiness()) {
+        return nullptr;
+    }
+
+    if (!score->lastMeasure() || !score->lastMeasure()->sectionBreak()) {
         return nullptr;
     }
 
@@ -321,6 +349,16 @@ LayoutBreak* AlbumItem::getSectionBreak() const
         }
     }
     return nullptr;
+}
+
+bool AlbumItem::checkReadiness() const
+{
+    if (!score) {
+        qDebug() << "You need to load a score before you use an AlbumItem." << endl;
+        Q_ASSERT(false);
+        return false;
+    }
+    return true;
 }
 
 //---------------------------------------------------------
