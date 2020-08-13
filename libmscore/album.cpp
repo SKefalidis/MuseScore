@@ -335,7 +335,7 @@ void AlbumItem::updateDuration()
 
 LayoutBreak* AlbumItem::getSectionBreak() const
 {
-    if (!checkReadiness()) {
+    if (!score) {
         return nullptr;
     }
 
