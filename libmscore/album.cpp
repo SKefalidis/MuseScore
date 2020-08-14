@@ -236,7 +236,7 @@ bool AlbumItem::removeAlbumPageBreak()
         return false;
     }
     if (m_extraPageBreak && score->lastMeasure()) {
-        for (auto& e : score->lastMeasure()->takeElements()) {
+        for (auto& e : score->lastMeasure()->el()) {
             if (e->isLayoutBreak() && toLayoutBreak(e)->isPageBreak()) {
                 score->lastMeasure()->remove(e);
                 m_extraPageBreak = false;
