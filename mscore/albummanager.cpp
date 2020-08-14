@@ -214,6 +214,7 @@ void AlbumManager::changeMode(bool checked)
                 m_tempScoreTabIndex = mscore->getTab1()->currentIndex();
             }
         }
+        m_album->getDominant()->doLayout();
         scoreModeButton->setChecked(false);
     } else {
         Q_ASSERT(false);

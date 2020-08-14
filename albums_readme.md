@@ -2,7 +2,7 @@ Notes:
 
 Tests:
     - compressed album file Test (almost done)
-    - change-mode simplification and test (parts are not tested fully right now)
+    - test Album::removeBreaks
 
 Week 2 - 3:
     Bugfixes and refactoring.
@@ -12,9 +12,6 @@ Week 2 - 3:
     Preferences.
     Contents page -> pages + improved alignment.
     Polish:
-    - Export options (front cover, add page breaks for printing).
-    - Drawing options (front cover).
-    - Create new Album
     Decide if I allow only one active album or not. If not rename, partOfActiveAlbum to partOfAlbum or something.
 
 Week 4:
