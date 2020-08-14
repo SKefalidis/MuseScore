@@ -5782,10 +5782,6 @@ bool MuseScore::restoreSession(bool always)
                         } else if (t == "albumModeActive") {
                             if (Album::activeAlbum && !Album::activeAlbum->albumModeActive() && albumManager && e.readBool()) {
                                 albumManager->albumModeButton->setChecked(true);
-                            } else {
-                                auto b1 = Album::activeAlbum;
-                                auto b2 = !Album::activeAlbum->albumModeActive();
-                                auto b3 = albumManager;
                             }
                         }
                     }
