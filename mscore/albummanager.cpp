@@ -183,6 +183,9 @@ void AlbumManager::changeMode(bool checked)
     if (!m_album || m_album->albumItems().size() == 0) {
         scoreModeButton->setChecked(true);
         albumModeButton->setChecked(false);
+
+        albumModeButton->blockSignals(false);
+        scoreModeButton->blockSignals(false);
         return;
     }
 
@@ -214,7 +217,6 @@ void AlbumManager::changeMode(bool checked)
         scoreModeButton->setChecked(false);
     } else {
         Q_ASSERT(false);
-        return;
     }
     m_album->setAlbumModeActive(albumModeButton->isChecked());
 
@@ -717,25 +719,42 @@ void AlbumManager::closeAlbumClicked(bool checked)
 
 void AlbumManager::setAlbum(std::unique_ptr<Album> a)
 {
-    std::cout << "setting album" << std::endl;
+    //
+    // Remove the existing Album and reset the Album Manager
+    //
+    disconnect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
+    disconnect(mscore->getTab1(), &ScoreTab::tabRemoved, this, &AlbumManager::tabRemoved);
+
+    // Album
     Album::activeAlbum = nullptr; // this allows mscore to delete the dominantScore
-    scoreList->setRowCount(0);
-    m_items.clear(); // TODO_SK: also free all
     if (m_album) {
         for (auto x : m_album->albumItems()) {
-            m_album->removeScore(x->score);
+            MasterScore* score = x->score;
+            m_album->removeScore(score);
+            mscore->closeScore(score);
         }
         if (m_album->getDominant()) {
             mscore->closeScore(m_album->getDominant());
         }
         m_album.release();
     }
+
+    // Album Manager
+    scoreList->setRowCount(0);
+    m_items.clear(); // TODO_SK: also free all
+    scoreModeButton->setChecked(true);
+    albumModeButton->setChecked(false);
+
+    connect(mscore->getTab1(), &ScoreTab::currentScoreViewChanged, this, &AlbumManager::tabChanged);
+    connect(mscore->getTab1(), &ScoreTab::tabRemoved, this, &AlbumManager::tabRemoved);
+
     if (!a) {
         return;
     }
-
+    //
+    // Add new Album
+    //
     m_album = std::move(a);
-
     scoreList->blockSignals(true);
     for (auto& item : m_album->albumItems()) {
         QString path = item->fileInfo.canonicalFilePath();
