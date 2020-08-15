@@ -1,9 +1,14 @@
 Notes:
 
+Today:
+    - improve multi-movement playback in seq (I want section break pauses in this)
+    - seq pause, for multi-movement correct behaviour
+    - bug with cursor and parts. setActiveScore is a called a bunch of times and things get confusing and it either chooses
+    an excerpt or the main score for the cursor
+
 Tests:
     - compressed album file Test (almost done)
-    - Album::partCompatibility
-    - Album::removeExcerpts
+    - old .album files
 
 Week 2 - 3:
     Bugfixes and refactoring.
@@ -12,8 +17,9 @@ Week 2 - 3:
     Git cleanup.
     Preferences.
     Contents page -> pages + improved alignment.
-    Polish:
     Decide if I allow only one active album or not. If not rename, partOfActiveAlbum to partOfAlbum or something.
+    - Improve the draw/don't draw front cover option
+    - Separate .album from .msca/.mscaz in the open options
 
 Week 4:
     Shortcuts.
@@ -56,3 +62,4 @@ Bugs:
  - james' list
  - crashes related to text (are this all on master?)
  - crash when changing to part and dragging the view (without doing anything before that)
+ - restore session crash in paintEvent (does not crash if you select an element first)
