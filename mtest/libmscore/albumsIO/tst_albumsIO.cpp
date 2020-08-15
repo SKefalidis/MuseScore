@@ -57,6 +57,7 @@ private slots:
 
     void albumsStrings() { stringsTest("smallPianoAlbum"); }
     void albumsAddRemove() { addRemoveTest("smallPianoAlbum"); }
+    // TODO_SK: we need to test adding/removing scores with parts
 
     void parts() { partsTest("albumWithParts"); }
 };
@@ -216,6 +217,13 @@ void TestAlbumsIO::addRemoveTest(const char* file)
 
     QVERIFY(album->albumItems().size() == 3);
     MasterScore* ms = album->albumItems().at(1)->score;
+    album->removeScore(ms);
+    QVERIFY(album->albumItems().size() == 2);
+    album->addScore(ms);
+    QVERIFY(album->albumItems().size() == 3);
+
+    album->createDominant();
+
     album->removeScore(ms);
     QVERIFY(album->albumItems().size() == 2);
     album->addScore(ms);
