@@ -140,7 +140,6 @@ public:
     MasterScore* getDominant() const;
     std::vector<AlbumItem*> albumItems() const;
 
-    void updateFrontCover();
     void updateContents();
 
     const QString& albumTitle() const;
@@ -166,6 +165,7 @@ public:
 
 public slots:
     void setAlbumLayoutMode(LayoutMode lm);
+    void updateFrontCover();
 
 private:
     AlbumItem* createItem(XmlReader& reader);

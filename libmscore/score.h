@@ -602,6 +602,8 @@ signals:
     void posChanged(POS, unsigned);
     void playlistChanged();
     void durationChanged();
+    void composerChanged();
+    void lyricistChanged();
 
 public:
     Score();

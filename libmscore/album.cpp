@@ -164,6 +164,8 @@ int AlbumItem::setScore(MasterScore* score)
 
     updateDuration();
     connect(score, &MasterScore::durationChanged, this, &AlbumItem::updateDuration);
+    connect(score, &MasterScore::composerChanged, &album, &Album::updateFrontCover);
+    connect(score, &MasterScore::lyricistChanged, &album, &Album::updateFrontCover);
     return 0;
 }
 
@@ -762,6 +764,12 @@ MasterScore* Album::createDominant()
     // add the album's scores as movements and layout the combined score
     for (auto& item : m_albumItems) {
         m_dominantScore->addMovement(item->score);
+    }
+    if (m_drawFrontCover) {
+        updateFrontCover();
+    }
+    if (m_generateContents) {
+        updateContents();
     }
     m_dominantScore->setLayoutAll();
     m_dominantScore->update();
