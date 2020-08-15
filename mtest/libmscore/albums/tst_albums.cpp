@@ -171,20 +171,20 @@ void TestAlbums::albumBreaks()
     myAlbum.addScore(aScore);
     myAlbum.addScore(bScore);
     myAlbum.addAlbumPageBreaks();
-    Q_ASSERT(aScore->lastMeasure()->pageBreak());
-    Q_ASSERT(bScore->lastMeasure()->pageBreak());
-    Q_ASSERT(aScore->lastMeasure()->sectionBreak());
-    Q_ASSERT(bScore->lastMeasure()->sectionBreak());
+    QVERIFY(aScore->lastMeasure()->pageBreak());
+    QVERIFY(bScore->lastMeasure()->pageBreak());
+    QVERIFY(aScore->lastMeasure()->sectionBreak());
+    QVERIFY(bScore->lastMeasure()->sectionBreak());
     myAlbum.removeAlbumPageBreaks();
-    Q_ASSERT(!aScore->lastMeasure()->pageBreak());
-    Q_ASSERT(!bScore->lastMeasure()->pageBreak());
-    Q_ASSERT(aScore->lastMeasure()->sectionBreak());
-    Q_ASSERT(bScore->lastMeasure()->sectionBreak());
+    QVERIFY(!aScore->lastMeasure()->pageBreak());
+    QVERIFY(!bScore->lastMeasure()->pageBreak());
+    QVERIFY(aScore->lastMeasure()->sectionBreak());
+    QVERIFY(bScore->lastMeasure()->sectionBreak());
     myAlbum.removeAlbumSectionBreaks();
-    Q_ASSERT(!aScore->lastMeasure()->pageBreak());
-    Q_ASSERT(!bScore->lastMeasure()->pageBreak());
-    Q_ASSERT(!aScore->lastMeasure()->sectionBreak());
-    Q_ASSERT(!bScore->lastMeasure()->sectionBreak());
+    QVERIFY(!aScore->lastMeasure()->pageBreak());
+    QVERIFY(!bScore->lastMeasure()->pageBreak());
+    QVERIFY(!aScore->lastMeasure()->sectionBreak());
+    QVERIFY(!bScore->lastMeasure()->sectionBreak());
 }
 
 QTEST_MAIN(TestAlbums)
