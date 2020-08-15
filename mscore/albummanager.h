@@ -91,6 +91,7 @@ private slots:
     void playAlbum(bool checked);
     void playAlbum();
     void startPlayback();
+    void stopPlayback();
     void rewindAlbum(bool checked = false);
 
     void updateAlbumTitle(const QString& text);

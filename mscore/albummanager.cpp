@@ -154,6 +154,11 @@ void AlbumManager::hideEvent(QHideEvent* event)
     MuseScore::saveGeometry(this);
     QDockWidget::hideEvent(event);
     getAction("toggle-album")->setChecked(false);
+
+    if (seq->isPlaying() && Album::scoreInActiveAlbum(seq->score())) {
+        stopPlayback();
+    }
+    closeAlbumClicked(); // TODO_SK: maybe not close?
 }
 
 //---------------------------------------------------------
@@ -301,8 +306,7 @@ void AlbumManager::playAlbum()
 
     // pause playback
     if (!playButton->isChecked() && seq->isPlaying()) {
-        disconnect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
-        seq->stop();
+        stopPlayback();
         m_continuing = true;
         return;
     }
@@ -389,6 +393,16 @@ void AlbumManager::rewindAlbum(bool checked)
 void AlbumManager::startPlayback()
 {
     seq->start();
+}
+
+//---------------------------------------------------------
+//   stopPlayback
+//---------------------------------------------------------
+
+void AlbumManager::stopPlayback()
+{
+    disconnect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum));
+    seq->stop();
 }
 
 //---------------------------------------------------------
