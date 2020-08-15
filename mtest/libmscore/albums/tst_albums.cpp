@@ -39,6 +39,7 @@ class TestAlbums : public QObject, public MTest
     void albumItemDuration();
     void albumItemEnable();
     void albumItemBreaks();
+    void albumBreaks();
 
 private slots:
     void initTestCase();
@@ -156,6 +157,34 @@ void TestAlbums::albumItemBreaks()
     // removePageBreak
     aItem->removeAlbumPageBreak();
     QCOMPARE(aScore->lastMeasure()->pageBreak(), false);
+}
+
+//---------------------------------------------------------
+//   albumBreaks
+//---------------------------------------------------------
+
+void TestAlbums::albumBreaks()
+{
+    Album myAlbum;
+    MasterScore* aScore = readScore(DIR + "AlbumItemTest.mscx");
+    MasterScore* bScore = readScore(DIR + "AlbumItemTest.mscx");
+    myAlbum.addScore(aScore);
+    myAlbum.addScore(bScore);
+    myAlbum.addAlbumPageBreaks();
+    Q_ASSERT(aScore->lastMeasure()->pageBreak());
+    Q_ASSERT(bScore->lastMeasure()->pageBreak());
+    Q_ASSERT(aScore->lastMeasure()->sectionBreak());
+    Q_ASSERT(bScore->lastMeasure()->sectionBreak());
+    myAlbum.removeAlbumPageBreaks();
+    Q_ASSERT(!aScore->lastMeasure()->pageBreak());
+    Q_ASSERT(!bScore->lastMeasure()->pageBreak());
+    Q_ASSERT(aScore->lastMeasure()->sectionBreak());
+    Q_ASSERT(bScore->lastMeasure()->sectionBreak());
+    myAlbum.removeAlbumSectionBreaks();
+    Q_ASSERT(!aScore->lastMeasure()->pageBreak());
+    Q_ASSERT(!bScore->lastMeasure()->pageBreak());
+    Q_ASSERT(!aScore->lastMeasure()->sectionBreak());
+    Q_ASSERT(!bScore->lastMeasure()->sectionBreak());
 }
 
 QTEST_MAIN(TestAlbums)

@@ -338,17 +338,7 @@ LayoutBreak* AlbumItem::getSectionBreak() const
     if (!score) {
         return nullptr;
     }
-
-    if (!score->lastMeasure() || !score->lastMeasure()->sectionBreak()) {
-        return nullptr;
-    }
-
-    for (auto& e : score->lastMeasure()->el()) {
-        if (e->isLayoutBreak() && toLayoutBreak(e)->isSectionBreak()) {
-            return toLayoutBreak(e);
-        }
-    }
-    return nullptr;
+    return score->lastMeasure()->sectionBreakElement();
 }
 
 bool AlbumItem::checkReadiness() const
@@ -645,6 +635,9 @@ bool Album::checkPartCompatibility(MasterScore* score)
     // check if the new score breaks compatibility
     MasterScore* firstMovement = m_albumItems.at(0)->score;
     int partCount = firstMovement->parts().size();
+    if (partCount < score->parts.size()) {
+        return false;
+    }
     for (int i = 0; i < partCount; i++) {
         if (score->parts().at(i)->partName().compare(firstMovement->parts().at(i)->partName(),
                                                      Qt::CaseSensitivity::CaseInsensitive)) {

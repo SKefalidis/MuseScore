@@ -40,6 +40,7 @@ class TestAlbumsIO : public QObject, public MTest
     void exportCompressedAlbumTest(const char* file);
     void stringsTest(const char* file);
     void addRemoveTest(const char* file);
+    void partsTest(const char* file);
 
     void loadScores(Album* album);
 
@@ -56,6 +57,8 @@ private slots:
 
     void albumsStrings() { stringsTest("smallPianoAlbum"); }
     void albumsAddRemove() { addRemoveTest("smallPianoAlbum"); }
+
+    void parts() { partsTest("albumWithParts"); }
 };
 
 //---------------------------------------------------------
@@ -219,6 +222,29 @@ void TestAlbumsIO::addRemoveTest(const char* file)
     QVERIFY(album->albumItems().size() == 3);
 
     delete album;
+}
+
+//---------------------------------------------------------
+//   partsTest
+//---------------------------------------------------------
+
+void TestAlbumsIO::partsTest(const char* file)
+{
+    MScore::debugMode = true;
+    Album* album = readAlbum(DIR + QString(file) + ".msca");
+    MasterScore* aScore = readScore(DIR + "Piano1.mscx");
+    MasterScore* bScore = readScore(DIR + "Movement_3.mscx");
+    QVERIFY(album);
+    loadScores(album);
+    album->createDominant();
+
+    QVERIFY(album->checkPartCompatibility());
+    QVERIFY(!album->checkPartCompatibility(aScore));
+    QVERIFY(!album->checkPartCompatibility(bScore));
+
+    QVERIFY(album->getDominant()->excerpts().size());
+    album->removeAlbumExcerpts();
+    QVERIFY(album->getDominant()->excerpts().size() == 0);
 }
 
 QTEST_MAIN(TestAlbumsIO)

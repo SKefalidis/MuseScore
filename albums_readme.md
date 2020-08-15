@@ -2,7 +2,8 @@ Notes:
 
 Tests:
     - compressed album file Test (almost done)
-    - test Album::removeBreaks
+    - Album::partCompatibility
+    - Album::removeExcerpts
 
 Week 2 - 3:
     Bugfixes and refactoring.
@@ -51,6 +52,7 @@ Investigate:
 
 Bugs:
  - Fix all the places where inActiveAlbum should be inActiveAlbum and the dominantScore is the one in the scoreview (e.g. the teleporting stuff, sequencer setScoreView)
- - Crush when editing title of part
+ - Crash when editing title of part
  - james' list
  - crashes related to text (are this all on master?)
+ - crash when changing to part and dragging the view (without doing anything before that)
