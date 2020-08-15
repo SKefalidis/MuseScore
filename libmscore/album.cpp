@@ -540,7 +540,6 @@ void Album::addAlbumPageBreaks()
 //   removeAlbumSectionBreaks
 //---------------------------------------------------------
 
-
 void Album::removeAlbumSectionBreaks()
 {
     for (auto& item : m_albumItems) {
