@@ -1288,8 +1288,6 @@ public:
     void localTimeDelete();
     void globalTimeDelete();
 
-//    bool isTopScore() const;
-
     Text* headerText(int index) const { return movements()->headersText()[index]; }
     Text* footerText(int index) const { return movements()->footersText()[index]; }
     void setHeaderText(Text* t, int index) { movements()->setHeaderText(t, index); }

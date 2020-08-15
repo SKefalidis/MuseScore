@@ -5355,17 +5355,6 @@ void MasterScore::rebuildAndUpdateExpressive(Synthesizer* synth)
 }
 
 //---------------------------------------------------------
-//   isTopScore
-//      true if this is the first movement in a multi-movement score
-//      TODO: use me!
-//---------------------------------------------------------
-
-//bool Score::isTopScore() const
-//{
-//    return (isMaster() && static_cast<MasterScore const *>(this)->movements()->size() > 1);
-//}
-
-//---------------------------------------------------------
 //   Movements
 //---------------------------------------------------------
 

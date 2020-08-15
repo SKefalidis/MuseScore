@@ -1795,7 +1795,7 @@ void Score::respace(std::vector<ChordRest*>* elements)
 }
 
 //---------------------------------------------------------
-//   getNextPage.
+//   getNextPage
 //---------------------------------------------------------
 
 void LayoutContext::getNextPage()
