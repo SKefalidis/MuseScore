@@ -96,6 +96,7 @@ public:
     ~ScoreTab();
 
     MsTabBar* getTab() const { return tab; }
+    MsTabBar* getTab2() const { return tab2; }
 
     void insertTab(MasterScore*);
     void setTabText(int, const QString&);

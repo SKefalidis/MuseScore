@@ -310,7 +310,10 @@ void AlbumManager::playAlbum()
     // connection used to move to the next score automatically during playback
     connect(seq, &Seq::stopped, this, static_cast<void (AlbumManager::*)()>(&AlbumManager::playAlbum),
             Qt::ConnectionType::UniqueConnection);
-
+    if (mscore->getTab1()->getTab2()->currentIndex() != 0) {
+        mscore->getTab1()->setExcerpt(0);
+        mscore->getTab1()->getTab2()->setCurrentIndex(0);
+    }
     if (m_playbackIndex == -1) {
         m_playbackIndex++;
     }

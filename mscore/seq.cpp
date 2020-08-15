@@ -247,7 +247,6 @@ void Seq::setScoreView(ScoreView* v)
 //---------------------------------------------------------
 //   setNextMovement
 ///     used to setup next movement for playback
-///     FIXME: probably crahses if the score is closed
 //---------------------------------------------------------
 
 void Seq::setNextMovement()
