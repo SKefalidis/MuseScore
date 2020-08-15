@@ -21,6 +21,7 @@
 #include "mtest/testutils.h"
 #include "mscore/musescore.h"
 #include "libmscore/album.h"
+#include "libmscore/excerpt.h"
 #include "mscore/preferences.h"
 
 #define DIR QString("libmscore/albumsIO/")
@@ -56,7 +57,9 @@ private slots:
     void exportCompressedAlbum() { exportCompressedAlbumTest("smallPianoAlbum"); }
 
     void albumsStrings() { stringsTest("smallPianoAlbum"); }
+
     void albumsAddRemove() { addRemoveTest("smallPianoAlbum"); }
+    void albumsAddRemoveParts() { addRemoveTest("albumWithParts"); }
     // TODO_SK: we need to test adding/removing scores with parts
 
     void parts() { partsTest("albumWithParts"); }
@@ -215,19 +218,42 @@ void TestAlbumsIO::addRemoveTest(const char* file)
     // load scores
     loadScores(album);
 
-    QVERIFY(album->albumItems().size() == 3);
-    MasterScore* ms = album->albumItems().at(1)->score;
+    if (strcmp(file, "smallPianoAlbum") == 0) {
+        QVERIFY(album->albumItems().size() == 3);
+    } else if (strcmp(file, "albumWithParts") == 0) {
+        QVERIFY(album->albumItems().size() == 2);
+    }
+
+    int albumSize = album->albumItems().size();
+    int lastIndex = albumSize - 1;
+
+    MasterScore* ms = album->albumItems().at(lastIndex)->score;
     album->removeScore(ms);
-    QVERIFY(album->albumItems().size() == 2);
+    QCOMPARE(int(album->albumItems().size()), albumSize - 1);
     album->addScore(ms);
-    QVERIFY(album->albumItems().size() == 3);
+    QCOMPARE(int(album->albumItems().size()), albumSize);
 
     album->createDominant();
+    MasterScore* dominant = album->getDominant();
+    for (auto& e : dominant->excerpts()) {
+        QCOMPARE(e->partScore()->isMaster(), true);
+    }
+    auto excerptCheck = [&]() {
+        for (auto& e : dominant->excerpts()) {
+            QCOMPARE(int(e->partScore()->movements()->size()), int(dominant->movements()->size()));
+        }
+    };
 
+    QCOMPARE(int(dominant->movements()->size()), albumSize + 1);
+    excerptCheck();
     album->removeScore(ms);
-    QVERIFY(album->albumItems().size() == 2);
+    QCOMPARE(int(album->albumItems().size()), albumSize - 1);
+    QCOMPARE(int(dominant->movements()->size()), albumSize);
+    excerptCheck();
     album->addScore(ms);
-    QVERIFY(album->albumItems().size() == 3);
+    QCOMPARE(int(album->albumItems().size()), albumSize);
+    QCOMPARE(int(dominant->movements()->size()), albumSize + 1);
+    excerptCheck();
 
     delete album;
 }
