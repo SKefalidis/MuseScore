@@ -615,6 +615,13 @@ bool Album::checkPartCompatibility() const
 
     MasterScore* firstMovement = m_albumItems.at(0)->score;
     int partCount = firstMovement->parts().size();
+    // check number of parts
+    for (auto& x : m_albumItems) {
+        if (partCount < x->score->parts().size()) {
+            return false;
+        }
+    }
+    // check part names
     for (int i = 0; i < partCount; i++) {
         for (auto& x : m_albumItems) {
             if (x->score->parts().at(i)->partName().compare(firstMovement->parts().at(i)->partName(),
@@ -635,9 +642,11 @@ bool Album::checkPartCompatibility(MasterScore* score)
     // check if the new score breaks compatibility
     MasterScore* firstMovement = m_albumItems.at(0)->score;
     int partCount = firstMovement->parts().size();
-    if (partCount < score->parts.size()) {
+    // check number of parts
+    if (partCount < score->parts().size()) {
         return false;
     }
+    // check part names
     for (int i = 0; i < partCount; i++) {
         if (score->parts().at(i)->partName().compare(firstMovement->parts().at(i)->partName(),
                                                      Qt::CaseSensitivity::CaseInsensitive)) {
