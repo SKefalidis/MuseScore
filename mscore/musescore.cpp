@@ -2785,7 +2785,7 @@ void MuseScore::askResetOldScorePositions(Score* score)
 }
 
 //---------------------------------------------------------
-//   setCurrentView
+//   setCurrentScoreView
 //---------------------------------------------------------
 
 void MuseScore::setCurrentScoreView(int idx)
@@ -2799,6 +2799,16 @@ void MuseScore::setCurrentScoreView(int idx)
         setCurrentView(1, idx);
         tab2->blockSignals(false);
     }
+}
+
+
+//---------------------------------------------------------
+//   setCurrentScoreView2
+//---------------------------------------------------------
+
+void MuseScore::setCurrentScoreView2(ScoreView* view)
+{
+    cv2 = view;
 }
 
 void MuseScore::setCurrentScoreViewSignalBlocking(int idx)
@@ -2833,6 +2843,7 @@ void MuseScore::setCurrentView(int tabIdx, int idx)
 void MuseScore::setCurrentScoreView(ScoreView* view)
 {
     cv = view;
+    cv2 = cv;
     if (cv) {
         ctab = (tab2 && tab2->view() == view) ? tab2 : tab1;
         if (timeline()) {
@@ -6674,22 +6685,23 @@ void MuseScore::cmd(QAction* a, const QString& cmd)
             mixer->setScore(currentScoreView() ? currentScoreView()->score() : cs);
         }
     } else if (cmd == "rewind") {
-        if (cv && cv->drawingScore()->movements()->size() > 1) {
+        if (cv2 && cv2->drawingScore()->movements()->size() > 1) {
+            std::cout << cv2->drawingScore()->title().toStdString() << std::endl;
             seq->setNextMovement(0);
             seq->rewindStart();
             Fraction tick = loop() ? seq->score()->loopInTick() : Fraction(0,1);
-            Measure* m = cs->tick2measureMM(tick);
+            Measure* m = cv2->score()->tick2measureMM(tick);
             if (m) {
-                cv->gotoMeasure(m);
+                cv2->gotoMeasure(m);
             }
         }
-        if (cs) {
-            Fraction tick = loop() ? cs->loopInTick() : Fraction(0,1);
+        if (cv2->score()) {
+            Fraction tick = loop() ? cv2->score()->loopInTick() : Fraction(0,1);
             seq->seek(tick.ticks());
-            if (cv) {
-                Measure* m = cs->tick2measureMM(tick);
+            if (cv2) {
+                Measure* m = cv2->score()->tick2measureMM(tick);
                 if (m) {
-                    cv->gotoMeasure(m);
+                    cv2->gotoMeasure(m);
                 }
             }
             if (playPanel) {

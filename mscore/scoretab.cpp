@@ -447,6 +447,7 @@ void ScoreTab::setExcerpt(int n)
     }
 
     v->update();
+    mscore->setCurrentScoreView2(v);
 //    score->select(score->firstElement());
 //    emit currentScoreViewChanged(v); disabled because it calls changeMode in the Album and this causes the excerpt tabs to disappear because setCurrentScoreView is called from changeMode
 }

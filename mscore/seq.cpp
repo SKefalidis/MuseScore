@@ -194,6 +194,8 @@ Seq::Seq()
     connect(this, SIGNAL(timeSigChanged()),this,SLOT(handleTimeSigTempoChanged()));
     connect(this, SIGNAL(tempoChanged()),this,SLOT(handleTimeSigTempoChanged()));
 
+    connect(this, &Seq::stopped, this, &Seq::playNextMovement, Qt::ConnectionType::UniqueConnection);
+
     initialMillisecondTimestampWithLatency = 0;
 }
 
@@ -258,7 +260,8 @@ void Seq::setNextMovement()
         cs = topMovement->movements()->at(topMovement->firstRealMovement());
         nextMovementIndex = topMovement->firstRealMovement() + 1;
     }
-    mscore->currentScoreView()->setActiveScore(mscore->currentScoreView()->drawingScore()->movements()->at(nextMovementIndex - 1)); // for cursor during playback
+    mscore->currentScoreView2()->setActiveScore(mscore->currentScoreView2()->drawingScore()->movements()->at(nextMovementIndex - 1)); // for cursor during playback
+    std::cout << mscore->currentScoreView2()->drawingScore()->movements()->at(nextMovementIndex - 1)->title().toStdString() << std::endl;
 
     midi = MidiRenderer(cs);
     midi.setMinChunkSize(10);
@@ -283,7 +286,8 @@ void Seq::setNextMovement(int i)
         cs = topMovement->movements()->at(topMovement->firstRealMovement());
         nextMovementIndex = topMovement->firstRealMovement() + 1;
     }
-    mscore->currentScoreView()->setActiveScore(mscore->currentScoreView()->drawingScore()->movements()->at(nextMovementIndex - 1)); // for cursor during playback
+    mscore->currentScoreView2()->setActiveScore(mscore->currentScoreView2()->drawingScore()->movements()->at(nextMovementIndex - 1)); // for cursor during playback
+    std::cout << mscore->currentScoreView2()->drawingScore()->movements()->at(nextMovementIndex - 1)->title().toStdString() << std::endl;
 
     midi = MidiRenderer(cs);
     midi.setMinChunkSize(10);
@@ -868,11 +872,9 @@ void Seq::process(unsigned framesPerPeriod, float* buffer)
             //          Works for parts.
             //
             if (mscore->currentScoreView()->drawingScore()->title() != "Temporary Album Score") {
+                pause = cs->lastMeasure()->pause() * 1000;
                 if (topMovement->movements()->size() > 1) {
                     setNextMovement();
-                }
-                if (cs != topMovement->movements()->at(topMovement->firstRealMovement())) {
-                    start();
                 }
             }
         } else if (state != driverState) {
@@ -1939,6 +1941,15 @@ void Seq::setLoopSelection()
 void Seq::handleTimeSigTempoChanged()
 {
     _driver->handleTimeSigTempoChanged();
+}
+
+void Seq::playNextMovement()
+{
+    if (mscore->currentScoreView()->drawingScore()->title() != "Temporary Album Score") {
+        if (cs != topMovement->movements()->at(topMovement->firstRealMovement())) {
+            QTimer::singleShot(pause, this, &Seq::start);
+        }
+    }
 }
 
 //---------------------------------------------------------

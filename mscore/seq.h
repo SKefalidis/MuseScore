@@ -111,7 +111,7 @@ class Seq : public QObject, public Sequencer
     Q_OBJECT
 
     mutable QMutex mutex;
-
+    qreal pause { 0 };
     MasterScore* topMovement;
     int nextMovementIndex;
     MasterScore* cs;
@@ -217,6 +217,7 @@ private slots:
     void midiInputReady();
     void setPlaylistChanged() { playlistChanged = true; }
     void handleTimeSigTempoChanged();
+    void playNextMovement();
 
 public slots:
     void setRelTempo(double);
