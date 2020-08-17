@@ -261,7 +261,6 @@ void Seq::setNextMovement()
         nextMovementIndex = topMovement->firstRealMovement() + 1;
     }
     mscore->currentScoreView2()->setActiveScore(mscore->currentScoreView2()->drawingScore()->movements()->at(nextMovementIndex - 1)); // for cursor during playback
-    std::cout << mscore->currentScoreView2()->drawingScore()->movements()->at(nextMovementIndex - 1)->title().toStdString() << std::endl;
 
     midi = MidiRenderer(cs);
     midi.setMinChunkSize(10);
@@ -287,7 +286,6 @@ void Seq::setNextMovement(int i)
         nextMovementIndex = topMovement->firstRealMovement() + 1;
     }
     mscore->currentScoreView2()->setActiveScore(mscore->currentScoreView2()->drawingScore()->movements()->at(nextMovementIndex - 1)); // for cursor during playback
-    std::cout << mscore->currentScoreView2()->drawingScore()->movements()->at(nextMovementIndex - 1)->title().toStdString() << std::endl;
 
     midi = MidiRenderer(cs);
     midi.setMinChunkSize(10);
@@ -442,6 +440,9 @@ void Seq::start()
         preferences.setPreference(PREF_IO_JACK_USEJACKTRANSPORT, false);
     }
     startTransport();
+    if (!mscore->playButton()->isChecked()) {
+        mscore->playButton()->setChecked(true);
+    }
 }
 
 //---------------------------------------------------------

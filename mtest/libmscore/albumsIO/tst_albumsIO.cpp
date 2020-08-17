@@ -239,10 +239,10 @@ void TestAlbumsIO::addRemoveTest(const char* file)
         QCOMPARE(e->partScore()->isMaster(), true);
     }
     auto excerptCheck = [&]() {
-        for (auto& e : dominant->excerpts()) {
-            QCOMPARE(int(e->partScore()->movements()->size()), int(dominant->movements()->size()));
-        }
-    };
+                            for (auto& e : dominant->excerpts()) {
+                                QCOMPARE(int(e->partScore()->movements()->size()), int(dominant->movements()->size()));
+                            }
+                        };
 
     QCOMPARE(int(dominant->movements()->size()), albumSize + 1);
     excerptCheck();
