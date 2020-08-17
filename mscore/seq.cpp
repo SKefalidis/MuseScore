@@ -1957,7 +1957,7 @@ void Seq::playNextMovement()
 {
     static bool playingLast { false };
 
-    if (mscore->currentScoreView()->drawingScore()->title() != "Temporary Album Score") {
+    if (mscore->currentScoreView()->drawingScore()->title() != "Temporary Album Score" && topMovement->movements()->size() > 1) {
         if (playingLast) {
             playingLast = false;
             mscore->playButton()->setChecked(false);
