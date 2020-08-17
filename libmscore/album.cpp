@@ -673,7 +673,7 @@ void Album::removeAlbumExcerpts()
     }
     for (auto& x : m_albumItems) {
         for (auto y : x->score->albumExcerpts()) {
-            x->score->removeAlbumExcerpt(y);
+            x->score->removeExcerpt(y, true);
         }
     }
 }
@@ -712,7 +712,7 @@ Excerpt* Album::createMovementExcerpt(Excerpt* e)
     e->setPartScore(nscore);
     nscore->setName(e->oscore()->title() + "_albumPart_" + e->oscore()->excerpts().size());
     qDebug() << " + Add part : " << e->title();
-    e->oscore()->addAlbumExcerpt(e);
+    e->oscore()->addExcerpt(e, true);
     Excerpt::createExcerpt(e);
 
     // a new excerpt is created in AddExcerpt, make sure the parts are filed

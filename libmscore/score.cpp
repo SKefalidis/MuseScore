@@ -2015,7 +2015,7 @@ void Score::setMetaTag(const QString& tag, const QString& val)
 //   addExcerpt
 //---------------------------------------------------------
 
-void MasterScore::addExcerpt(Excerpt* ex)
+void MasterScore::addExcerpt(Excerpt* ex, bool isAlbumExcerpt)
 {
     Score* score = ex->partScore();
 
@@ -2062,88 +2062,32 @@ void MasterScore::addExcerpt(Excerpt* ex)
         }
         ex->setTracks(tracks);
     }
-    excerpts().append(ex);
+    if (isAlbumExcerpt) {
+        albumExcerpts().append(ex);
+    } else {
+        excerpts().append(ex);
+    }
     setExcerptsChanged(true);
-}
-
-//---------------------------------------------------------
-//   adAlbumExcerpt
-//---------------------------------------------------------
-
-void MasterScore::addAlbumExcerpt(Excerpt* ex)
-{
-    Score* score = ex->partScore();
-
-    int nstaves { 1 }; // Initialise to 1 to force writing of the first part.
-    for (Staff* s : score->staves()) {
-        const LinkedElements* ls = s->links();
-        if (ls == 0) {
-            continue;
-        }
-
-        for (auto le : *ls) {
-            if (le->score() != this) {
-                continue;
-            }
-
-            // For instruments with multiple staves, every staff will point to the
-            // same part. To prevent adding the same part several times to the excerpt,
-            // add only the part of the first staff pointing to the part.
-            Staff* ps = toStaff(le);
-            if (!(--nstaves)) {
-                ex->parts().append(ps->part());
-                nstaves = ps->part()->nstaves();
-            }
-            break;
-        }
-    }
-
-    if (ex->tracks().isEmpty()) {                           // SHOULDN'T HAPPEN, protected in the UI, but it happens during read-in!!!
-        QMultiMap<int, int> tracks;
-        for (Staff* s : score->staves()) {
-            const LinkedElements* ls = s->links();
-            if (ls == 0) {
-                continue;
-            }
-            for (auto le : *ls) {
-                Staff* ps = toStaff(le);
-                if (ps->primaryStaff()) {
-                    for (int i = 0; i < VOICES; i++) {
-                        tracks.insert(ps->idx() * VOICES + i % VOICES, s->idx() * VOICES + i % VOICES);
-                    }
-                    break;
-                }
-            }
-        }
-        ex->setTracks(tracks);
-    }
-    albumExcerpts().append(ex);
 }
 
 //---------------------------------------------------------
 //   removeExcerpt
 //---------------------------------------------------------
 
-void MasterScore::removeExcerpt(Excerpt* ex)
+void MasterScore::removeExcerpt(Excerpt* ex, bool isAlbumExcerpt)
 {
-    if (excerpts().removeOne(ex)) {
-        // delete ex;
+    if (!isAlbumExcerpt) {
+        if (excerpts().removeOne(ex)) {
+            // delete ex;
+        } else {
+            qDebug("removeExcerpt:: ex not found");
+        }
     } else {
-        qDebug("removeExcerpt:: ex not found");
-    }
-}
-
-//---------------------------------------------------------
-//   removeAlbumExcerpt
-//---------------------------------------------------------
-
-void MasterScore::removeAlbumExcerpt(Excerpt* ex)
-{
-    if (albumExcerpts().removeOne(ex)) {
-        setExcerptsChanged(true);
-        // delete ex;
-    } else {
-        qDebug("removeExcerpt:: ex not found");
+        if (albumExcerpts().removeOne(ex)) {
+            // delete ex;
+        } else {
+            qDebug("removeExcerpt:: ex not found");
+        }
     }
 }
 

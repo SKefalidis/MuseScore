@@ -1502,12 +1502,9 @@ public:
     Fraction pos(POS pos) const { return _pos[int(pos)]; }
     void setPos(POS pos, Fraction tick);
 
-    void addExcerpt(Excerpt*);
-    void addAlbumExcerpt(Excerpt*);
-    void removeExcerpt(Excerpt*);
-    void removeAlbumExcerpt(Excerpt*);
-    void deleteExcerpt(Excerpt*);
-    void deleteAlbumExcerpt(Excerpt*);
+    void addExcerpt(Excerpt*, bool isAlbumExcerpt = false);
+    void removeExcerpt(Excerpt*,  bool isAlbumExcerpt = false);
+    void deleteExcerpt(Excerpt*, bool isAlbumExcerpt = false);
 
     void setPlaybackScore(Score*);
     Score* playbackScore() { return _playbackScore; }

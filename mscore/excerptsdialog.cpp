@@ -630,7 +630,7 @@ void ExcerptsDialog::accept()
                     if (m == score) {
                         continue;
                     }
-                    m->deleteAlbumExcerpt(m->albumExcerpts().at(i));
+                    m->deleteExcerpt(m->albumExcerpts().at(i), true);
                 }
             }
         } else {
