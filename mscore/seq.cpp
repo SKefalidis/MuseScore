@@ -419,7 +419,7 @@ void Seq::start()
         qDebug("No driver!");
         return;
     }
-
+    waitingToStart = false;
     allowBackgroundRendering = true;
     collectEvents(getPlayStartUtick());
     if (cs->playMode() == PlayMode::AUDIO) {
@@ -553,6 +553,11 @@ void Seq::unmarkNotes()
 void Seq::guiStop()
 {
     QAction* a = getAction("play");
+    bool b = a->isChecked();
+    if (!b) {
+        disconnect(this, &Seq::stopped, this, &Seq::playNextMovement);
+        mscore->playButton()->setChecked(false);
+    }
     a->setChecked(false);
 
     unmarkNotes();
@@ -564,6 +569,7 @@ void Seq::guiStop()
     cs->setPlayPos(Fraction::fromTicks(tck));
     cs->update();
     emit stopped();
+    connect(this, &Seq::stopped, this, &Seq::playNextMovement, Qt::ConnectionType::UniqueConnection);
 }
 
 //---------------------------------------------------------
