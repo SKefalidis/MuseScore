@@ -260,6 +260,9 @@ void Seq::setNextMovement()
         cs = topMovement->movements()->at(topMovement->firstRealMovement());
         nextMovementIndex = topMovement->firstRealMovement() + 1;
     }
+    if (nextMovementIndex == topMovement->movements()->size()) {
+        lastPiece = true;
+    }
     mscore->currentScoreView2()->setActiveScore(mscore->currentScoreView2()->drawingScore()->movements()->at(nextMovementIndex - 1)); // for cursor during playback
 
     midi = MidiRenderer(cs);
@@ -284,6 +287,9 @@ void Seq::setNextMovement(int i)
     } else {
         cs = topMovement->movements()->at(topMovement->firstRealMovement());
         nextMovementIndex = topMovement->firstRealMovement() + 1;
+    }
+    if (nextMovementIndex == topMovement->movements()->size()) {
+        lastPiece = true;
     }
     mscore->currentScoreView2()->setActiveScore(mscore->currentScoreView2()->drawingScore()->movements()->at(nextMovementIndex - 1)); // for cursor during playback
 
@@ -440,9 +446,6 @@ void Seq::start()
         preferences.setPreference(PREF_IO_JACK_USEJACKTRANSPORT, false);
     }
     startTransport();
-    if (!mscore->playButton()->isChecked()) {
-        mscore->playButton()->setChecked(true);
-    }
 }
 
 //---------------------------------------------------------
@@ -856,6 +859,16 @@ void Seq::process(unsigned framesPerPeriod, float* buffer)
             // Muting all notes
             stopNotes(-1, true);
             initInstruments(true);
+            //
+            // TODO_SK: See if I can move some of AlbumManager::play logic here. For now, this is disabled for the dominant album score.
+            //          Works for parts.
+            //
+            if (mscore->currentScoreView()->drawingScore()->title() != "Temporary Album Score") {
+                pause = cs->lastMeasure()->pause() * 1000;
+                if (topMovement->movements()->size() > 1) {
+                    setNextMovement();
+                }
+            }
             if (playPos == eventsEnd) {
                 if (mscore->loop()) {
                     qDebug("Seq.cpp - Process - Loop whole score. playPos = %d, cs->pos() = %d", playPos->first,
@@ -867,16 +880,6 @@ void Seq::process(unsigned framesPerPeriod, float* buffer)
                 }
             } else {
                 emit toGui('0');
-            }
-            //
-            // TODO_SK: See if I can move some of AlbumManager::play logic here. For now, this is disabled for the dominant album score.
-            //          Works for parts.
-            //
-            if (mscore->currentScoreView()->drawingScore()->title() != "Temporary Album Score") {
-                pause = cs->lastMeasure()->pause() * 1000;
-                if (topMovement->movements()->size() > 1) {
-                    setNextMovement();
-                }
             }
         } else if (state != driverState) {
             qDebug("Seq: state transition %d -> %d ?",
@@ -1946,10 +1949,23 @@ void Seq::handleTimeSigTempoChanged()
 
 void Seq::playNextMovement()
 {
+    static bool playingLast { false };
+
     if (mscore->currentScoreView()->drawingScore()->title() != "Temporary Album Score") {
-        if (cs != topMovement->movements()->at(topMovement->firstRealMovement())) {
-            QTimer::singleShot(pause, this, &Seq::start);
+        if (playingLast) {
+            playingLast = false;
+            mscore->playButton()->setChecked(false);
+            return;
         }
+        if (lastPiece) {
+            lastPiece = false;
+            playingLast = true;
+        }
+        if (!mscore->playButton()->isChecked()) {
+            mscore->playButton()->setChecked(true);
+        }
+        waitingToStart = true;
+        QTimer::singleShot(pause, this, &Seq::start);
     }
 }
 

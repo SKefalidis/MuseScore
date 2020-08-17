@@ -112,6 +112,8 @@ class Seq : public QObject, public Sequencer
 
     mutable QMutex mutex;
     qreal pause { 0 };
+    bool waitingToStart { false };
+    bool lastPiece { false };
     MasterScore* topMovement;
     int nextMovementIndex;
     MasterScore* cs;
